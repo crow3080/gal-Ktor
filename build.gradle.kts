@@ -27,8 +27,15 @@ dependencies {
     implementation(libs.ktor.server.conditional.headers)
     implementation(libs.ktor.server.compression)
     implementation(libs.ktor.server.netty)
+    implementation("io.ktor:ktor-server-sessions")
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
+    implementation("io.ktor:ktor-server-websockets:3.3.0")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    implementation("org.jetbrains.kotlinx:kotlinx-html:0.12.0")
+    implementation("io.ktor:ktor-server-html-builder")
+    implementation("io.ktor:ktor-server-status-pages")
+    implementation("io.ktor:ktor-server-thymeleaf")
+
 }
