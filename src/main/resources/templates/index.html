@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="slik">
+<head>
+    <meta charset="UTF-8">
+    <title>DaisyUI Todo App</title>
+
+    <!-- Tailwind + DaisyUI -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+
+<body x-data="todoApp()" x-init="initTodos([[${todos}]])" class="min-h-screen">
+
+<div class="drawer lg:drawer-open">
+    <!-- Drawer Toggle -->
+    <input id="sidebar-toggle" type="checkbox" class="drawer-toggle" />
+
+    <!-- Main Content -->
+    <div class="drawer-content flex flex-col">
+        <!-- Navbar for Mobile -->
+        <div class="w-full navbar bg-base-200 lg:hidden">
+            <div class="flex-none">
+                <label for="sidebar-toggle" class="btn btn-square btn-ghost">
+                    ☰
+                </label>
+            </div>
+            <div class="flex-1">
+                <h1 class="text-xl font-bold">TodoApp</h1>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-6">
+
+            <!-- Alerts -->
+            <div x-show="alert" role="alert" x-transition class="alert alert-success mb-4">
+                <span x-text="alert"></span>
+            </div>
+
+            <!-- Home Page -->
+            <div x-show="page==='home'">
+                <h2 class="text-2xl font-bold mb-4">My Todo App 🚀</h2>
+
+                <!-- Add Todo -->
+                <div class="join w-full mb-4">
+                    <input type="text" x-model="newTodo" @keydown.enter.prevent="addTodo"
+                           class="input input-bordered join-item w-full"
+                           placeholder="Add new todo">
+                    <button @click="addTodo" class="btn btn-success join-item">Add</button>
+                </div>
+
+                <!-- Search -->
+                <input type="text" x-model="filter"
+                       class="input input-bordered w-full mb-4"
+                       placeholder="Search...">
+
+                <!-- Todo Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <template x-for="todo in filteredTodos()" :key="todo.id">
+                        <div class="card bg-base-100 shadow">
+                            <div class="card-body">
+                                <h5 class="card-title" x-text="todo.text"></h5>
+                                <div class="card-actions justify-end">
+                                    <button class="btn btn-sm btn-info" @click="openModal(todo)">View</button>
+                                    <button class="btn btn-sm btn-error" @click="deleteTodo(todo.id)">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- About Page -->
+            <div x-show="page==='about'">
+                <h2 class="text-xl font-bold">About</h2>
+                <p>This is a <strong>DaisyUI + Alpine.js + Ktor</strong> Todo demo 💚</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="drawer-side">
+        <label for="sidebar-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
+        <aside class="w-64 bg-base-200 p-4">
+            <h1 class="text-xl font-bold mb-6 hidden lg:block">TodoApp</h1>
+            <nav class="flex flex-col gap-2">
+                <a href="#" @click.prevent="page='home'"
+                   :class="page==='home' ? 'btn btn-primary' : 'btn btn-ghost'">🏠 Home</a>
+                <a href="#" @click.prevent="page='about'"
+                   :class="page==='about' ? 'btn btn-primary' : 'btn btn-ghost'">ℹ️ About</a>
+            </nav>
+        </aside>
+    </div>
+</div>
+
+<!-- Modal -->
+<div x-show="selectedTodo" class="modal modal-open" x-transition>
+    <div class="modal-box">
+        <h3 class="font-bold text-lg" x-text="selectedTodo?.text"></h3>
+        <p>ID: <span x-text="selectedTodo?.id"></span></p>
+        <div class="modal-action">
+            <button @click="closeModal" class="btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function todoApp() {
+        return {
+            todos: [],
+            newTodo: '',
+            filter: '',
+            page: 'home',
+            alert: '',
+            selectedTodo: null,
+
+            initTodos(initial) {
+                this.todos = initial;
+            },
+
+            async addTodo() {
+                if (!this.newTodo.trim()) return;
+                const response = await fetch('/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ todo: this.newTodo })
+                });
+                const todo = await response.json();
+                this.todos.push(todo);
+                this.alert = "Todo added successfully!";
+                this.newTodo = '';
+                setTimeout(() => this.alert = '', 2000);
+            },
+
+            async deleteTodo(id) {
+                await fetch(`/delete/${id}`, { method: 'DELETE' });
+                this.todos = this.todos.filter(t => t.id !== id);
+                this.alert = "Todo deleted!";
+                setTimeout(() => this.alert = '', 2000);
+            },
+
+            filteredTodos() {
+                if (!this.filter) return this.todos;
+                return this.todos.filter(t => t.text.toLowerCase().includes(this.filter.toLowerCase()));
+            },
+
+            openModal(todo) {
+                this.selectedTodo = todo;
+            },
+
+            closeModal() {
+                this.selectedTodo = null;
+            }
+        }
+    }
+</script>
+</body>
+</html>
+```

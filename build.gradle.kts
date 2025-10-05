@@ -7,8 +7,12 @@ plugins {
 group = "com.example"
 version = "0.0.1"
 
+
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
+    applicationDefaultJvmArgs = listOf(
+        "--enable-native-access=ALL-UNNAMED"
+    )
 }
 
 dependencies {
@@ -31,6 +35,8 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
     implementation("io.ktor:ktor-server-websockets:3.3.0")
+    implementation("io.ktor:ktor-client-auth:3.3.0")
+    implementation("io.ktor:ktor-client-resources:3.3.0")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.12.0")
