@@ -21,11 +21,9 @@ fun Application.module() {
 
 
 fun Route.app() {
-
     get("/person") {
         call.respondText("Hello World!")
     }
-
 }
 
 
