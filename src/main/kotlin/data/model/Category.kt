@@ -1,6 +1,7 @@
 package com.example.data.model
 
-import java.util.UUID
+import org.jetbrains.exposed.dao.id.UUIDTable
 
-@kotlinx.serialization.Serializable
-data class Category(val id: String = UUID.randomUUID().toString(), val name: String)
+object Categories : UUIDTable("categories") {
+    val name = varchar("name", 255).uniqueIndex()
+}

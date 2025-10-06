@@ -1,11 +1,13 @@
 package com.example.data.model
 
-import java.util.UUID
+import org.jetbrains.exposed.dao.id.UUIDTable
 
-@kotlinx.serialization.Serializable
-data class Product(
-    val id: String = UUID.randomUUID().toString(),
-    val name: String,
-    val price: Double,
-    val categoryId: String
-)
+
+object Products : UUIDTable("products") {
+    val name = varchar("name", 255)
+    val price = double("price")
+    val categoryId = reference("category_id", Categories)
+}
+
+
+
