@@ -1,432 +1,243 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gal Admin Panel</title>
-
-    <!-- Tailwind CSS -->
+    <title>لوحة إدارة المستخدمين</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- DaisyUI -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.20/dist/full.min.css" rel="stylesheet" type="text/css" />
-
-    <!-- Alpine.js -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.20/dist/full.min.css" rel="stylesheet" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <style>
-        /* RTL adjustments for better mobile */
-        .rtl .input-group .input { direction: rtl; text-align: right; }
-        .rtl .join .input, .rtl .join .select { direction: rtl; text-align: right; }
-        .rtl .card-body { direction: rtl; }
-        /* Ensure no horizontal scroll on mobile */
-        body { overflow-x: hidden; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: all 0.3s; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .photo-circle { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid; }
+        .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center; }
+        .modal-box { max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
+<body x-data="app()" x-init="init()" class="bg-base-100">
 
-<body x-data="shopApp()" x-init="initData()" class="min-h-screen bg-gradient-to-br from-base-100 to-base-200 rtl">
+<!-- Navbar -->
+<div class="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
+    <div class="flex-1">
+        <a class="btn btn-ghost text-xl">👥 إدارة المستخدمين</a>
+    </div>
+    <div class="flex-none gap-2">
+        <button @click="toggleTheme()" class="btn btn-ghost btn-circle">
+            <svg x-show="theme==='light'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <svg x-show="theme==='dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+    </div>
+</div>
 
-<div class="drawer lg:drawer-open">
-    <input id="sidebar-toggle" type="checkbox" class="drawer-toggle" />
+<div class="container mx-auto p-4 max-w-6xl">
+    <!-- Alert -->
+    <div x-show="alert.show" x-transition class="alert shadow-lg mb-4" :class="alert.type === 'success' ? 'alert-success' : 'alert-error'">
+        <span x-text="alert.message"></span>
+    </div>
 
-    <!-- Mobile Navbar -->
-    <div class="drawer-content flex flex-col">
-        <div class="w-full navbar bg-gradient-to-r from-primary to-secondary shadow-lg lg:hidden fixed top-0 z-50">
-            <div class="flex-none lg:hidden">
-                <label for="sidebar-toggle" class="btn btn-square btn-ghost drawer-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
+    <!-- Add User Section -->
+    <div class="card bg-base-200 shadow-xl mb-6 fade-in">
+        <div class="card-body">
+            <h2 class="card-title text-2xl mb-4">➕ إضافة مستخدم</h2>
+            <div class="flex justify-center mb-4">
+                <label class="cursor-pointer">
+                    <input type="file" accept="image/*" @change="handlePhoto($event, 'new')" class="hidden">
+                    <img x-show="newUser.preview" :src="newUser.preview" class="photo-circle border-primary">
+                    <div x-show="!newUser.preview" class="photo-circle border-base-300 bg-base-300 flex items-center justify-center text-4xl">📷</div>
                 </label>
             </div>
-            <div class="flex-1 px-2 mx-2 text-xl font-bold text-white">
-                🛒 Gal Shop
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input type="text" x-model="newUser.name" placeholder="الاسم" class="input input-bordered">
+                <input type="email" x-model="newUser.email" placeholder="البريد الإلكتروني" class="input input-bordered">
+                <input type="number" x-model="newUser.age" placeholder="العمر" class="input input-bordered">
             </div>
-            <div class="flex-none">
-                <!-- Add cart icon or search if needed -->
-            </div>
+            <button @click="addUser()" class="btn btn-primary mt-3">➕ إضافة</button>
         </div>
-
-        <!-- Page Content with padding for fixed navbar -->
-        <main class="flex-1 pt-16 p-2 sm:p-4 lg:p-8">
-            <!-- Alerts with better styling -->
-            <div x-show="alert" role="alert" x-transition:enter="transition ease-in-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="alert alert-success shadow-lg mb-4 sm:mb-6 max-w-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span x-text="alert"></span>
-            </div>
-
-            <!-- Home Page -->
-            <div x-show="page==='home'">
-                <div class="hero min-h-0 mb-6 sm:mb-8">
-                    <div class="hero-content text-center">
-                        <div>
-                            <h2 class="text-3xl sm:text-4xl font-bold text-primary mb-2">📦 منتجاتنا</h2>
-                            <p class="text-base-content/60 text-sm sm:text-base">مفيش احسن منها</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add Product Form with better layout for mobile -->
-                <div class="card bg-base-100 shadow-xl mb-6 sm:mb-8 overflow-hidden">
-                    <div class="card-body p-4 sm:p-6">
-                        <h3 class="card-title text-lg font-semibold mb-4">➕ إضافة منتج جديد</h3>
-                        <div class="join w-full flex-wrap gap-2 sm:gap-0">
-                            <input type="text" x-model="newProduct.name" class="input input-bordered join-item flex-1 min-w-0" placeholder="اسم المنتج">
-                            <input type="number" x-model="newProduct.price" class="input input-bordered join-item w-24 sm:w-32" placeholder="السعر">
-                            <select x-model="newProduct.categoryId" class="select select-bordered join-item w-32 sm:w-48">
-                                <option value="">اختر الفئة</option>
-                                <template x-for="c in categories" :key="c.id">
-                                    <option :value="c.id" x-text="c.name"></option>
-                                </template>
-                            </select>
-                            <button @click="addProduct" class="btn btn-success join-item whitespace-nowrap">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                إضافة
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Search Bar -->
-                <div class="form-control mb-6 sm:mb-8">
-                    <div class="input-group">
-                        <input type="text" x-model="filter" class="input input-bordered flex-1" placeholder="ابحث عن المنتجات...">
-                        <button class="btn btn-square">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Product Grid with better mobile responsiveness -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    <template x-for="product in filteredProducts()" :key="product.id">
-                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 compact">
-                            <figure class="px-4 sm:px-6 pt-4 sm:pt-6">
-                                <!-- Placeholder image or icon -->
-                                <div class="w-full h-32 sm:h-48 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
-                                    <span class="text-3xl sm:text-4xl">🛍️</span>
-                                </div>
-                            </figure>
-                            <div class="card-body items-center text-center p-4 sm:p-6">
-                                <h2 class="card-title text-lg sm:text-xl font-bold line-clamp-2" x-text="product.name"></h2>
-                                <p class="text-primary font-semibold text-sm sm:text-base">💲 <span x-text="product.price"></span></p>
-                                <p class="text-base-content/70 text-sm">📂 <span x-text="categories.find(c => c.id === product.categoryId)?.name || 'غير محدد'"></span></p>
-                                <div class="card-actions justify-center gap-2 mt-3 sm:mt-4 w-full">
-                                    <button class="btn btn-info btn-sm flex-1 sm:flex-none" @click="openModal(product)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                        عرض
-                                    </button>
-                                    <button class="btn btn-error btn-sm flex-1 sm:flex-none" @click="deleteProduct(product.id)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        حذف
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Empty state -->
-                <div x-show="filteredProducts().length === 0" class="text-center py-12">
-                    <div class="avatar mx-auto">
-                        <div class="w-16 sm:w-24 rounded-full">
-                            <span class="text-4xl sm:text-5xl">🔍</span>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold mt-4">لا توجد منتجات</h3>
-                    <p class="text-base-content/60 text-sm sm:text-base">جرب البحث عن شيء آخر أو أضف منتج جديد</p>
-                </div>
-            </div>
-
-            <!-- Categories Page -->
-            <div x-show="page==='categories'">
-                <div class="hero min-h-0 mb-6 sm:mb-8">
-                    <div class="hero-content text-center">
-                        <div>
-                            <h2 class="text-3xl sm:text-4xl font-bold text-secondary mb-2">📂 الفئات</h2>
-                            <p class="text-base-content/60 text-sm sm:text-base">إدارة فئات المنتجات </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add Category Form -->
-                <div class="card bg-base-100 shadow-xl mb-6 sm:mb-8 overflow-hidden">
-                    <div class="card-body p-4 sm:p-6">
-                        <h3 class="card-title text-lg font-semibold mb-4">➕ إضافة فئة جديدة</h3>
-                        <div class="join w-full flex-wrap gap-2 sm:gap-0">
-                            <input type="text" x-model="newCategory.name" class="input input-bordered join-item flex-1 min-w-0" placeholder="اسم الفئة">
-                            <button @click="addCategory" class="btn btn-success join-item whitespace-nowrap">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                إضافة
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Category List with badges -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <template x-for="c in categories" :key="c.id">
-                        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 compact">
-                            <div class="card-body flex justify-between items-center p-4">
-                                <div class="badge badge-primary p-2 sm:p-4 rounded-lg flex-1 mr-2 text-right">
-                                    <span class="text-base sm:text-lg font-semibold" x-text="c.name"></span>
-                                </div>
-                                <button class="btn btn-error btn-sm" @click="deleteCategory(c.id)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Empty state -->
-                <div x-show="categories.length === 0" class="text-center py-12">
-                    <div class="avatar mx-auto">
-                        <div class="w-16 sm:w-24 rounded-full">
-                            <span class="text-4xl sm:text-5xl">📂</span>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold mt-4">لا توجد فئات</h3>
-                    <p class="text-base-content/60 text-sm sm:text-base">ابدأ بإضافة فئة جديدة</p>
-                </div>
-            </div>
-
-            <!-- About Page -->
-            <div x-show="page==='about'">
-                <div class="hero min-h-0 mb-6 sm:mb-8">
-                    <div class="hero-content text-center">
-                        <div>
-                            <h2 class="text-3xl sm:text-4xl font-bold text-accent mb-2">ℹ️ عن التطبيق</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body items-center text-center p-4 sm:p-6">
-                        <div class="avatar mb-4">
-                            <div class="w-16 sm:w-24 rounded-full ring ring-primary">
-                                <span class="text-4xl sm:text-5xl">🚀</span>
-                            </div>
-                        </div>
-                        <h3 class="text-xl sm:text-2xl font-bold mb-4">Gal Shop Admin</h3>
-                        <p class="text-base-content/80 mb-6 text-sm sm:text-base"><strong>DaisyUI + Alpine.js + Ktor</strong>. 💚</p>
-                        <div class="stats stats-vertical sm:stats-horizontal shadow mb-0 w-full">
-                            <div class="stat place-items-center">
-                                <div class="stat-title">التقنيات</div>
-                                <div class="stat-value text-primary">Frontend</div>
-                                <div class="stat-desc">Alpine.js & DaisyUI</div>
-                            </div>
-                            <div class="stat place-items-center">
-                                <div class="stat-title">Backend</div>
-                                <div class="stat-value text-secondary">Ktor</div>
-                                <div class="stat-desc">Kotlin Server</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
     </div>
 
-    <!-- Sidebar for Desktop -->
-    <div class="drawer-side">
-        <label for="sidebar-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
-        <aside class="w-56 sm:w-64 bg-gradient-to-b from-base-200 to-base-300 text-base-content min-h-screen p-4 sm:p-6 shadow-2xl">
-            <div class="flex items-center justify-center mb-6 sm:mb-8 text-right">
-                <div class="avatar mr-2">
-                    <div class="w-12 sm:w-16 rounded-full ring ring-primary">
-                        <span class="text-2xl sm:text-3xl">🛒</span>
+    <!-- Search -->
+    <div class="mb-6">
+        <input type="text" x-model="search" placeholder="🔍 ابحث عن مستخدم..." class="input input-bordered w-full max-w-md mx-auto block">
+    </div>
+
+    <!-- Users Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <template x-for="user in filtered()" :key="user.id">
+            <div class="card bg-base-100 shadow-lg card-hover fade-in">
+                <figure class="px-6 pt-6">
+                    <img x-show="user.photo" :src="user.photo" class="w-full h-40 object-cover rounded-lg">
+                    <div x-show="!user.photo" class="w-full h-40 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center text-5xl">👤</div>
+                </figure>
+                <div class="card-body items-center text-center">
+                    <h3 class="card-title" x-text="user.name"></h3>
+                    <p class="text-sm opacity-70">📧 <span x-text="user.email"></span></p>
+                    <p class="text-sm opacity-70">🎂 <span x-text="user.age"></span> سنة</p>
+                    <div class="card-actions justify-center gap-2 mt-3 w-full">
+                        <button @click="viewUser(user)" class="btn btn-info btn-sm flex-1">عرض</button>
+                        <button @click="editUser(user)" class="btn btn-warning btn-sm flex-1">تعديل</button>
+                        <button @click="deleteUser(user.id)" class="btn btn-error btn-sm flex-1">حذف</button>
                     </div>
                 </div>
-                <h1 class="text-xl sm:text-2xl font-bold">Gal Shop</h1>
             </div>
-            <nav class="menu menu-md flex flex-col gap-2">
-                <a href="#" @click.prevent="page='home'" :class="page==='home' ? 'btn btn-primary w-full justify-end' : 'btn btn-ghost w-full justify-end'">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    الرئيسية
-                </a>
-                <a href="#" @click.prevent="page='categories'" :class="page==='categories' ? 'btn btn-primary w-full justify-end' : 'btn btn-ghost w-full justify-end'">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    الفئات
-                </a>
-                <a href="#" @click.prevent="page='about'" :class="page==='about' ? 'btn btn-primary w-full justify-end' : 'btn btn-ghost w-full justify-end'">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    عنا
-                </a>
-            </nav>
-        </aside>
+        </template>
+    </div>
+
+    <!-- Empty State -->
+    <div x-show="filtered().length === 0" class="text-center py-12">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-2xl font-bold">لا توجد نتائج</h3>
+        <p class="opacity-70 mt-2">جرب البحث بكلمات أخرى</p>
     </div>
 </div>
 
-<!-- Modal with better styling for mobile -->
-<div x-show="selectedProduct" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="modal modal-open">
-    <div class="modal-box bg-gradient-to-br from-base-100 to-base-200 shadow-2xl max-w-95 w-full max-h-95">
-        <h3 class="font-bold text-xl sm:text-2xl mb-4 text-right" x-text="selectedProduct?.name"></h3>
-        <div class="space-y-4 text-right">
-            <div class="flex justify-between items-center">
-                <span class="font-semibold">🆔 المعرف:</span>
-                <span class="font-medium" x-text="selectedProduct?.id"></span>
+<!-- Modal -->
+<template x-if="modal.show">
+    <div class="modal-bg" @click="closeModal()">
+        <div class="modal-box bg-base-100 p-6 rounded-lg shadow-2xl" @click.stop>
+            <h3 class="text-2xl font-bold mb-4" x-text="modal.title"></h3>
+            <div class="flex justify-center mb-4">
+                <template x-if="modal.edit">
+                    <label class="cursor-pointer">
+                        <input type="file" accept="image/*" @change="handlePhoto($event, 'edit')" class="hidden">
+                        <img x-show="modal.user.preview || modal.user.photo" :src="modal.user.preview || modal.user.photo" class="photo-circle border-primary">
+                        <div x-show="!modal.user.preview && !modal.user.photo" class="photo-circle border-base-300 bg-base-300 flex items-center justify-center text-4xl">👤</div>
+                    </label>
+                </template>
+                <template x-if="!modal.edit">
+                    <img x-show="modal.user.photo" :src="modal.user.photo" class="photo-circle border-primary">
+                    <div x-show="!modal.user.photo" class="photo-circle border-base-300 bg-base-300 flex items-center justify-center text-4xl">👤</div>
+                </template>
             </div>
-            <div class="flex justify-between items-center">
-                <span class="font-semibold">💲 السعر:</span>
-                <span class="font-medium" x-text="selectedProduct?.price"></span>
+            <div x-show="!modal.edit" class="space-y-2">
+                <div class="p-3 bg-base-200 rounded"><strong>🆔 المعرف:</strong> <span x-text="modal.user.id"></span></div>
+                <div class="p-3 bg-base-200 rounded"><strong>👤 الاسم:</strong> <span x-text="modal.user.name"></span></div>
+                <div class="p-3 bg-base-200 rounded"><strong>📧 البريد:</strong> <span x-text="modal.user.email"></span></div>
+                <div class="p-3 bg-base-200 rounded"><strong>🎂 العمر:</strong> <span x-text="modal.user.age"></span> سنة</div>
             </div>
-            <div class="flex justify-between items-center">
-                <span class="font-semibold">📂 الفئة:</span>
-                <span class="font-medium" x-text="categories.find(c => c.id === selectedProduct?.categoryId)?.name || 'غير محدد'"></span>
+            <div x-show="modal.edit" class="space-y-3">
+                <input type="text" x-model="modal.user.name" placeholder="الاسم" class="input input-bordered w-full">
+                <input type="email" x-model="modal.user.email" placeholder="البريد" class="input input-bordered w-full">
+                <input type="number" x-model="modal.user.age" placeholder="العمر" class="input input-bordered w-full">
+            </div>
+            <div class="flex gap-2 mt-4 justify-end">
+                <button @click="closeModal()" class="btn btn-ghost">إغلاق</button>
+                <button x-show="!modal.edit" @click="editUser(modal.user)" class="btn btn-warning">تعديل</button>
+                <button x-show="modal.edit" @click="saveUser()" class="btn btn-primary">حفظ</button>
             </div>
         </div>
-        <div class="modal-action mt-6 justify-end">
-            <button @click="closeModal" class="btn btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                إغلاق
-            </button>
-        </div>
     </div>
-</div>
-
-<!-- Footer -->
-<footer class="footer footer-center p-4 bg-base-300 text-base-content rounded mt-8 lg:rounded-none text-sm">
-    <div>
-        <p>© 2025 Gal Shop. Built with ❤️ using DaisyUI & Alpine.js</p>
-    </div>
-</footer>
+</template>
 
 <script>
-    function shopApp() {
-        return {
-            categories: [],
-            products: [],
-            newProduct: { name: '', price: '', categoryId: '' },
-            newCategory: { name: '' },
-            filter: '',
-            page: 'home',
-            alert: '',
-            selectedProduct: null,
+function app() {
+    return {
+        users: [],
+        newUser: { name: '', email: '', age: '', photo: null, preview: null },
+        search: '',
+        theme: 'light',
+        alert: { show: false, message: '', type: 'success' },
+        modal: { show: false, user: {}, edit: false, title: '' },
 
-            async initData() {
-                await this.loadCategories();
-                await this.loadProducts();
-            },
+        init() {
+            this.loadTheme();
+            this.users = [
 
-            async loadCategories() {
-                try {
-                    const res = await fetch('/categories');
-                    if (!res.ok) throw new Error('Failed to load categories');
-                    this.categories = await res.json();
-                } catch (error) {
-                    console.error('Error loading categories:', error);
-                    this.alert = 'خطأ في تحميل الفئات!';
-                    setTimeout(() => this.alert = '', 3000);
-                }
-            },
+            ];
+        },
 
-            async loadProducts() {
-                try {
-                    const res = await fetch('/products');
-                    if (!res.ok) throw new Error('Failed to load products');
-                    this.products = await res.json();
-                } catch (error) {
-                    console.error('Error loading products:', error);
-                    this.alert = 'خطأ في تحميل المنتجات!';
-                    setTimeout(() => this.alert = '', 3000);
-                }
-            },
+        loadTheme() {
+            document.documentElement.setAttribute('data-theme', this.theme);
+        },
 
-            async addProduct() {
-                if (!this.newProduct.name.trim() || !this.newProduct.price || !this.newProduct.categoryId) {
-                    this.alert = 'يرجى ملء جميع الحقول!';
-                    setTimeout(() => this.alert = '', 3000);
-                    return;
-                }
-                const productData = {
-                    ...this.newProduct,
-                    price: parseFloat(this.newProduct.price)  // Ensure price is number
-                };
-                try {
-                    const res = await fetch('/products', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(productData)
-                    });
-                    if (!res.ok) throw new Error('Failed to add product');
-                    const product = await res.json();
-                    this.products.push(product);
-                    this.alert = "✅ تم إضافة المنتج بنجاح!";
-                    this.newProduct = { name: '', price: '', categoryId: '' };
-                } catch (error) {
-                    console.error('Error adding product:', error);
-                    this.alert = 'خطأ في إضافة المنتج!';
-                }
-                setTimeout(() => this.alert = '', 3000);
-            },
+        toggleTheme() {
+            this.theme = this.theme === 'light' ? 'dark' : 'light';
+            this.loadTheme();
+        },
 
-            async deleteProduct(id) {
-                if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
-                try {
-                    const res = await fetch(`/products/${id}`, { method: 'DELETE' });
-                    if (!res.ok) throw new Error('Failed to delete product');
-                    this.products = this.products.filter(p => p.id !== id);
-                    this.alert = "🗑️ تم حذف المنتج!";
-                } catch (error) {
-                    console.error('Error deleting product:', error);
-                    this.alert = 'خطأ في حذف المنتج!';
-                }
-                setTimeout(() => this.alert = '', 3000);
-            },
-
-            async addCategory() {
-                if (!this.newCategory.name.trim()) {
-                    this.alert = 'يرجى إدخال اسم الفئة!';
-                    setTimeout(() => this.alert = '', 3000);
-                    return;
-                }
-                try {
-                    const res = await fetch('/categories', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(this.newCategory)
-                    });
-                    if (!res.ok) throw new Error('Failed to add category');
-                    const category = await res.json();
-                    this.categories.push(category);
-                    this.alert = "✅ تم إضافة الفئة بنجاح!";
-                    this.newCategory = { name: '' };
-                } catch (error) {
-                    console.error('Error adding category:', error);
-                    this.alert = 'خطأ في إضافة الفئة!';
-                }
-                setTimeout(() => this.alert = '', 3000);
-            },
-
-            async deleteCategory(id) {
-                if (!confirm('هل أنت متأكد من حذف هذه الفئة؟')) return;
-                try {
-                    const res = await fetch(`/categories/${id}`, { method: 'DELETE' });
-                    if (!res.ok) throw new Error('Failed to delete category');
-                    this.categories = this.categories.filter(c => c.id !== id);
-                    this.alert = "🗑️ تم حذف الفئة!";
-                } catch (error) {
-                    console.error('Error deleting category:', error);
-                    this.alert = 'خطأ في حذف الفئة!';
-                }
-                setTimeout(() => this.alert = '', 3000);
-            },
-
-            filteredProducts() {
-                if (!this.filter) return this.products;
-                return this.products.filter(p => p.name.toLowerCase().includes(this.filter.toLowerCase()));
-            },
-
-            openModal(product) {
-                this.selectedProduct = product;
-            },
-
-            closeModal() {
-                this.selectedProduct = null;
+        handlePhoto(e, mode) {
+            const file = e.target.files[0];
+            if (!file || !file.type.startsWith('image/')) {
+                this.showAlert('⚠️ اختر صورة صالحة!', 'error');
+                return;
             }
+            if (file.size > 5 * 1024 * 1024) {
+                this.showAlert('⚠️ حجم الصورة كبير جداً!', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = e.target.result;
+                if (mode === 'new') {
+                    this.newUser.photo = data;
+                    this.newUser.preview = data;
+                } else if (mode === 'edit') {
+                    this.modal.user.photo = data;
+                    this.modal.user.preview = data;
+                }
+            };
+            reader.readAsDataURL(file);
+        },
+
+        async addUser() {
+            if (!this.newUser.name.trim() || !this.newUser.email.trim() || !this.newUser.age) {
+                this.showAlert('⚠️ املأ جميع الحقول!', 'error');
+                return;
+            }
+            const id = this.users.length > 0 ? Math.max(...this.users.map(u => u.id)) + 1 : 1;
+            this.users.push({ id, ...this.newUser });
+            this.showAlert('✅ تمت الإضافة بنجاح!', 'success');
+            this.newUser = { name: '', email: '', age: '', photo: null, preview: null };
+        },
+
+        viewUser(user) {
+            this.modal = { show: true, user: { ...user }, edit: false, title: user.name };
+        },
+
+        editUser(user) {
+            this.modal = { show: true, user: { ...user, preview: user.photo }, edit: true, title: 'تعديل المستخدم' };
+        },
+
+        async saveUser() {
+            if (!this.modal.user.name.trim() || !this.modal.user.email.trim() || !this.modal.user.age) {
+                this.showAlert('⚠️ املأ جميع الحقول!', 'error');
+                return;
+            }
+            const idx = this.users.findIndex(u => u.id === this.modal.user.id);
+            if (idx !== -1) {
+                this.users[idx] = { ...this.modal.user };
+            }
+            this.showAlert('✅ تم التحديث بنجاح!', 'success');
+            this.closeModal();
+        },
+
+        deleteUser(id) {
+            if (confirm('هل تريد حذف هذا المستخدم؟')) {
+                this.users = this.users.filter(u => u.id !== id);
+                this.showAlert('✅ تم الحذف بنجاح!', 'success');
+            }
+        },
+
+        filtered() {
+            if (!this.search) return this.users;
+            const s = this.search.toLowerCase();
+            return this.users.filter(u => u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s));
+        },
+
+        closeModal() {
+            this.modal.show = false;
+        },
+
+        showAlert(msg, type = 'success') {
+            this.alert = { show: true, message: msg, type };
+            setTimeout(() => this.alert.show = false, 3000);
         }
     }
+}
 </script>
-
 </body>
 </html>

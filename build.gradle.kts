@@ -34,11 +34,13 @@ dependencies {
     implementation("io.ktor:ktor-server-sessions")
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
-    implementation("io.ktor:ktor-server-websockets:3.3.0")
     implementation("io.ktor:ktor-client-auth:3.3.0")
     implementation("io.ktor:ktor-client-resources:3.3.0")
     implementation("org.jetbrains.exposed:exposed-core:0.61.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.61.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.61.0")
+    implementation("org.flywaydb:flyway-core:10.17.0")
+
     implementation("com.h2database:h2:2.3.232")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
@@ -46,6 +48,5 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder")
     implementation("io.ktor:ktor-server-status-pages")
     implementation("io.ktor:ktor-server-thymeleaf")
-    implementation("org.xerial:sqlite-jdbc:3.50.3.0")
 
 }
