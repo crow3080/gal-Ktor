@@ -4,6 +4,7 @@ import com.example.Service.FileUploadService
 import com.example.Service.ProductService
 import com.example.db.models.Product
 import com.example.utils.ApiResponse
+import com.example.utils.ensureAdminSession
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.request.*
@@ -16,9 +17,13 @@ fun Route.productRoutes(
     fileUploadService: FileUploadService
 ) {
 
+
     get("/products") {
+        if (!call.ensureAdminSession()) return@get
         call.respond(ThymeleafContent("index", mapOf()))
     }
+
+
 
     route("/api/products") {
 

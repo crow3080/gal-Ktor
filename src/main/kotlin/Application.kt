@@ -7,12 +7,16 @@ import com.example.Service.FileUploadService
 import com.example.Service.ProductService
 import com.example.db.DatabaseConfig
 import com.example.di.appModules
+import com.example.utils.AdminSession
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import io.ktor.server.thymeleaf.*
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
@@ -32,6 +36,12 @@ fun Application.module() {
 
     install(ContentNegotiation) {
         json()
+    }
+    install(Sessions) {
+        cookie<AdminSession>("ADMIN_SESSION") {
+            cookie.path = "/"
+            cookie.httpOnly = true
+        }
     }
 
     install(Thymeleaf) {
@@ -55,6 +65,28 @@ fun Application.module() {
         productRoutes(productService, fileUploadService)  // ✅
         categoryRoutes(categoryService, fileUploadService)  // ✅
 
+
+        get("/login") {
+            call.respond(ThymeleafContent("login", mapOf()))
+        }
+
+        post("/login") {
+            val params = call.receiveParameters()
+            val username = params["username"]
+            val password = params["password"]
+
+            if (username == "admin" && password == "1234") {
+                call.sessions.set(AdminSession(username))
+                call.respondRedirect("/products")
+            } else {
+                call.respond(ThymeleafContent("login", mapOf("error" to "بيانات الدخول غير صحيحة")))
+            }
+        }
+
+        get("/logout") {
+            call.sessions.clear<AdminSession>()
+            call.respondRedirect("/login")
+        }
     }
 
 }

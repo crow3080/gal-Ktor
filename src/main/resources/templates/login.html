@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="fantasy">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول | Gal Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-base-200 min-h-screen flex items-center justify-center">
+
+<div class="card w-full max-w-md bg-base-100 shadow-xl p-6">
+    <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-primary mb-2">🛒 Gal Admin Panel</h1>
+        <p class="text-base-content/70">تسجيل الدخول إلى لوحة التحكم</p>
+    </div>
+
+    <!-- رسالة خطأ -->
+    <div th:if="${error}" class="alert alert-error mb-4">
+        <span th:text="${error}">بيانات الدخول غير صحيحة</span>
+    </div>
+
+    <!-- نموذج تسجيل الدخول -->
+    <form action="/login" method="post" class="space-y-4">
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">اسم المستخدم</span>
+            </label>
+            <input type="text" name="username" class="input input-bordered w-full" placeholder="ادخل اسم المستخدم" required>
+        </div>
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">كلمة المرور</span>
+            </label>
+            <input type="password" name="password" class="input input-bordered w-full" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full">تسجيل الدخول</button>
+    </form>
+
+    <p class="text-center mt-6 text-sm text-base-content/60">
+        جميع الحقوق محفوظة © <span class="font-semibold">Crow Studio</span> - 2025
+    </p>
+</div>
+
+</body>
+</html>
