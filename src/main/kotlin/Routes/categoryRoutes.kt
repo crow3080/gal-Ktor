@@ -1,0 +1,175 @@
+package com.example.Routes
+
+import com.example.Service.CategoryService
+import com.example.Service.FileUploadService
+import com.example.db.models.Category
+import com.example.utils.CategoryApiResponse
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.thymeleaf.*
+
+fun Route.categoryRoutes(
+    categoryService: CategoryService,
+    fileUploadService: FileUploadService
+) {
+
+    get("/categories") {
+        call.respond(ThymeleafContent("categories", mapOf()))
+    }
+
+    route("/api/categories") {
+
+        get {
+            try {
+                val categories = categoryService.getAllCategories()
+                call.respond(HttpStatusCode.OK, categories)
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    CategoryApiResponse(false, "خطأ في جلب التصنيفات: ${e.message}")
+                )
+            }
+        }
+
+        post("/with-image") {
+            try {
+                val multipart = call.receiveMultipart()
+                var name = ""
+                var imageUrl: String? = null
+
+                multipart.forEachPart { part ->
+                    when (part) {
+                        is PartData.FormItem -> {
+                            if (part.name == "name") {
+                                name = part.value
+                            }
+                        }
+                        is PartData.FileItem -> {
+                            val fileBytes = part.streamProvider().readBytes()
+                            val originalFileName = part.originalFileName ?: "image.jpg"
+                            val fileExtension = originalFileName.substringAfterLast(".")
+                            val fileName = "${java.util.UUID.randomUUID()}.$fileExtension"
+                            val file = java.io.File("uploads/images/$fileName")
+                            file.parentFile.mkdirs()
+                            file.writeBytes(fileBytes)
+                            imageUrl = "/uploads/images/$fileName"
+                        }
+                        else -> {}
+                    }
+                    part.dispose()
+                }
+
+                if (name.isBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        CategoryApiResponse(false, "اسم التصنيف مطلوب")
+                    )
+                    return@post
+                }
+
+                val category = Category(name = name, imageUrl = imageUrl)
+                val newCategory = categoryService.createCategory(category)
+
+                call.respond(
+                    HttpStatusCode.Created,
+                    CategoryApiResponse(true, "تمت الإضافة بنجاح", newCategory)
+                )
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    CategoryApiResponse(false, "خطأ: ${e.message}")
+                )
+            }
+        }
+
+        post {
+            try {
+                val category = call.receive<Category>()
+
+                if (category.name.isBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        CategoryApiResponse(false, "اسم التصنيف مطلوب")
+                    )
+                    return@post
+                }
+
+                val newCategory = categoryService.createCategory(category)
+                call.respond(
+                    HttpStatusCode.Created,
+                    CategoryApiResponse(true, "تمت الإضافة بنجاح", newCategory)
+                )
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    CategoryApiResponse(false, "خطأ في إضافة التصنيف: ${e.message}")
+                )
+            }
+        }
+
+        put("/{id}") {
+            try {
+                val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
+                val category = call.receive<Category>()
+
+                if (category.name.isBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        CategoryApiResponse(false, "اسم التصنيف مطلوب")
+                    )
+                    return@put
+                }
+
+                val updated = categoryService.updateCategory(id, category)
+
+                if (updated) {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        CategoryApiResponse(true, "تم التحديث بنجاح")
+                    )
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        CategoryApiResponse(false, "التصنيف غير موجود")
+                    )
+                }
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    CategoryApiResponse(false, "خطأ في التحديث: ${e.message}")
+                )
+            }
+        }
+
+        delete("/{id}") {
+            try {
+                val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
+
+                val category = categoryService.getCategoryById(id)
+                category?.imageUrl?.let { fileUploadService.deleteImage(it) }
+
+                val deleted = categoryService.deleteCategory(id)
+
+                if (deleted) {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        CategoryApiResponse(true, "تم الحذف بنجاح")
+                    )
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        CategoryApiResponse(false, "التصنيف غير موجود")
+                    )
+                }
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    CategoryApiResponse(false, "خطأ في الحذف: ${e.message}")
+                )
+            }
+        }
+    }
+}

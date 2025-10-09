@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="fantasy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التصنيفات - Gal Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" type="text/css"/>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body x-data="categoryApp()" x-init="init()" class="bg-base-100 min-h-screen">
+
+<header class="bg-base-200 shadow-sm sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-base-content">🏷️ إدارة التصنيفات</h1>
+            <a href="/products" class="btn btn-ghost btn-sm">
+                ← العودة للمنتجات
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6">
+
+    <div x-show="alert.show" x-transition
+         :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'" class="mb-6">
+        <p x-text="alert.message" class="font-medium"></p>
+    </div>
+
+    <div class="card bg-base-100 shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold text-base-content mb-4">إضافة تصنيف جديد</h2>
+        <form @submit.prevent="addCategory()" enctype="multipart/form-data">
+            <div class="space-y-4">
+                <input type="text" x-model="newCategory.name" placeholder="اسم التصنيف"
+                       class="input input-bordered w-full" required>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">صورة التصنيف (اختياري)</span>
+                    </label>
+                    <input type="file" @change="handleFileSelect($event)" accept="image/*"
+                           class="file-input file-input-bordered w-full">
+                </div>
+
+                <div x-show="imagePreview" class="flex items-center gap-3">
+                    <img :src="imagePreview" alt="Preview" class="w-20 h-20 object-cover rounded-lg">
+                    <button type="button" @click="clearImage()" class="btn btn-error btn-sm">إزالة</button>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full">➕ إضافة</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+        <div class="card-body">
+            <h2 class="card-title mb-4">التصنيفات الموجودة</h2>
+            <div class="mb-4">
+                <input
+                        type="text"
+                        x-model="searchQuery"
+                        placeholder="🔍 ابحث عن تصنيف..."
+                        class="input input-bordered w-full"
+                >
+            </div>
+
+            <div class="space-y-2">
+                <template x-for="category in filteredCategories" :key="category._id">
+                    <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg hover:bg-base-300 transition">
+                        <div class="flex items-center gap-3">
+                            <img x-show="category.imageUrl" :src="category.imageUrl" :alt="category.name"
+                                 class="w-12 h-12 object-cover rounded-lg">
+                            <span x-show="!category.imageUrl" class="text-2xl">🏷️</span>
+                            <span class="font-medium text-lg" x-text="category.name"></span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click="openEditModal(category)" class="btn btn-warning btn-sm">✏️ تعديل</button>
+                            <button @click="deleteCategory(category._id)" class="btn btn-error btn-sm">🗑️ حذف</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div x-show="categories.length === 0" class="text-center py-12">
+                <div class="text-6xl mb-3">🏷️</div>
+                <p class="text-base-content/70">لا توجد تصنيفات بعد</p>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="modal.show" x-transition @click="modal.show = false"
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6">
+            <h3 class="text-xl font-semibold text-base-content mb-4">تعديل التصنيف</h3>
+            <div class="form-control space-y-4">
+                <input type="text" x-model="modal.category.name" placeholder="اسم التصنيف"
+                       class="input input-bordered w-full" required>
+
+                <div x-show="modal.category.imageUrl" class="flex items-center gap-3">
+                    <img :src="modal.category.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg">
+                    <span class="text-sm text-base-content/70">الصورة الحالية</span>
+                </div>
+
+                <div class="flex gap-3">
+                    <button @click="modal.show = false" class="btn btn-ghost flex-1">إلغاء</button>
+                    <button @click="updateCategory()" class="btn btn-primary flex-1">💾 حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+
+<script src="/js/category.js"></script>
+
+</body>
+</html>
