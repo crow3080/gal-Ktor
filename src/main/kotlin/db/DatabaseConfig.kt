@@ -1,5 +1,6 @@
 package com.example.db
 
+import com.example.db.models.Category
 import com.example.db.models.Product
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoCollection
@@ -21,7 +22,9 @@ object DatabaseConfig {
     val productCollection: MongoCollection<Product> by lazy {
         database.getCollection<Product>(COLLECTION_NAME)
     }
-
+    val categoryCollection: MongoCollection<Category> by lazy {
+        database.getCollection<Category>("categories")
+    }
     fun closeConnection() {
         client.close()
     }

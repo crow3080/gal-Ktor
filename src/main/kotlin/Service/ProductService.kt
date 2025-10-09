@@ -1,5 +1,6 @@
 package com.example.Service
 
+import com.example.db.DatabaseConfig
 import com.example.db.models.Product
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Updates
@@ -30,10 +31,16 @@ class ProductService(private val collection: MongoCollection<Product>) {
                 Updates.set("name", product.name),
                 Updates.set("price", product.price),
                 Updates.set("description", product.description),
-                Updates.set("category", product.category)
+                Updates.set("categoryId", product.categoryId),
+                Updates.set("imageUrl", product.imageUrl)  // ✅
             )
         )
         return updateResult.matchedCount > 0
+    }
+    suspend fun categoryExists(categoryId: String): Boolean {
+        val categoryCollection = DatabaseConfig.categoryCollection  // ✅ صح
+        val found = categoryCollection.find(Filters.eq("_id", categoryId)).toList()
+        return found.isNotEmpty()
     }
 
     suspend fun deleteProduct(id: String): Boolean {
@@ -46,6 +53,7 @@ class ProductService(private val collection: MongoCollection<Product>) {
             product.name.isBlank() -> "اسم المنتج مطلوب"
             product.price <= 0 -> "السعر يجب أن يكون أكبر من صفر"
             product.description.isBlank() -> "وصف المنتج مطلوب"
+            product.categoryId.isBlank() -> "يجب اختيار تصنيف للمنتج"
             else -> null
         }
     }
