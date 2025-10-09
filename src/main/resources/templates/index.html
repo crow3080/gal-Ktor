@@ -3,84 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المستخدمين</title>
+    <title>إدارة المنتجات</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.20/dist/full.min.css" rel="stylesheet" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: all 0.3s; }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .photo-circle { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid; }
-        .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center; }
-        .modal-box { max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body x-data="app()" x-init="init()" class="bg-base-100">
+<body x-data="productApp()" x-init="init()" class="bg-gray-50 min-h-screen">
 
-<!-- Navbar -->
-<div class="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
-    <div class="flex-1">
-        <a class="btn btn-ghost text-xl">👥 إدارة المستخدمين</a>
+<!-- Header -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+        <h1 class="text-2xl font-bold text-gray-800">📦 إدارة المنتجات</h1>
     </div>
-    <div class="flex-none gap-2">
-        <button @click="toggleTheme()" class="btn btn-ghost btn-circle">
-            <svg x-show="theme==='light'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            <svg x-show="theme==='dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-        </button>
-    </div>
-</div>
+</header>
 
-<div class="container mx-auto p-4 max-w-6xl">
+<main class="max-w-6xl mx-auto px-4 py-6">
+
     <!-- Alert -->
-    <div x-show="alert.show" x-transition class="alert shadow-lg mb-4" :class="alert.type === 'success' ? 'alert-success' : 'alert-error'">
-        <span x-text="alert.message"></span>
+    <div x-show="alert.show"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform scale-90"
+         x-transition:enter-end="opacity-100 transform scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         :class="alert.type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'"
+         class="border-r-4 p-4 mb-6 rounded" role="alert">
+        <p x-text="alert.message" class="font-medium"></p>
     </div>
 
-    <!-- Add User Section -->
-    <div class="card bg-base-200 shadow-xl mb-6 fade-in">
-        <div class="card-body">
-            <h2 class="card-title text-2xl mb-4">➕ إضافة مستخدم</h2>
-            <div class="flex justify-center mb-4">
-                <label class="cursor-pointer">
-                    <input type="file" accept="image/*" @change="handlePhoto($event, 'new')" class="hidden">
-                    <img x-show="newUser.preview" :src="newUser.preview" class="photo-circle border-primary">
-                    <div x-show="!newUser.preview" class="photo-circle border-base-300 bg-base-300 flex items-center justify-center text-4xl">📷</div>
-                </label>
+    <!-- Add Product Form -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">إضافة منتج جديد</h2>
+        <form @submit.prevent="addProduct()" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text"
+                       x-model="newProduct.name"
+                       placeholder="اسم المنتج"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                       required>
+
+                <input type="number"
+                       x-model.number="newProduct.price"
+                       placeholder="السعر"
+                       step="0.01"
+                       min="0"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                       required>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <input type="text" x-model="newUser.name" placeholder="الاسم" class="input input-bordered">
-                <input type="email" x-model="newUser.email" placeholder="البريد الإلكتروني" class="input input-bordered">
-                <input type="number" x-model="newUser.age" placeholder="العمر" class="input input-bordered">
-            </div>
-            <button @click="addUser()" class="btn btn-primary mt-3">➕ إضافة</button>
-        </div>
+
+            <input type="text"
+                   x-model="newProduct.category"
+                   placeholder="التصنيف"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+
+            <textarea x-model="newProduct.description"
+                      placeholder="وصف المنتج"
+                      rows="3"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                      required></textarea>
+
+            <button type="submit"
+                    class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-2.5 rounded-lg transition-colors">
+                ➕ إضافة المنتج
+            </button>
+        </form>
     </div>
 
-    <!-- Search -->
-    <div class="mb-6">
-        <input type="text" x-model="search" placeholder="🔍 ابحث عن مستخدم..." class="input input-bordered w-full max-w-md mx-auto block">
-    </div>
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="product in products" :key="product._id">
+            <div class="card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-semibold text-gray-800" x-text="product.name"></h3>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded" x-text="product.category"></span>
+                    </div>
 
-    <!-- Users Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <template x-for="user in filtered()" :key="user.id">
-            <div class="card bg-base-100 shadow-lg card-hover fade-in">
-                <figure class="px-6 pt-6">
-                    <img x-show="user.photo" :src="user.photo" class="w-full h-40 object-cover rounded-lg">
-                    <div x-show="!user.photo" class="w-full h-40 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center text-5xl">👤</div>
-                </figure>
-                <div class="card-body items-center text-center">
-                    <h3 class="card-title" x-text="user.name"></h3>
-                    <p class="text-sm opacity-70">📧 <span x-text="user.email"></span></p>
-                    <p class="text-sm opacity-70">🎂 <span x-text="user.age"></span> سنة</p>
-                    <div class="card-actions justify-center gap-2 mt-3 w-full">
-                        <button @click="viewUser(user)" class="btn btn-info btn-sm flex-1">عرض</button>
-                        <button @click="editUser(user)" class="btn btn-warning btn-sm flex-1">تعديل</button>
-                        <button @click="deleteUser(user.id)" class="btn btn-error btn-sm flex-1">حذف</button>
+                    <p class="text-2xl font-bold text-blue-600 mb-2">
+                        <span x-text="product.price.toFixed(2)"></span> ريال
+                    </p>
+
+                    <p class="text-sm text-gray-600 mb-4 line-clamp-2" x-text="product.description"></p>
+
+                    <div class="flex gap-2">
+                        <button @click="openEditModal(product)"
+                                class="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            ✏️ تعديل
+                        </button>
+                        <button @click="deleteProduct(product._id)"
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            🗑️ حذف
+                        </button>
                     </div>
                 </div>
             </div>
@@ -88,156 +107,206 @@
     </div>
 
     <!-- Empty State -->
-    <div x-show="filtered().length === 0" class="text-center py-12">
-        <div class="text-6xl mb-4">🔍</div>
-        <h3 class="text-2xl font-bold">لا توجد نتائج</h3>
-        <p class="opacity-70 mt-2">جرب البحث بكلمات أخرى</p>
+    <div x-show="products.length === 0" class="text-center py-20">
+        <div class="text-8xl mb-4">📦</div>
+        <h3 class="text-2xl font-semibold text-gray-700 mb-2">لا توجد منتجات</h3>
+        <p class="text-gray-500">ابدأ بإضافة منتج جديد</p>
     </div>
-</div>
 
-<!-- Modal -->
-<template x-if="modal.show">
-    <div class="modal-bg" @click="closeModal()">
-        <div class="modal-box bg-base-100 p-6 rounded-lg shadow-2xl" @click.stop>
-            <h3 class="text-2xl font-bold mb-4" x-text="modal.title"></h3>
-            <div class="flex justify-center mb-4">
-                <template x-if="modal.edit">
-                    <label class="cursor-pointer">
-                        <input type="file" accept="image/*" @change="handlePhoto($event, 'edit')" class="hidden">
-                        <img x-show="modal.user.preview || modal.user.photo" :src="modal.user.preview || modal.user.photo" class="photo-circle border-primary">
-                        <div x-show="!modal.user.preview && !modal.user.photo" class="photo-circle border-base-300 bg-base-300 flex items-center justify-center text-4xl">👤</div>
-                    </label>
-                </template>
-                <template x-if="!modal.edit">
-                    <img x-show="modal.user.photo" :src="modal.user.photo" class="photo-circle border-primary">
-                    <div x-show="!modal.user.photo" class="photo-circle border-base-300 bg-base-300 flex items-center justify-center text-4xl">👤</div>
-                </template>
-            </div>
-            <div x-show="!modal.edit" class="space-y-2">
-                <div class="p-3 bg-base-200 rounded"><strong>🆔 المعرف:</strong> <span x-text="modal.user.id"></span></div>
-                <div class="p-3 bg-base-200 rounded"><strong>👤 الاسم:</strong> <span x-text="modal.user.name"></span></div>
-                <div class="p-3 bg-base-200 rounded"><strong>📧 البريد:</strong> <span x-text="modal.user.email"></span></div>
-                <div class="p-3 bg-base-200 rounded"><strong>🎂 العمر:</strong> <span x-text="modal.user.age"></span> سنة</div>
-            </div>
-            <div x-show="modal.edit" class="space-y-3">
-                <input type="text" x-model="modal.user.name" placeholder="الاسم" class="input input-bordered w-full">
-                <input type="email" x-model="modal.user.email" placeholder="البريد" class="input input-bordered w-full">
-                <input type="number" x-model="modal.user.age" placeholder="العمر" class="input input-bordered w-full">
-            </div>
-            <div class="flex gap-2 mt-4 justify-end">
-                <button @click="closeModal()" class="btn btn-ghost">إغلاق</button>
-                <button x-show="!modal.edit" @click="editUser(modal.user)" class="btn btn-warning">تعديل</button>
-                <button x-show="modal.edit" @click="saveUser()" class="btn btn-primary">حفظ</button>
-            </div>
+    <!-- Edit Modal -->
+    <div x-show="modal.show"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="modal.show = false"
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+
+        <div @click.stop
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform scale-90"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">تعديل المنتج</h3>
+
+            <form @submit.prevent="updateProduct()" class="space-y-4">
+                <input type="text"
+                       x-model="modal.product.name"
+                       placeholder="اسم المنتج"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                       required>
+
+                <input type="number"
+                       x-model.number="modal.product.price"
+                       placeholder="السعر"
+                       step="0.01"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                       required>
+
+                <input type="text"
+                       x-model="modal.product.category"
+                       placeholder="التصنيف"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+
+                <textarea x-model="modal.product.description"
+                          placeholder="وصف المنتج"
+                          rows="3"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                          required></textarea>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button"
+                            @click="modal.show = false"
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors">
+                        إلغاء
+                    </button>
+                    <button type="submit"
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        💾 حفظ التغييرات
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-</template>
+
+</main>
 
 <script>
-function app() {
-    return {
-        users: [],
-        newUser: { name: '', email: '', age: '', photo: null, preview: null },
-        search: '',
-        theme: 'light',
-        alert: { show: false, message: '', type: 'success' },
-        modal: { show: false, user: {}, edit: false, title: '' },
+    function productApp() {
+        return {
+            products: [],
+            newProduct: { name: '', price: 0, description: '', category: 'عام' },
+            modal: { show: false, product: {} },
+            alert: { show: false, message: '', type: 'success' },
 
-        init() {
-            this.loadTheme();
-            this.users = [
+            async init() {
+                await this.loadProducts();
+            },
 
-            ];
-        },
-
-        loadTheme() {
-            document.documentElement.setAttribute('data-theme', this.theme);
-        },
-
-        toggleTheme() {
-            this.theme = this.theme === 'light' ? 'dark' : 'light';
-            this.loadTheme();
-        },
-
-        handlePhoto(e, mode) {
-            const file = e.target.files[0];
-            if (!file || !file.type.startsWith('image/')) {
-                this.showAlert('⚠️ اختر صورة صالحة!', 'error');
-                return;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                this.showAlert('⚠️ حجم الصورة كبير جداً!', 'error');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = e.target.result;
-                if (mode === 'new') {
-                    this.newUser.photo = data;
-                    this.newUser.preview = data;
-                } else if (mode === 'edit') {
-                    this.modal.user.photo = data;
-                    this.modal.user.preview = data;
+            async loadProducts() {
+                try {
+                    const res = await fetch('/api/products');
+                    if (!res.ok) throw new Error('فشل في جلب المنتجات');
+                    this.products = await res.json();
+                } catch (err) {
+                    this.showAlert(err.message, 'error');
                 }
-            };
-            reader.readAsDataURL(file);
-        },
+            },
 
-        async addUser() {
-            if (!this.newUser.name.trim() || !this.newUser.email.trim() || !this.newUser.age) {
-                this.showAlert('⚠️ املأ جميع الحقول!', 'error');
-                return;
+            async addProduct() {
+                if (!this.validateProduct(this.newProduct)) return;
+
+                try {
+                    const res = await fetch('/api/products', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newProduct)
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(data.message || 'فشل في إضافة المنتج');
+                    }
+
+                    // إضافة المنتج للقائمة مباشرة بدون refresh
+                    if (data.data) {
+                        this.products.push(data.data);
+                    } else {
+                        await this.loadProducts();
+                    }
+
+                    this.newProduct = { name: '', price: 0, description: '', category: 'عام' };
+                    this.showAlert('✅ تمت الإضافة بنجاح', 'success');
+                } catch (err) {
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            openEditModal(product) {
+                this.modal = {
+                    show: true,
+                    product: { ...product }
+                };
+            },
+
+            async updateProduct() {
+                if (!this.validateProduct(this.modal.product)) return;
+
+                try {
+                    const res = await fetch(`/api/products/${this.modal.product._id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.modal.product)
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(data.message || 'فشل في تحديث المنتج');
+                    }
+
+                    // تحديث المنتج في القائمة مباشرة
+                    const index = this.products.findIndex(p => p._id === this.modal.product._id);
+                    if (index !== -1) {
+                        this.products[index] = { ...this.modal.product };
+                    }
+
+                    this.modal.show = false;
+                    this.showAlert('✅ تم التحديث بنجاح', 'success');
+                } catch (err) {
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            async deleteProduct(id) {
+                if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+
+                try {
+                    const res = await fetch(`/api/products/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(data.message || 'فشل في حذف المنتج');
+                    }
+
+                    // حذف المنتج من القائمة مباشرة
+                    this.products = this.products.filter(p => p._id !== id);
+                    this.showAlert('✅ تم الحذف بنجاح', 'success');
+                } catch (err) {
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            validateProduct(product) {
+                if (!product.name.trim()) {
+                    this.showAlert('⚠️ اسم المنتج مطلوب', 'error');
+                    return false;
+                }
+                if (!product.price || product.price <= 0) {
+                    this.showAlert('⚠️ السعر يجب أن يكون أكبر من صفر', 'error');
+                    return false;
+                }
+                if (!product.description.trim()) {
+                    this.showAlert('⚠️ وصف المنتج مطلوب', 'error');
+                    return false;
+                }
+                return true;
+            },
+
+            showAlert(message, type = 'success') {
+                this.alert = { show: true, message, type };
+                setTimeout(() => this.alert.show = false, 4000);
             }
-            const id = this.users.length > 0 ? Math.max(...this.users.map(u => u.id)) + 1 : 1;
-            this.users.push({ id, ...this.newUser });
-            this.showAlert('✅ تمت الإضافة بنجاح!', 'success');
-            this.newUser = { name: '', email: '', age: '', photo: null, preview: null };
-        },
-
-        viewUser(user) {
-            this.modal = { show: true, user: { ...user }, edit: false, title: user.name };
-        },
-
-        editUser(user) {
-            this.modal = { show: true, user: { ...user, preview: user.photo }, edit: true, title: 'تعديل المستخدم' };
-        },
-
-        async saveUser() {
-            if (!this.modal.user.name.trim() || !this.modal.user.email.trim() || !this.modal.user.age) {
-                this.showAlert('⚠️ املأ جميع الحقول!', 'error');
-                return;
-            }
-            const idx = this.users.findIndex(u => u.id === this.modal.user.id);
-            if (idx !== -1) {
-                this.users[idx] = { ...this.modal.user };
-            }
-            this.showAlert('✅ تم التحديث بنجاح!', 'success');
-            this.closeModal();
-        },
-
-        deleteUser(id) {
-            if (confirm('هل تريد حذف هذا المستخدم؟')) {
-                this.users = this.users.filter(u => u.id !== id);
-                this.showAlert('✅ تم الحذف بنجاح!', 'success');
-            }
-        },
-
-        filtered() {
-            if (!this.search) return this.users;
-            const s = this.search.toLowerCase();
-            return this.users.filter(u => u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s));
-        },
-
-        closeModal() {
-            this.modal.show = false;
-        },
-
-        showAlert(msg, type = 'success') {
-            this.alert = { show: true, message: msg, type };
-            setTimeout(() => this.alert.show = false, 3000);
         }
     }
-}
 </script>
+
 </body>
 </html>
