@@ -1,6 +1,6 @@
 package com.example.db
 
-import com.example.Product
+import com.example.db.models.Product
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
@@ -14,11 +14,15 @@ object DatabaseConfig {
         MongoClient.create(MONGO_STRING)
     }
 
-    val database: MongoDatabase by lazy {
+    private val database: MongoDatabase by lazy {
         client.getDatabase(DATABASE_NAME)
     }
 
-    open val productCollection: MongoCollection<Product> by lazy {
+    val productCollection: MongoCollection<Product> by lazy {
         database.getCollection<Product>(COLLECTION_NAME)
+    }
+
+    fun closeConnection() {
+        client.close()
     }
 }

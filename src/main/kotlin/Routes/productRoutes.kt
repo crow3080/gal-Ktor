@@ -1,8 +1,8 @@
 package com.example.Routes
 
-import com.example.ApiResponse
-import com.example.Product
 import com.example.Service.ProductService
+import com.example.db.models.Product
+import com.example.utils.ApiResponse
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -11,14 +11,12 @@ import io.ktor.server.thymeleaf.*
 
 fun Route.productRoutes(productService: ProductService) {
 
-    // Render initial page
     get("/products") {
         call.respond(ThymeleafContent("index", mapOf()))
     }
 
     route("/api/products") {
 
-        // Get all products
         get {
             try {
                 val products = productService.getAllProducts()
@@ -31,7 +29,6 @@ fun Route.productRoutes(productService: ProductService) {
             }
         }
 
-        // Get single product
         get("/{id}") {
             try {
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
@@ -53,12 +50,10 @@ fun Route.productRoutes(productService: ProductService) {
             }
         }
 
-        // Create product
         post {
             try {
                 val product = call.receive<Product>()
 
-                // Validate product
                 val validationError = productService.validateProduct(product)
                 if (validationError != null) {
                     call.respond(
@@ -81,13 +76,11 @@ fun Route.productRoutes(productService: ProductService) {
             }
         }
 
-        // Update product
         put("/{id}") {
             try {
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
                 val product = call.receive<Product>()
 
-                // Validate product
                 val validationError = productService.validateProduct(product)
                 if (validationError != null) {
                     call.respond(
@@ -118,7 +111,6 @@ fun Route.productRoutes(productService: ProductService) {
             }
         }
 
-        // Delete product
         delete("/{id}") {
             try {
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")

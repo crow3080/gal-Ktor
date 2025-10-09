@@ -1,6 +1,6 @@
 package com.example.Service
 
-import com.example.Product
+import com.example.db.models.Product
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoCollection
