@@ -6,6 +6,7 @@ import com.example.db.DatabaseConfig
 import com.example.di.appModules
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
@@ -42,6 +43,8 @@ fun Application.module() {
     val productService = ProductService(DatabaseConfig.productCollection)
 
     routing {
+        staticResources("/", "static")
         productRoutes(productService)
     }
+
 }
