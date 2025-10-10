@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="emerald">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سلة المشتريات - جال للتجارة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-base-100">
+
+<!-- 🔹 الهيدر -->
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
+    <div class="flex-1">
+        <a href="/" class="text-1xl font-bold flex items-center gap-2">
+            <i class="fas fa-industry text-2xl" style="color: #d4af37;"></i>
+            <span>جال للتجارة و توريدات المصانع</span>
+        </a>
+    </div>
+
+    <!-- قائمة Desktop -->
+    <nav class="hidden md:flex gap-3">
+        <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
+        <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
+        <a href="/contact" class="btn btn-ghost btn-sm"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
+        <a href="/clientLogin" class="btn btn-primary btn-sm">تسجيل الدخول</a>
+    </nav>
+
+    <!-- Dropdown للموبايل -->
+    <div class="dropdown dropdown-end md:hidden relative">
+        <button tabindex="0" class="btn btn-ghost btn-lg">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
+            <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> المنتجات</a></li>
+            <li><a href="/cart" class="py-4"><i class="fas fa-shopping-cart ml-2 text-xl"></i> السلة</a></li>
+            <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> تواصل معنا</a></li>
+            <li><a href="/clientLogin" class="py-4 text-[#d4af37]"><i class="fas fa-sign-in-alt ml-2 text-xl"></i> تسجيل الدخول</a></li>
+        </ul>
+    </div>
+</header>
+
+
+
+<!-- 🔹 المحتوى -->
+<main class="max-w-4xl mx-auto p-6 min-h-[70vh]">
+    <h1 class="text-3xl font-bold mb-4 text-emerald-700">🛒 سلة المشتريات</h1>
+
+    <div class="bg-base-200 p-6 rounded-2xl shadow-sm text-center">
+        <p class="text-lg text-gray-600">العربة فارغة حاليًا.</p>
+        <a href="/productCatalog" class="btn btn-emerald-500 text-white mt-4">تصفح المنتجات</a>
+    </div>
+</main>
+
+<!-- 🔹 الفوتر -->
+<footer class="footer footer-center p-10 bg-white/70 backdrop-blur-md text-base-content">
+    <nav class="grid grid-flow-col gap-4">
+        <a href="/productCatalog" class="link link-hover">المنتجات</a>
+        <a href="/cart" class="link link-hover">السلة</a>
+        <a href="/contact" class="link link-hover">تواصل معنا</a>
+    </nav>
+    <div class="flex justify-center gap-4 text-xl mt-4">
+        <a href="#" class="hover:text-blue-600"><i class="fab fa-facebook"></i></a>
+        <a href="#" class="hover:text-pink-500"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="hover:text-green-500"><i class="fab fa-whatsapp"></i></a>
+    </div>
+    <p class="text-base-content/70 mt-4">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+</footer>
+
+</body>
+</html>

@@ -87,6 +87,29 @@ fun Application.module() {
             call.sessions.clear<AdminSession>()
             call.respondRedirect("/login")
         }
+
+
+// ✅ الموقع التجاري (الواجهة العامة)
+        get("/") {
+            call.respond(ThymeleafContent("main", mapOf()))
+        }
+
+        get("/contact") {
+            call.respond(ThymeleafContent("contact", mapOf()))
+        }
+
+        get("/cart") {
+            call.respond(ThymeleafContent("cart", mapOf()))
+        }
+
+        get("/productCatalog") {
+            call.respond(ThymeleafContent("productCatalog", mapOf()))
+        }
+        get("/clientLogin") {
+            call.respond(ThymeleafContent("clientlogin", mapOf()))
+        }
+
+
     }
 
 }
