@@ -1,8 +1,6 @@
 package com.example.Service
 
-import io.ktor.http.content.*
 import java.io.File
-import java.util.*
 
 class FileUploadService {
 
@@ -10,30 +8,6 @@ class FileUploadService {
 
     init {
         File(uploadDir).mkdirs()
-    }
-
-    suspend fun saveImage(multipart: MultiPartData): String? {
-        var fileName: String? = null
-
-        multipart.forEachPart { part ->
-            when (part) {
-                is PartData.FileItem -> {
-                    val fileBytes = part.streamProvider().readBytes()
-                    val originalFileName = part.originalFileName ?: "image.jpg"
-                    val fileExtension = originalFileName.substringAfterLast(".")
-
-                    // إنشاء اسم فريد للملف
-                    fileName = "${UUID.randomUUID()}.$fileExtension"
-                    val file = File("$uploadDir/$fileName")
-
-                    file.writeBytes(fileBytes)
-                }
-                else -> {}
-            }
-            part.dispose()
-        }
-
-        return fileName?.let { "/uploads/images/$it" }
     }
 
     fun deleteImage(imageUrl: String) {
