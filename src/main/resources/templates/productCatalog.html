@@ -7,19 +7,58 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: all 0.4s;
+        }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+        .product-image {
+            height: 200px;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .gold-text {
+            color: #d4af37;
+        }
+        .loading-spinner {
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body class="bg-base-100">
 
-<!-- 🔹 الهيدر -->
+<!-- الهيدر -->
 <header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
     <div class="flex-1">
-        <a href="/" class="text-1xl font-bold flex items-center gap-2">
-            <i class="fas fa-industry text-2xl" style="color: #d4af37;"></i>
+        <a href="/" class="text-2xl font-bold flex items-center gap-2">
+            <i class="fas fa-industry text-3xl" style="color: #d4af37;"></i>
             <span>جال للتجارة و توريدات المصانع</span>
         </a>
     </div>
 
-    <!-- قائمة Desktop -->
     <nav class="hidden md:flex gap-3">
         <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
         <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
@@ -27,7 +66,6 @@
         <a href="/clientLogin" class="btn btn-primary btn-sm">تسجيل الدخول</a>
     </nav>
 
-    <!-- Dropdown للموبايل -->
     <div class="dropdown dropdown-end md:hidden relative">
         <button tabindex="0" class="btn btn-ghost btn-lg">
             <i class="fas fa-bars text-2xl"></i>
@@ -41,34 +79,326 @@
     </div>
 </header>
 
+<!-- المحتوى الرئيسي -->
+<main class="max-w-7xl mx-auto p-6 min-h-[70vh]" x-data="productCatalog()" x-init="init()">
 
+    <!-- العنوان والبحث -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-6 text-center" style="color: #d4af37;">
+            <i class="fas fa-box-open ml-2"></i> كتالوج المنتجات
+        </h1>
 
-<!-- 🔹 المحتوى -->
-<main class="max-w-6xl mx-auto p-6 min-h-[70vh]">
-    <h1 class="text-3xl font-bold mb-6 text-emerald-700">🛍️ كتالوج المنتجات</h1>
+        <!-- شريط البحث والفلاتر -->
+        <div class="glass-card p-6 rounded-2xl mb-6">
+            <div class="grid md:grid-cols-3 gap-4">
+                <!-- البحث -->
+                <div class="form-control">
+                    <div class="input-group">
+                        <input type="text"
+                               x-model="searchQuery"
+                               @input="filterProducts()"
+                               placeholder="ابحث عن منتج..."
+                               class="input input-bordered w-full bg-base-200 text-gray-200">
+                        <button class="btn btn-square" style="background: #d4af37;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Placeholder للمنتجات -->
-        <div class="card bg-base-200 shadow-sm p-6 text-center">
-            <p class="text-gray-500">قريبًا سيتم عرض المنتجات من قاعدة البيانات هنا.</p>
+                <!-- فلتر التصنيف -->
+                <select x-model="selectedCategory"
+                        @change="filterProducts()"
+                        class="select select-bordered bg-base-200 text-gray-200">
+                    <option value="">جميع التصنيفات</option>
+                    <template x-for="cat in categories" :key="cat._id">
+                        <option :value="cat._id" x-text="cat.name"></option>
+                    </template>
+                </select>
+
+                <!-- فلتر السعر -->
+                <select x-model="sortBy"
+                        @change="sortProducts()"
+                        class="select select-bordered bg-base-200 text-gray-200">
+                    <option value="">ترتيب حسب</option>
+                    <option value="price-asc">السعر: من الأقل للأعلى</option>
+                    <option value="price-desc">السعر: من الأعلى للأقل</option>
+                    <option value="name">الاسم</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- حالة التحميل -->
+    <div x-show="loading" class="flex justify-center items-center py-20">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- رسالة خطأ -->
+    <div x-show="error" class="alert alert-error shadow-lg mb-6" x-transition>
+        <i class="fas fa-exclamation-circle"></i>
+        <span x-text="error"></span>
+    </div>
+
+    <!-- عرض المنتجات -->
+    <div x-show="!loading && filteredProducts.length > 0"
+         class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+         x-transition>
+        <template x-for="product in filteredProducts" :key="product._id">
+            <div class="glass-card rounded-2xl overflow-hidden shadow-xl">
+                <!-- صورة المنتج -->
+                <div class="relative">
+                    <img :src="product.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'"
+                         :alt="product.name"
+                         class="w-full product-image">
+                    <div class="absolute top-2 right-2">
+                        <span class="badge badge-lg" style="background: #d4af37; color: #1a1a2e; font-weight: bold;">
+                            <span x-text="product.price"></span> جنيه
+                        </span>
+                    </div>
+                </div>
+
+                <!-- تفاصيل المنتج -->
+                <div class="p-5">
+                    <h3 class="text-xl font-bold mb-2 text-gray-100" x-text="product.name"></h3>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2" x-text="product.description"></p>
+
+                    <div class="flex items-center gap-2 mb-4 text-sm text-gray-300">
+                        <i class="fas fa-layer-group gold-text"></i>
+                        <span x-text="getCategoryName(product.categoryId)"></span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button @click="addToCart(product)"
+                                class="btn btn-sm flex-1 text-slate-900 font-bold hover:scale-105 transition-transform"
+                                style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
+                            <i class="fas fa-cart-plus"></i>
+                            أضف للسلة
+                        </button>
+                        <button @click="showProductDetails(product)"
+                                class="btn btn-sm btn-outline"
+                                style="border-color: #d4af37; color: #d4af37;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- رسالة عدم وجود منتجات -->
+    <div x-show="!loading && filteredProducts.length === 0"
+         class="text-center py-20"
+         x-transition>
+        <div class="glass-card rounded-3xl p-12 max-w-md mx-auto">
+            <i class="fas fa-box-open text-6xl gold-text mb-4"></i>
+            <h3 class="text-2xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
+            <p class="text-gray-400">جرب البحث بكلمات مختلفة أو تصفح جميع التصنيفات</p>
+        </div>
+    </div>
+
+    <!-- Modal تفاصيل المنتج -->
+    <div x-show="showModal"
+         x-transition
+         @click="showModal = false"
+         class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div @click.stop
+             x-transition
+             class="glass-card rounded-3xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <template x-if="selectedProduct">
+                <div>
+                    <img :src="selectedProduct.imageUrl || 'https://via.placeholder.com/600x400'"
+                         :alt="selectedProduct.name"
+                         class="w-full h-64 object-cover rounded-2xl mb-6">
+
+                    <h2 class="text-3xl font-bold mb-4 text-gray-100" x-text="selectedProduct.name"></h2>
+                    <p class="text-gray-300 mb-4" x-text="selectedProduct.description"></p>
+
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="text-3xl font-bold gold-text">
+                            <span x-text="selectedProduct.price"></span> جنيه
+                        </span>
+                        <span class="badge badge-lg" style="background: rgba(212, 175, 55, 0.2); color: #d4af37;">
+                            <i class="fas fa-layer-group ml-1"></i>
+                            <span x-text="getCategoryName(selectedProduct.categoryId)"></span>
+                        </span>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button @click="addToCart(selectedProduct); showModal = false"
+                                class="btn flex-1 text-slate-900 font-bold"
+                                style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
+                            <i class="fas fa-cart-plus ml-2"></i>
+                            أضف للسلة
+                        </button>
+                        <button @click="showModal = false"
+                                class="btn btn-outline"
+                                style="border-color: #d4af37; color: #d4af37;">
+                            إغلاق
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Toast إضافة للسلة -->
+    <div x-show="showToast"
+         x-transition
+         class="toast toast-top toast-center z-50">
+        <div class="alert shadow-2xl" style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); color: #1a1a2e; border: none;">
+            <i class="fas fa-check-circle text-2xl"></i>
+            <span class="font-bold" x-text="toastMessage"></span>
         </div>
     </div>
 </main>
 
-<!-- 🔹 الفوتر -->
-<footer class="footer footer-center p-10 bg-white/70 backdrop-blur-md text-base-content">
-    <nav class="grid grid-flow-col gap-4">
-        <a href="/productCatalog" class="link link-hover">المنتجات</a>
-        <a href="/cart" class="link link-hover">السلة</a>
-        <a href="/contact" class="link link-hover">تواصل معنا</a>
+<!-- الفوتر -->
+<footer class="footer footer-center p-12 glass-card text-gray-300 relative overflow-hidden mt-12">
+    <div class="mb-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+            <i class="fas fa-industry text-4xl" style="color:#d4af37;"></i>
+            <span class="text-3xl font-bold gold-text">جال للتجارة</span>
+        </div>
+        <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
+    </div>
+    <nav class="grid grid-flow-col gap-6 text-base">
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
     </nav>
-    <div class="flex justify-center gap-4 text-xl mt-4">
+    <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
         <a href="#" class="hover:text-blue-600"><i class="fab fa-facebook"></i></a>
         <a href="#" class="hover:text-pink-500"><i class="fab fa-instagram"></i></a>
         <a href="#" class="hover:text-green-500"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="hover:text-blue-700"><i class="fab fa-linkedin"></i></a>
     </div>
-    <p class="text-base-content/70 mt-4">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
+
+<script>
+    function productCatalog() {
+        return {
+            products: [],
+            categories: [],
+            filteredProducts: [],
+            loading: true,
+            error: '',
+            searchQuery: '',
+            selectedCategory: '',
+            sortBy: '',
+            showModal: false,
+            selectedProduct: null,
+            showToast: false,
+            toastMessage: '',
+
+            async init() {
+                await this.loadCategories();
+                await this.loadProducts();
+            },
+
+            async loadProducts() {
+                try {
+                    this.loading = true;
+                    this.error = '';
+
+                    const response = await fetch('/api/products');
+                    if (!response.ok) throw new Error('فشل تحميل المنتجات');
+
+                    const data = await response.json();
+                    this.products = data;
+                    this.filteredProducts = data;
+                } catch (err) {
+                    this.error = 'حدث خطأ في تحميل المنتجات';
+                    console.error(err);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async loadCategories() {
+                try {
+                    const response = await fetch('/api/categories');
+                    if (!response.ok) throw new Error('فشل تحميل التصنيفات');
+
+                    const data = await response.json();
+                    this.categories = data;
+                } catch (err) {
+                    console.error('خطأ في تحميل التصنيفات:', err);
+                }
+            },
+
+            filterProducts() {
+                let result = [...this.products];
+
+                // فلترة حسب البحث
+                if (this.searchQuery) {
+                    const query = this.searchQuery.toLowerCase();
+                    result = result.filter(p =>
+                        p.name.toLowerCase().includes(query) ||
+                        p.description.toLowerCase().includes(query)
+                    );
+                }
+
+                // فلترة حسب التصنيف
+                if (this.selectedCategory) {
+                    result = result.filter(p => p.categoryId === this.selectedCategory);
+                }
+
+                this.filteredProducts = result;
+                this.sortProducts();
+            },
+
+            sortProducts() {
+                if (!this.sortBy) return;
+
+                const sorted = [...this.filteredProducts];
+
+                switch(this.sortBy) {
+                    case 'price-asc':
+                        sorted.sort((a, b) => a.price - b.price);
+                        break;
+                    case 'price-desc':
+                        sorted.sort((a, b) => b.price - a.price);
+                        break;
+                    case 'name':
+                        sorted.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+                        break;
+                }
+
+                this.filteredProducts = sorted;
+            },
+
+            getCategoryName(categoryId) {
+                const category = this.categories.find(c => c._id === categoryId);
+                return category ? category.name : 'غير محدد';
+            },
+
+            showProductDetails(product) {
+                this.selectedProduct = product;
+                this.showModal = true;
+            },
+
+            addToCart(product) {
+                // حفظ في localStorage
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+                const existingItem = cart.find(item => item._id === product._id);
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({...product, quantity: 1});
+                }
+
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                // إظهار Toast
+                this.toastMessage = `تمت إضافة "${product.name}" للسلة`;
+                this.showToast = true;
+                setTimeout(() => this.showToast = false, 3000);
+            }
+        }
+    }
+</script>
 
 </body>
 </html>

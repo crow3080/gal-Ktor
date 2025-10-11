@@ -1,90 +1,205 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="dark">
+<html lang="ar" dir="rtl" data-theme="luxury">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>تسجيل الدخول - جال للتجارة</title>
+    <title>تسجيل الدخول - جال للتجارة والتوريدات</title>
 
     <!-- Tailwind & DaisyUI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-            href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
-            rel="stylesheet"
-    />
-
-    <!-- Google Font -->
-    <link
-            href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap"
-            rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         body {
             font-family: "Cairo", sans-serif;
-            background: linear-gradient(to bottom right, #d1fae5, #a7f3d0);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background-attachment: fixed;
         }
-        .card {
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
             backdrop-filter: blur(12px);
-            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-modern {
+            background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+            color: #1a1a2e;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-modern:hover {
+            background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .gold-border {
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            background: rgba(30, 41, 59, 0.5);
+            color: #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .gold-border:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+
+        .industrial-accent::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d4af37, #ffd700, #d4af37);
+        }
+
+        .gold-text {
+            color: #d4af37;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center px-4">
-<div class="card w-full max-w-md shadow-2xl">
-    <div class="card-body">
-        <!-- Logo -->
-        <div class="flex justify-center mb-4">
-            <img
-                    src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png"
-                    alt="Logo"
-                    class="w-20 h-20"
-            />
+<body class="text-base-content flex flex-col min-h-screen">
+
+<!-- Header -->
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4 header-glass">
+    <div class="flex-1">
+        <a href="/" class="text-2xl font-bold flex items-center gap-2">
+            <i class="fas fa-industry text-3xl gold-text"></i>
+            <span>جال للتجارة و توريدات المصانع</span>
+        </a>
+    </div>
+    <nav class="hidden md:flex gap-3">
+        <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
+        <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
+        <a href="/contact" class="btn btn-ghost btn-sm"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
+        <a href="/register" class="btn btn-primary btn-sm">إنشاء حساب</a>
+    </nav>
+    <div class="dropdown dropdown-end md:hidden">
+        <button tabindex="0" class="btn btn-ghost"><i class="fas fa-bars text-xl"></i></button>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-2 shadow bg-base-100 rounded-box w-52 z-[100]">
+            <li><a href="/productCatalog"><i class="fas fa-box-open ml-1"></i> المنتجات</a></li>
+            <li><a href="/cart"><i class="fas fa-shopping-cart ml-1"></i> السلة</a></li>
+            <li><a href="/contact"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a></li>
+        </ul>
+    </div>
+</header>
+
+<!-- Main -->
+<main class="flex-1 flex items-center justify-center p-6 md:p-12 fade-in"
+      x-data="{ phone: '', password: '', message: '', type: 'info', showToast: false, handleLogin() {
+    fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ phone: this.phone, password: this.password })
+    })
+    .then(res => res.json())
+    .then(data => {
+      this.message = data.message || 'تم تسجيل الدخول بنجاح';
+      this.type = data.success ? 'success' : 'error';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+      if (data.success) {
+        setTimeout(() => window.location.href = '/dashboard', 1500);
+      }
+    })
+    .catch(() => {
+      this.message = 'حدث خطأ في الاتصال';
+      this.type = 'error';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+    });
+  } }">
+    <div class="glass-card relative industrial-accent rounded-3xl p-8 md:p-10 max-w-md w-full shadow-2xl">
+        <div class="flex justify-center mb-6">
+            <i class="fas fa-sign-in-alt text-6xl gold-text"></i>
         </div>
 
-        <h2 class="text-center text-2xl font-bold mb-2 text-primary">
+        <h1 class="text-center text-3xl font-bold mb-4 text-gray-100">
             تسجيل الدخول
-        </h2>
-        <p class="text-center text-gray-500 mb-6">
-            أهلاً بك في <strong>جال للتجارة والتوريدات</strong>
-            — سجل دخولك للمتابعة
+        </h1>
+        <p class="text-center text-gray-400 mb-8">
+            مرحبًا بك من جديد في <span class="gold-text font-semibold">جال للتجارة والتوريدات</span>
         </p>
 
-        <!-- Phone -->
-        <div class="form-control mb-4">
-            <label class="label"><span class="label-text">رقم الهاتف</span></label>
-            <input
-                    type="text"
-                    placeholder="أدخل رقم الهاتف"
-                    class="input input-bordered focus:input-primary"
-            />
-        </div>
+        <form @submit.prevent="handleLogin" class="space-y-5">
+            <div>
+                <label class="block mb-2 text-gray-300 font-semibold">رقم الهاتف</label>
+                <input type="text" x-model="phone" placeholder="أدخل رقم الهاتف" class="input gold-border w-full" required />
+            </div>
 
-        <!-- Password -->
-        <div class="form-control mb-6">
-            <label class="label"><span class="label-text">كلمة المرور</span></label>
-            <input
-                    type="password"
-                    placeholder="••••••••"
-                    class="input input-bordered focus:input-primary"
-            />
-        </div>
+            <div>
+                <label class="block mb-2 text-gray-300 font-semibold">كلمة المرور</label>
+                <input type="password" x-model="password" placeholder="••••••••" class="input gold-border w-full" required />
+            </div>
 
-        <button class="btn btn-primary w-full mb-3">تسجيل الدخول</button>
+            <button type="submit" class="btn btn-modern w-full text-lg">
+                <i class="fas fa-right-to-bracket ml-2"></i> تسجيل الدخول
+            </button>
 
-        <div class="text-center text-sm">
-            <a href="#" class="link link-hover text-primary">نسيت كلمة المرور؟</a>
-        </div>
+            <div class="text-center mt-3">
+                <a href="#" class="link gold-text hover:underline">نسيت كلمة المرور؟</a>
+            </div>
 
-        <div class="divider">أو</div>
+            <div class="divider text-gray-400">أو</div>
 
-        <div class="text-center">
-            <p class="mb-2 text-gray-600">ليس لديك حساب؟</p>
-            <a href="/register" class="btn btn-outline btn-success w-full">
-                إنشاء حساب جديد
+            <a href="/register" class="btn btn-outline w-full border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-[#1a1a2e] transition-all font-bold">
+                <i class="fas fa-user-plus ml-2"></i> إنشاء حساب جديد
             </a>
-        </div>
+        </form>
     </div>
-</div>
+
+    <template x-if="showToast">
+        <div class="toast toast-top toast-center">
+            <div :class="type === 'success' ? 'alert alert-success' : 'alert alert-error'">
+                <span x-text="message"></span>
+            </div>
+        </div>
+    </template>
+</main>
+
+<!-- Footer -->
+<footer class="footer footer-center p-10 header-glass text-gray-300 border-t border-gray-700/50">
+    <div>
+        <i class="fas fa-industry text-4xl gold-text"></i>
+        <p class="font-bold text-xl mt-2">جال للتجارة والتوريدات</p>
+        <p class="text-gray-400">شريكك الموثوق في عالم الصناعة</p>
+    </div>
+    <div>
+        <p class="text-sm text-gray-500">
+            <i class="fas fa-shield-alt gold-text ml-1"></i>
+            جميع الحقوق محفوظة © 2025
+        </p>
+    </div>
+</footer>
+
 </body>
 </html>

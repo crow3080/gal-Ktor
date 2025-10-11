@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="emerald">
+<html lang="ar" dir="rtl" data-theme="luxury">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +7,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .gold-text { color: #d4af37; }
+        .cart-item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+    </style>
 </head>
 <body class="bg-base-100">
 
-<!-- 🔹 الهيدر -->
+<!-- الهيدر -->
 <header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
     <div class="flex-1">
-        <a href="/" class="text-1xl font-bold flex items-center gap-2">
-            <i class="fas fa-industry text-2xl" style="color: #d4af37;"></i>
+        <a href="/" class="text-2xl font-bold flex items-center gap-2">
+            <i class="fas fa-industry text-3xl" style="color: #d4af37;"></i>
             <span>جال للتجارة و توريدات المصانع</span>
         </a>
     </div>
 
-    <!-- قائمة Desktop -->
     <nav class="hidden md:flex gap-3">
         <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
         <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
@@ -27,7 +47,6 @@
         <a href="/clientLogin" class="btn btn-primary btn-sm">تسجيل الدخول</a>
     </nav>
 
-    <!-- Dropdown للموبايل -->
     <div class="dropdown dropdown-end md:hidden relative">
         <button tabindex="0" class="btn btn-ghost btn-lg">
             <i class="fas fa-bars text-2xl"></i>
@@ -41,32 +60,313 @@
     </div>
 </header>
 
+<!-- المحتوى الرئيسي -->
+<main class="max-w-6xl mx-auto p-6 min-h-[70vh]" x-data="cartManager()" x-init="init()">
 
+    <h1 class="text-4xl font-bold mb-8 text-center gold-text">
+        <i class="fas fa-shopping-cart ml-2"></i> سلة المشتريات
+    </h1>
 
-<!-- 🔹 المحتوى -->
-<main class="max-w-4xl mx-auto p-6 min-h-[70vh]">
-    <h1 class="text-3xl font-bold mb-4 text-emerald-700">🛒 سلة المشتريات</h1>
+    <!-- السلة الفارغة -->
+    <div x-show="cartItems.length === 0" x-transition class="text-center py-16">
+        <div class="glass-card rounded-3xl p-12 max-w-md mx-auto">
+            <i class="fas fa-shopping-cart text-7xl gold-text mb-6"></i>
+            <h2 class="text-2xl font-bold mb-4 text-gray-100">السلة فارغة</h2>
+            <p class="text-gray-400 mb-6">لم تقم بإضافة أي منتجات بعد</p>
+            <a href="/productCatalog" class="btn text-slate-900 font-bold"
+               style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
+                <i class="fas fa-box-open ml-2"></i>
+                تصفح المنتجات
+            </a>
+        </div>
+    </div>
 
-    <div class="bg-base-200 p-6 rounded-2xl shadow-sm text-center">
-        <p class="text-lg text-gray-600">العربة فارغة حاليًا.</p>
-        <a href="/productCatalog" class="btn btn-emerald-500 text-white mt-4">تصفح المنتجات</a>
+    <!-- عناصر السلة -->
+    <div x-show="cartItems.length > 0" x-transition class="grid lg:grid-cols-3 gap-6">
+
+        <!-- قائمة المنتجات -->
+        <div class="lg:col-span-2 space-y-4">
+            <template x-for="(item, index) in cartItems" :key="item._id">
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <!-- الصورة -->
+                        <img :src="item.imageUrl || 'https://via.placeholder.com/100'"
+                             :alt="item.name"
+                             class="cart-item-image">
+
+                        <!-- التفاصيل -->
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-100 mb-2" x-text="item.name"></h3>
+                            <p class="text-gray-400 text-sm mb-3 line-clamp-2" x-text="item.description"></p>
+
+                            <div class="flex items-center justify-between flex-wrap gap-3">
+                                <!-- السعر -->
+                                <div class="text-2xl font-bold gold-text">
+                                    <span x-text="item.price"></span> جنيه
+                                </div>
+
+                                <!-- الكمية -->
+                                <div class="flex items-center gap-2">
+                                    <button @click="decreaseQuantity(index)"
+                                            class="btn btn-sm btn-circle"
+                                            style="background: rgba(212, 175, 55, 0.2); border-color: #d4af37; color: #d4af37;">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="text-xl font-bold text-gray-100 px-4" x-text="item.quantity"></span>
+                                    <button @click="increaseQuantity(index)"
+                                            class="btn btn-sm btn-circle"
+                                            style="background: rgba(212, 175, 55, 0.2); border-color: #d4af37; color: #d4af37;">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+
+                                <!-- حذف -->
+                                <button @click="removeItem(index)"
+                                        class="btn btn-sm btn-error">
+                                    <i class="fas fa-trash"></i>
+                                    حذف
+                                </button>
+                            </div>
+
+                            <!-- الإجمالي للمنتج -->
+                            <div class="mt-3 text-left">
+                                <span class="text-gray-400">الإجمالي: </span>
+                                <span class="text-xl font-bold gold-text">
+                                    <span x-text="(item.price * item.quantity).toFixed(2)"></span> جنيه
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- ملخص الطلب -->
+        <div class="lg:col-span-1">
+            <div class="glass-card rounded-2xl p-6 sticky top-24">
+                <h2 class="text-2xl font-bold mb-6 text-gray-100">
+                    <i class="fas fa-receipt ml-2 gold-text"></i>
+                    ملخص الطلب
+                </h2>
+
+                <div class="space-y-4 mb-6">
+                    <div class="flex justify-between text-gray-300">
+                        <span>عدد المنتجات:</span>
+                        <span class="font-bold" x-text="getTotalItems()"></span>
+                    </div>
+
+                    <div class="flex justify-between text-gray-300">
+                        <span>المجموع الفرعي:</span>
+                        <span class="font-bold" x-text="getSubtotal().toFixed(2) + ' جنيه'"></span>
+                    </div>
+
+                    <div class="flex justify-between text-gray-300">
+                        <span>الضريبة (14%):</span>
+                        <span class="font-bold" x-text="getTax().toFixed(2) + ' جنيه'"></span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="flex justify-between text-xl">
+                        <span class="font-bold text-gray-100">الإجمالي:</span>
+                        <span class="font-bold text-2xl gold-text" x-text="getTotal().toFixed(2) + ' جنيه'"></span>
+                    </div>
+                </div>
+
+                <button @click="checkout()"
+                        class="btn w-full text-slate-900 font-bold text-lg mb-3"
+                        style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
+                    <i class="fas fa-check-circle ml-2"></i>
+                    إتمام الطلب
+                </button>
+
+                <button @click="clearCart()"
+                        class="btn btn-outline w-full"
+                        style="border-color: #dc2626; color: #dc2626;">
+                    <i class="fas fa-trash ml-2"></i>
+                    إفراغ السلة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div x-show="showToast"
+         x-transition
+         class="toast toast-top toast-center z-50">
+        <div class="alert shadow-2xl"
+             :class="toastType === 'success' ? 'alert-success' : 'alert-error'">
+            <i :class="toastType === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'" class="text-2xl"></i>
+            <span class="font-bold" x-text="toastMessage"></span>
+        </div>
+    </div>
+
+    <!-- Modal تأكيد الطلب -->
+    <div x-show="showCheckoutModal"
+         x-transition
+         @click="showCheckoutModal = false"
+         class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div @click.stop
+             x-transition
+             class="glass-card rounded-3xl max-w-md w-full p-8">
+            <div class="text-center mb-6">
+                <i class="fas fa-check-circle text-6xl gold-text mb-4"></i>
+                <h2 class="text-3xl font-bold text-gray-100 mb-2">تم استلام طلبك!</h2>
+                <p class="text-gray-400">سنتواصل معك قريباً لتأكيد الطلب</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-xl mb-6 border border-[#d4af37]/30">
+                <div class="text-gray-300 space-y-2">
+                    <div class="flex justify-between">
+                        <span>رقم الطلب:</span>
+                        <span class="font-bold gold-text" x-text="orderNumber"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>الإجمالي:</span>
+                        <span class="font-bold gold-text" x-text="getTotal().toFixed(2) + ' جنيه'"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <a href="/productCatalog" class="btn flex-1" style="background: #d4af37; color: #1a1a2e; border: none;">
+                    متابعة التسوق
+                </a>
+                <button @click="showCheckoutModal = false" class="btn btn-outline flex-1" style="border-color: #d4af37; color: #d4af37;">
+                    إغلاق
+                </button>
+            </div>
+        </div>
     </div>
 </main>
 
-<!-- 🔹 الفوتر -->
-<footer class="footer footer-center p-10 bg-white/70 backdrop-blur-md text-base-content">
-    <nav class="grid grid-flow-col gap-4">
-        <a href="/productCatalog" class="link link-hover">المنتجات</a>
-        <a href="/cart" class="link link-hover">السلة</a>
-        <a href="/contact" class="link link-hover">تواصل معنا</a>
+<!-- الفوتر -->
+<footer class="footer footer-center p-12 glass-card text-gray-300 relative overflow-hidden mt-12">
+    <div class="mb-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+            <i class="fas fa-industry text-4xl" style="color:#d4af37;"></i>
+            <span class="text-3xl font-bold gold-text">جال للتجارة</span>
+        </div>
+        <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
+    </div>
+    <nav class="grid grid-flow-col gap-6 text-base">
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
     </nav>
-    <div class="flex justify-center gap-4 text-xl mt-4">
+    <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
         <a href="#" class="hover:text-blue-600"><i class="fab fa-facebook"></i></a>
         <a href="#" class="hover:text-pink-500"><i class="fab fa-instagram"></i></a>
         <a href="#" class="hover:text-green-500"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="hover:text-blue-700"><i class="fab fa-linkedin"></i></a>
     </div>
-    <p class="text-base-content/70 mt-4">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
+
+<script>
+    function cartManager() {
+        return {
+            cartItems: [],
+            showToast: false,
+            toastMessage: '',
+            toastType: 'success',
+            showCheckoutModal: false,
+            orderNumber: '',
+
+            init() {
+                this.loadCart();
+            },
+
+            loadCart() {
+                const cart = localStorage.getItem('cart');
+                this.cartItems = cart ? JSON.parse(cart) : [];
+            },
+
+            saveCart() {
+                localStorage.setItem('cart', JSON.stringify(this.cartItems));
+            },
+
+            increaseQuantity(index) {
+                this.cartItems[index].quantity++;
+                this.saveCart();
+            },
+
+            decreaseQuantity(index) {
+                if (this.cartItems[index].quantity > 1) {
+                    this.cartItems[index].quantity--;
+                    this.saveCart();
+                }
+            },
+
+            removeItem(index) {
+                const itemName = this.cartItems[index].name;
+                this.cartItems.splice(index, 1);
+                this.saveCart();
+                this.showToastMessage(`تم حذف "${itemName}" من السلة`, 'success');
+            },
+
+            clearCart() {
+                if (confirm('هل أنت متأكد من إفراغ السلة؟')) {
+                    this.cartItems = [];
+                    this.saveCart();
+                    this.showToastMessage('تم إفراغ السلة بنجاح', 'success');
+                }
+            },
+
+            getTotalItems() {
+                return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            },
+
+            getSubtotal() {
+                return this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            },
+
+            getTax() {
+                return this.getSubtotal() * 0.14;
+            },
+
+            getTotal() {
+                return this.getSubtotal() + this.getTax();
+            },
+
+            async checkout() {
+                if (this.cartItems.length === 0) {
+                    this.showToastMessage('السلة فارغة!', 'error');
+                    return;
+                }
+
+                // توليد رقم طلب عشوائي
+                this.orderNumber = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+                // في حالة وجود API للطلبات، يمكن إرسال البيانات هنا
+                // const response = await fetch('/api/orders', {
+                //     method: 'POST',
+                //     headers: {'Content-Type': 'application/json'},
+                //     body: JSON.stringify({
+                //         items: this.cartItems,
+                //         total: this.getTotal()
+                //     })
+                // });
+
+                // إظهار modal التأكيد
+                this.showCheckoutModal = true;
+
+                // إفراغ السلة
+                setTimeout(() => {
+                    this.cartItems = [];
+                    this.saveCart();
+                }, 1000);
+            },
+
+            showToastMessage(message, type = 'success') {
+                this.toastMessage = message;
+                this.toastType = type;
+                this.showToast = true;
+                setTimeout(() => this.showToast = false, 3000);
+            }
+        }
+    }
+</script>
 
 </body>
 </html>
