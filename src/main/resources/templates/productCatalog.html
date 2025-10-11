@@ -46,6 +46,9 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-base-100">
@@ -90,7 +93,7 @@
 
         <!-- شريط البحث والفلاتر -->
         <div class="glass-card p-6 rounded-2xl mb-6">
-            <div class="grid md:grid-cols-3 gap-4">
+            <div class="grid md:grid-cols-2 gap-4">
                 <!-- البحث -->
                 <div class="form-control">
                     <div class="input-group">
@@ -105,16 +108,6 @@
                     </div>
                 </div>
 
-                <!-- فلتر التصنيف -->
-                <select x-model="selectedCategory"
-                        @change="filterProducts()"
-                        class="select select-bordered bg-base-200 text-gray-200">
-                    <option value="">جميع التصنيفات</option>
-                    <template x-for="cat in categories" :key="cat._id">
-                        <option :value="cat._id" x-text="cat.name"></option>
-                    </template>
-                </select>
-
                 <!-- فلتر السعر -->
                 <select x-model="sortBy"
                         @change="sortProducts()"
@@ -124,6 +117,68 @@
                     <option value="price-desc">السعر: من الأعلى للأقل</option>
                     <option value="name">الاسم</option>
                 </select>
+            </div>
+        </div>
+
+        <!-- شريط التصنيفات الأفقي -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-gray-100 flex items-center gap-2">
+                <i class="fas fa-layer-group gold-text"></i>
+                التصنيفات
+            </h2>
+
+            <div class="relative">
+                <!-- أزرار التمرير -->
+                <button @click="scrollCategories('right')"
+                        class="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 btn btn-circle btn-sm"
+                        style="background: rgba(212, 175, 55, 0.9); border: none;">
+                    <i class="fas fa-chevron-right text-slate-900"></i>
+                </button>
+                <button @click="scrollCategories('left')"
+                        class="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 z-10 btn btn-circle btn-sm"
+                        style="background: rgba(212, 175, 55, 0.9); border: none;">
+                    <i class="fas fa-chevron-left text-slate-900"></i>
+                </button>
+
+                <!-- حاوية التصنيفات القابلة للتمرير -->
+                <div x-ref="categoriesScroll"
+                     class="flex gap-4 overflow-x-auto pb-4 px-2 scroll-smooth hide-scrollbar"
+                     style="scrollbar-width: none; -ms-overflow-style: none;">
+
+                    <!-- تصنيف "الكل" -->
+                    <div @click="selectedCategory = ''; filterProducts()"
+                         :class="selectedCategory === '' ? 'ring-4 ring-[#d4af37]' : ''"
+                         class="flex-shrink-0 w-36 glass-card rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 group">
+                        <div class="h-24 bg-gradient-to-br from-[#d4af37] to-[#ffd700] flex items-center justify-center">
+                            <i class="fas fa-th-large text-4xl text-slate-900"></i>
+                        </div>
+                        <div class="p-3 text-center">
+                            <h3 class="font-bold text-gray-100 text-sm">الكل</h3>
+                            <p class="text-xs text-gray-400 mt-1">
+                                <span x-text="products.length"></span> منتج
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- التصنيفات الفعلية -->
+                    <template x-for="cat in categories" :key="cat._id">
+                        <div @click="selectedCategory = cat._id; filterProducts()"
+                             :class="selectedCategory === cat._id ? 'ring-4 ring-[#d4af37]' : ''"
+                             class="flex-shrink-0 w-36 glass-card rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 group">
+                            <div class="h-24 overflow-hidden bg-base-300">
+                                <img :src="cat.imageUrl || 'https://via.placeholder.com/150x100?text=' + cat.name"
+                                     :alt="cat.name"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            </div>
+                            <div class="p-3 text-center">
+                                <h3 class="font-bold text-gray-100 text-sm line-clamp-1" x-text="cat.name"></h3>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    <span x-text="getCategoryProductCount(cat._id)"></span> منتج
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
     </div>
@@ -371,6 +426,21 @@
             getCategoryName(categoryId) {
                 const category = this.categories.find(c => c._id === categoryId);
                 return category ? category.name : 'غير محدد';
+            },
+
+            getCategoryProductCount(categoryId) {
+                return this.products.filter(p => p.categoryId === categoryId).length;
+            },
+
+            scrollCategories(direction) {
+                const container = this.$refs.categoriesScroll;
+                const scrollAmount = 300;
+
+                if (direction === 'left') {
+                    container.scrollLeft -= scrollAmount;
+                } else {
+                    container.scrollLeft += scrollAmount;
+                }
             },
 
             showProductDetails(product) {
