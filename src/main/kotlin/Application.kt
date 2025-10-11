@@ -108,6 +108,10 @@ fun Application.module() {
         get("/clientLogin") {
             call.respond(ThymeleafContent("clientlogin", mapOf()))
         }
+        get("/register") {
+            call.respond(ThymeleafContent("register", mapOf()))
+        }
+
 
 
     }
