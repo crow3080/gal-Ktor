@@ -15,12 +15,17 @@
             font-family: 'Cairo', sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         }
+
         .glass-card {
             background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(212, 175, 55, 0.2);
         }
-        .gold-text { color: #d4af37; }
+
+        .gold-text {
+            color: #d4af37;
+        }
+
         .cart-item-image {
             width: 100px;
             height: 100px;
@@ -51,11 +56,13 @@
         <button tabindex="0" class="btn btn-ghost btn-lg">
             <i class="fas fa-bars text-2xl"></i>
         </button>
-        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
+        <ul tabindex="0"
+            class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
             <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> المنتجات</a></li>
             <li><a href="/cart" class="py-4"><i class="fas fa-shopping-cart ml-2 text-xl"></i> السلة</a></li>
             <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> تواصل معنا</a></li>
-            <li><a href="/clientLogin" class="py-4 text-[#d4af37]"><i class="fas fa-sign-in-alt ml-2 text-xl"></i> تسجيل الدخول</a></li>
+            <li><a href="/clientLogin" class="py-4 text-[#d4af37]"><i class="fas fa-sign-in-alt ml-2 text-xl"></i> تسجيل
+                الدخول</a></li>
         </ul>
     </div>
 </header>
@@ -196,7 +203,8 @@
          class="toast toast-top toast-center z-50">
         <div class="alert shadow-2xl"
              :class="toastType === 'success' ? 'alert-success' : 'alert-error'">
-            <i :class="toastType === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'" class="text-2xl"></i>
+            <i :class="toastType === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"
+               class="text-2xl"></i>
             <span class="font-bold" x-text="toastMessage"></span>
         </div>
     </div>
@@ -232,7 +240,8 @@
                 <a href="/productCatalog" class="btn flex-1" style="background: #d4af37; color: #1a1a2e; border: none;">
                     متابعة التسوق
                 </a>
-                <button @click="showCheckoutModal = false" class="btn btn-outline flex-1" style="border-color: #d4af37; color: #d4af37;">
+                <button @click="showCheckoutModal = false" class="btn btn-outline flex-1"
+                        style="border-color: #d4af37; color: #d4af37;">
                     إغلاق
                 </button>
             </div>
@@ -247,10 +256,12 @@
             <i class="fas fa-industry text-4xl" style="color:#d4af37;"></i>
             <span class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
-        <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
+        <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير
+            الجودة</p>
     </div>
     <nav class="grid grid-flow-col gap-6 text-base">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i>
+            المنتجات</a>
         <a href="/cart" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
         <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
     </nav>
@@ -262,111 +273,8 @@
     </div>
     <p class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
+<script src="/js/cartManager.js"></script>
 
-<script>
-    function cartManager() {
-        return {
-            cartItems: [],
-            showToast: false,
-            toastMessage: '',
-            toastType: 'success',
-            showCheckoutModal: false,
-            orderNumber: '',
-
-            init() {
-                this.loadCart();
-            },
-
-            loadCart() {
-                const cart = localStorage.getItem('cart');
-                this.cartItems = cart ? JSON.parse(cart) : [];
-            },
-
-            saveCart() {
-                localStorage.setItem('cart', JSON.stringify(this.cartItems));
-            },
-
-            increaseQuantity(index) {
-                this.cartItems[index].quantity++;
-                this.saveCart();
-            },
-
-            decreaseQuantity(index) {
-                if (this.cartItems[index].quantity > 1) {
-                    this.cartItems[index].quantity--;
-                    this.saveCart();
-                }
-            },
-
-            removeItem(index) {
-                const itemName = this.cartItems[index].name;
-                this.cartItems.splice(index, 1);
-                this.saveCart();
-                this.showToastMessage(`تم حذف "${itemName}" من السلة`, 'success');
-            },
-
-            clearCart() {
-                if (confirm('هل أنت متأكد من إفراغ السلة؟')) {
-                    this.cartItems = [];
-                    this.saveCart();
-                    this.showToastMessage('تم إفراغ السلة بنجاح', 'success');
-                }
-            },
-
-            getTotalItems() {
-                return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
-            },
-
-            getSubtotal() {
-                return this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            },
-
-            getTax() {
-                return this.getSubtotal() * 0.14;
-            },
-
-            getTotal() {
-                return this.getSubtotal() + this.getTax();
-            },
-
-            async checkout() {
-                if (this.cartItems.length === 0) {
-                    this.showToastMessage('السلة فارغة!', 'error');
-                    return;
-                }
-
-                // توليد رقم طلب عشوائي
-                this.orderNumber = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-
-                // في حالة وجود API للطلبات، يمكن إرسال البيانات هنا
-                // const response = await fetch('/api/orders', {
-                //     method: 'POST',
-                //     headers: {'Content-Type': 'application/json'},
-                //     body: JSON.stringify({
-                //         items: this.cartItems,
-                //         total: this.getTotal()
-                //     })
-                // });
-
-                // إظهار modal التأكيد
-                this.showCheckoutModal = true;
-
-                // إفراغ السلة
-                setTimeout(() => {
-                    this.cartItems = [];
-                    this.saveCart();
-                }, 1000);
-            },
-
-            showToastMessage(message, type = 'success') {
-                this.toastMessage = message;
-                this.toastType = type;
-                this.showToast = true;
-                setTimeout(() => this.showToast = false, 3000);
-            }
-        }
-    }
-</script>
 
 </body>
 </html>
