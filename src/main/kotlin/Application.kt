@@ -89,7 +89,6 @@ fun Application.module() {
         }
 
 
-// ✅ الموقع التجاري (الواجهة العامة)
         get("/") {
             call.respond(ThymeleafContent("main", mapOf()))
         }

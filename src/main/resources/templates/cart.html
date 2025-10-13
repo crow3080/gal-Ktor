@@ -32,6 +32,28 @@
             object-fit: cover;
             border-radius: 12px;
         }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .btn-whatsapp:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+
+        .btn-telegram {
+            background: linear-gradient(135deg, #0088cc 0%, #005885 100%);
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .btn-telegram:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body class="bg-base-100">
@@ -163,20 +185,15 @@
                     </div>
 
                     <div class="flex justify-between text-gray-300">
-                        <span>المجموع الفرعي:</span>
+                        <span>الإجمالي:</span>
                         <span class="font-bold" x-text="getSubtotal().toFixed(2) + ' جنيه'"></span>
-                    </div>
-
-                    <div class="flex justify-between text-gray-300">
-                        <span>الضريبة (14%):</span>
-                        <span class="font-bold" x-text="getTax().toFixed(2) + ' جنيه'"></span>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="flex justify-between text-xl">
                         <span class="font-bold text-gray-100">الإجمالي:</span>
-                        <span class="font-bold text-2xl gold-text" x-text="getTotal().toFixed(2) + ' جنيه'"></span>
+                        <span class="font-bold text-2xl gold-text" x-text="getSubtotal().toFixed(2) + ' جنيه'"></span>
                     </div>
                 </div>
 
@@ -212,36 +229,141 @@
     <!-- Modal تأكيد الطلب -->
     <div x-show="showCheckoutModal"
          x-transition
-         @click="showCheckoutModal = false"
+         @click.self="closeCheckoutModal"
          class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
         <div @click.stop
              x-transition
-             class="glass-card rounded-3xl max-w-md w-full p-8">
+             class="glass-card rounded-3xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+
+            <!-- Header -->
             <div class="text-center mb-6">
                 <i class="fas fa-check-circle text-6xl gold-text mb-4"></i>
-                <h2 class="text-3xl font-bold text-gray-100 mb-2">تم استلام طلبك!</h2>
-                <p class="text-gray-400">سنتواصل معك قريباً لتأكيد الطلب</p>
+                <h2 class="text-3xl font-bold text-gray-100 mb-2">تم استلام طلبك بنجاح! 🎉</h2>
+                <p class="text-gray-400">اختر طريقة إرسال الطلب المفضلة لديك</p>
             </div>
 
-            <div class="glass-card p-4 rounded-xl mb-6 border border-[#d4af37]/30">
-                <div class="text-gray-300 space-y-2">
-                    <div class="flex justify-between">
-                        <span>رقم الطلب:</span>
-                        <span class="font-bold gold-text" x-text="orderNumber"></span>
+            <!-- تفاصيل الطلب -->
+            <div class="glass-card p-5 rounded-2xl mb-6 border border-[#d4af37]/30">
+                <h3 class="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
+                    <i class="fas fa-clipboard-list gold-text"></i>
+                    تفاصيل الطلب
+                </h3>
+
+                <div class="space-y-3 mb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">رقم الطلب:</span>
+                        <span class="font-bold gold-text text-lg" x-text="orderNumber"></span>
                     </div>
-                    <div class="flex justify-between">
+
+                    <div class="divider my-2"></div>
+
+                    <!-- عرض المنتجات -->
+                    <template x-for="(item, idx) in completedOrder" :key="idx">
+                        <div class="flex justify-between items-start text-sm">
+                            <div class="flex-1">
+                                <span class="text-gray-200 font-semibold" x-text="item.name"></span>
+                                <span class="text-gray-400 mr-2">×<span x-text="item.quantity"></span></span>
+                            </div>
+                            <span class="text-gray-200 font-bold" x-text="(item.price * item.quantity).toFixed(2) + ' ج'"></span>
+                        </div>
+                    </template>
+
+                    <div class="divider my-2"></div>
+
+                    <div class="flex justify-between text-gray-400">
                         <span>الإجمالي:</span>
-                        <span class="font-bold gold-text" x-text="getTotal().toFixed(2) + ' جنيه'"></span>
+                        <span x-text="getOrderSubtotal().toFixed(2) + ' جنيه'"></span>
+                    </div>
+
+                    <div class="divider my-2"></div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-xl font-bold text-gray-100">الإجمالي:</span>
+                        <span class="text-2xl font-bold gold-text" x-text="getOrderSubtotal().toFixed(2) + ' جنيه'"></span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex gap-3">
-                <a href="/productCatalog" class="btn flex-1" style="background: #d4af37; color: #1a1a2e; border: none;">
+            <!-- حقل إدخال معلومات الاتصال -->
+            <div class="glass-card p-5 rounded-2xl mb-6 border border-[#d4af37]/30">
+                <h3 class="text-lg font-bold text-gray-100 mb-3 flex items-center gap-2">
+                    <i class="fas fa-user gold-text"></i>
+                    معلومات الاتصال (اختياري)
+                </h3>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-gray-300 mb-2 text-sm font-semibold">
+                            <i class="fas fa-mobile-alt ml-1"></i>
+                            رقم الهاتف / واتساب
+                        </label>
+                        <input x-model="customerWhatsApp"
+                               type="tel"
+                               placeholder="مثال: 01101234567 أو +201101234567"
+                               class="input input-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"/>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 mb-2 text-sm font-semibold">
+                            <i class="fas fa-user ml-1"></i>
+                            الاسم (اختياري)
+                        </label>
+                        <input x-model="customerName"
+                               type="text"
+                               placeholder="أدخل اسمك"
+                               class="input input-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"/>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 mb-2 text-sm font-semibold">
+                            <i class="fas fa-comment-alt ml-1"></i>
+                            ملاحظات إضافية (اختياري)
+                        </label>
+                        <textarea x-model="customerNotes"
+                                  rows="2"
+                                  placeholder="أي ملاحظات خاصة بالطلب..."
+                                  class="textarea textarea-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أزرار الإرسال -->
+            <div class="space-y-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-100 mb-3 flex items-center gap-2">
+                    <i class="fas fa-paper-plane gold-text"></i>
+                    إرسال الطلب عبر:
+                </h3>
+
+                <!-- زر واتساب -->
+                <button @click="sendOrderViaWhatsApp()"
+                        class="btn btn-whatsapp w-full text-white font-bold text-lg">
+                    <i class="fab fa-whatsapp ml-2 text-2xl"></i>
+                    إرسال عبر واتساب
+                    <span class="text-xs opacity-80 mr-2">(01104391245)</span>
+                </button>
+
+                <!-- زر تليجرام -->
+                <button @click="sendOrderViaTelegram()"
+                        class="btn btn-telegram w-full text-white font-bold text-lg">
+                    <i class="fab fa-telegram ml-2 text-2xl"></i>
+                    إرسال عبر تليجرام
+                    <span class="text-xs opacity-80 mr-2">(@GalTrading)</span>
+                </button>
+            </div>
+
+            <!-- أزرار التحكم -->
+            <div class="flex gap-3 mt-6">
+                <a href="/productCatalog"
+                   class="btn flex-1 font-semibold"
+                   style="background: #d4af37; color: #1a1a2e; border: none;">
+                    <i class="fas fa-shopping-bag ml-2"></i>
                     متابعة التسوق
                 </a>
-                <button @click="showCheckoutModal = false" class="btn btn-outline flex-1"
+
+                <button @click="closeCheckoutModal"
+                        class="btn btn-outline flex-1 font-semibold"
                         style="border-color: #d4af37; color: #d4af37;">
+                    <i class="fas fa-times ml-2"></i>
                     إغلاق
                 </button>
             </div>
@@ -266,15 +388,230 @@
         <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
     </nav>
     <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
-        <a href="#" class="hover:text-blue-600"><i class="fab fa-facebook"></i></a>
-        <a href="#" class="hover:text-pink-500"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="hover:text-green-500"><i class="fab fa-whatsapp"></i></a>
-        <a href="#" class="hover:text-blue-700"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="hover:text-blue-600 transition-colors"><i class="fab fa-facebook"></i></a>
+        <a href="#" class="hover:text-pink-500 transition-colors"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="hover:text-green-500 transition-colors"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="hover:text-blue-700 transition-colors"><i class="fab fa-linkedin"></i></a>
     </div>
     <p class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
-<script src="/js/cartManager.js"></script>
 
+<script>
+    function cartManager() {
+        return {
+            cartItems: [],
+            completedOrder: [],
+            showToast: false,
+            toastMessage: '',
+            toastType: 'success',
+            showCheckoutModal: false,
+            orderNumber: '',
+            customerWhatsApp: '',
+            customerName: '',
+            customerNotes: '',
 
+            // إعدادات التاجر
+            merchantWhatsAppRaw: '01104391245',
+            merchantWhatsAppIntl: '201104391245',
+            merchantTelegramUsername: 'GalTrading', // ضع username تليجرام هنا
+            merchantTelegramChatId: '', // اختياري: إذا كان لديك Chat ID
+
+            init() {
+                this.loadCart();
+            },
+
+            loadCart() {
+                const cart = localStorage.getItem('cart');
+                this.cartItems = cart ? JSON.parse(cart) : [];
+            },
+
+            saveCart() {
+                localStorage.setItem('cart', JSON.stringify(this.cartItems));
+            },
+
+            increaseQuantity(index) {
+                this.cartItems[index].quantity++;
+                this.saveCart();
+            },
+
+            decreaseQuantity(index) {
+                if (this.cartItems[index].quantity > 1) {
+                    this.cartItems[index].quantity--;
+                    this.saveCart();
+                }
+            },
+
+            removeItem(index) {
+                const itemName = this.cartItems[index].name;
+                this.cartItems.splice(index, 1);
+                this.saveCart();
+                this.showToastMessage(`تم حذف "${itemName}" من السلة`, 'success');
+            },
+
+            clearCart() {
+                if (confirm('هل أنت متأكد من إفراغ السلة؟')) {
+                    this.cartItems = [];
+                    this.saveCart();
+                    this.showToastMessage('تم إفراغ السلة بنجاح', 'success');
+                }
+            },
+
+            getTotalItems() {
+                return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            },
+
+            getSubtotal() {
+                return this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            },
+
+            getOrderSubtotal() {
+                if (this.completedOrder.length > 0) {
+                    return this.completedOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                }
+                return this.getSubtotal();
+            },
+
+            async checkout() {
+                if (this.cartItems.length === 0) {
+                    this.showToastMessage('السلة فارغة!', 'error');
+                    return;
+                }
+
+                this.orderNumber = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                this.completedOrder = JSON.parse(JSON.stringify(this.cartItems));
+                this.showCheckoutModal = true;
+            },
+
+            closeCheckoutModal() {
+                this.showCheckoutModal = false;
+                this.cartItems = [];
+                this.saveCart();
+                this.customerWhatsApp = '';
+                this.customerName = '';
+                this.customerNotes = '';
+            },
+
+            showToastMessage(message, type = 'success') {
+                this.toastMessage = message;
+                this.toastType = type;
+                this.showToast = true;
+                setTimeout(() => this.showToast = false, 3000);
+            },
+
+            normalizeWhatsAppNumber(input) {
+                if (!input) return '';
+                let n = input.toString().trim();
+                n = n.replace(/[^0-9]/g, '');
+                if (n.startsWith('00')) n = n.replace(/^00/, '');
+                if (n.startsWith('0')) n = '20' + n.slice(1);
+                return n;
+            },
+
+            buildOrderMessage() {
+                const lines = [];
+                const emoji = {
+                    box: '📦',
+                    check: '✅',
+                    phone: '📱',
+                    user: '👤',
+                    note: '📝',
+                    money: '💰',
+                    cart: '🛒',
+                    line: '─────────────────'
+                };
+
+                lines.push(`${emoji.box} طلب جديد من جال للتجارة`);
+                lines.push(emoji.line);
+                lines.push(`${emoji.cart} رقم الطلب: ${this.orderNumber}`);
+                lines.push('');
+
+                // معلومات العميل
+                if (this.customerName) {
+                    lines.push(`${emoji.user} العميل: ${this.customerName}`);
+                }
+                if (this.customerWhatsApp) {
+                    lines.push(`${emoji.phone} الهاتف: ${this.customerWhatsApp}`);
+                }
+                if (this.customerName || this.customerWhatsApp) {
+                    lines.push('');
+                }
+
+                // المنتجات
+                lines.push('📋 المنتجات المطلوبة:');
+                lines.push('');
+
+                const orderItems = this.completedOrder.length > 0 ? this.completedOrder : this.cartItems;
+
+                orderItems.forEach((item, idx) => {
+                    const itemTotal = item.price * item.quantity;
+                    lines.push(`${idx + 1}. ${item.name}`);
+                    lines.push(`   الكمية: ${item.quantity} × ${item.price.toFixed(2)} جنيه`);
+                    lines.push(`   الإجمالي: ${itemTotal.toFixed(2)} جنيه`);
+                    lines.push('');
+                });
+
+                // الملخص المالي
+                const total = this.getOrderSubtotal();
+
+                lines.push(emoji.line);
+                lines.push(`${emoji.money} الملخص المالي:`);
+                lines.push(`   ${emoji.check} الإجمالي النهائي: ${total.toFixed(2)} جنيه`);
+
+                // ملاحظات
+                if (this.customerNotes) {
+                    lines.push('');
+                    lines.push(`${emoji.note} ملاحظات العميل:`);
+                    lines.push(`   ${this.customerNotes}`);
+                }
+
+                lines.push('');
+                lines.push(emoji.line);
+                lines.push('⏰ يرجى التواصل مع العميل لتأكيد الطلب');
+
+                return lines.join('\n');
+            },
+
+            sendOrderViaWhatsApp() {
+                const input = this.customerWhatsApp ? this.customerWhatsApp.trim() : '';
+                if (input) {
+                    const normalized = this.normalizeWhatsAppNumber(input);
+                    if (!/^[0-9]{8,15}$/.test(normalized)) {
+                        this.showToastMessage('رقم واتساب غير صحيح. استخدم مثال: 01101234567', 'error');
+                        return;
+                    }
+                }
+
+                const merchant = this.merchantWhatsAppIntl;
+                const message = encodeURIComponent(this.buildOrderMessage());
+                const waLink = `https://wa.me/${merchant}?text=${message}`;
+
+                window.open(waLink, '_blank');
+                this.showToastMessage('تم فتح واتساب لإرسال الطلب ✅', 'success');
+
+                setTimeout(() => {
+                    this.closeCheckoutModal();
+                }, 1500);
+            },
+
+            sendOrderViaTelegram() {
+                const message = encodeURIComponent(this.buildOrderMessage());
+
+                // يمكنك استخدام أحد الطريقتين:
+                // 1. إرسال إلى username معين
+                const telegramLink = `https://t.me/${this.merchantTelegramUsername}?text=${message}`;
+
+                // 2. أو إذا كان لديك bot وتريد إرسال مباشر إلى chat_id
+                // const telegramLink = `https://t.me/share/url?url=&text=${message}`;
+
+                window.open(telegramLink, '_blank');
+                this.showToastMessage('تم فتح تليجرام لإرسال الطلب ✅', 'success');
+
+                setTimeout(() => {
+                    this.closeCheckoutModal();
+                }, 1500);
+            }
+        }
+    }
+</script>
 </body>
 </html>
