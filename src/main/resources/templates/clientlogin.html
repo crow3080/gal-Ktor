@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="luxury">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>تسجيل الدخول - جال للتجارة والتوريدات</title>
 
     <!-- Tailwind & DaisyUI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"/>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -25,7 +25,17 @@
             border: 1px solid rgba(212, 175, 55, 0.2);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+.navbar-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
 
+.footer-logo {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
         .glass-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
@@ -90,11 +100,12 @@
 <body class="text-base-content flex flex-col min-h-screen">
 
 <!-- Header -->
+<!-- Header -->
 <header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4 header-glass">
     <div class="flex-1">
-        <a href="/" class="text-2xl font-bold flex items-center gap-2">
-            <i class="fas fa-industry text-3xl gold-text"></i>
-            <span>جال للتجارة و توريدات المصانع</span>
+        <a href="/" class="flex items-center gap-3">
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo">
+            <span class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
         </a>
     </div>
     <nav class="hidden md:flex gap-3">
@@ -115,7 +126,6 @@
         </ul>
     </div>
 </header>
-
 <!-- Main -->
 <main class="flex-1 flex items-center justify-center p-6 md:p-12 fade-in"
       x-data="{ phone: '', password: '', message: '', type: 'info', showToast: false, handleLogin() {
@@ -156,12 +166,14 @@
         <form @submit.prevent="handleLogin" class="space-y-5">
             <div>
                 <label class="block mb-2 text-gray-300 font-semibold">رقم الهاتف</label>
-                <input type="text" x-model="phone" placeholder="أدخل رقم الهاتف" class="input gold-border w-full" required />
+                <input type="text" x-model="phone" placeholder="أدخل رقم الهاتف" class="input gold-border w-full"
+                       required/>
             </div>
 
             <div>
                 <label class="block mb-2 text-gray-300 font-semibold">كلمة المرور</label>
-                <input type="password" x-model="password" placeholder="••••••••" class="input gold-border w-full" required />
+                <input type="password" x-model="password" placeholder="••••••••" class="input gold-border w-full"
+                       required/>
             </div>
 
             <button type="submit" class="btn btn-modern w-full text-lg">
@@ -174,7 +186,8 @@
 
             <div class="divider text-gray-400">أو</div>
 
-            <a href="/register" class="btn btn-outline w-full border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-[#1a1a2e] transition-all font-bold">
+            <a href="/register"
+               class="btn btn-outline w-full border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-[#1a1a2e] transition-all font-bold">
                 <i class="fas fa-user-plus ml-2"></i> إنشاء حساب جديد
             </a>
         </form>
@@ -192,7 +205,7 @@
 <!-- Footer -->
 <footer class="footer footer-center p-10 header-glass text-gray-300 border-t border-gray-700/50">
     <div>
-        <i class="fas fa-industry text-4xl gold-text"></i>
+        <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo mx-auto mb-2">
         <p class="font-bold text-xl mt-2">جال للتجارة والتوريدات</p>
         <p class="text-gray-400">شريكك الموثوق في عالم الصناعة</p>
     </div>
@@ -203,6 +216,5 @@
         </p>
     </div>
 </footer>
-
 </body>
 </html>

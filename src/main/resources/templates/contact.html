@@ -90,17 +90,29 @@
             opacity: 1;
             transform: translateY(0);
         }
+        .navbar-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.footer-logo {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
     </style>
 </head>
 
 <body class="text-base-content">
 
 <!-- الهيدر -->
+<!-- الهيدر -->
 <header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
     <div class="flex-1">
-        <a href="/" class="text-2xl font-bold flex items-center gap-2">
-            <i class="fas fa-industry text-3xl" style="color: #d4af37;"></i>
-            <span>جال للتجارة و توريدات المصانع</span>
+        <a href="/" class="flex items-center gap-3">
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo">
+            <span class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
         </a>
     </div>
 
@@ -125,7 +137,6 @@
         </ul>
     </div>
 </header>
-
 <!-- المحتوى -->
 <main class="max-w-6xl mx-auto p-6 md:p-10 py-12 space-y-12">
 
@@ -238,7 +249,7 @@
     <div class="absolute top-0 left-0 right-0 h-1" style="background: linear-gradient(90deg, transparent, #d4af37, #ffd700, #d4af37, transparent);"></div>
     <div class="mb-6">
         <div class="flex items-center gap-3 justify-center mb-4">
-            <i class="fas fa-industry text-4xl gold-text"></i>
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
             <span class="text-3xl font-bold gradient-text">جال للتجارة</span>
         </div>
         <p class="text-gray-400 max-w-md">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
