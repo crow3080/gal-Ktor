@@ -27,6 +27,45 @@
         .industrial-accent { position: relative; overflow: hidden; }
         .industrial-accent::before { content: ''; position: absolute; top:0; left:0; right:0; height:4px; background: linear-gradient(90deg,#d4af37,#ffd700,#d4af37); animation: shimmer 3s infinite; }
         @keyframes shimmer { 0%,100%{transform:translateX(-100%);}50%{transform:translateX(100%);} }
+
+        .hero-logo {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 30px rgba(212, 175, 55, 0.4));
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .hero-logo {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        .navbar-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .footer-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+        }
+
+        .gold-text {
+            background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 
@@ -35,9 +74,9 @@
 <!-- Navbar -->
 <header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
     <div class="flex-1">
-        <a href="/" class="text-2xl font-bold flex items-center gap-2">
-            <i class="fas fa-industry text-3xl" style="color: #d4af37;"></i>
-            <span>جال للتجارة و توريدات المصانع</span>
+        <a href="/" class="flex items-center gap-3">
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo">
+            <span class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
         </a>
     </div>
 
@@ -65,17 +104,17 @@
 
 <!-- Hero Section -->
 <main class="min-h-screen">
-    <section class="hero ..." style="background-image: url('/images/background.jpg');">
+    <section class="hero min-h-screen" style="background-image: url('/images/background.jpg');">
         <div class="hero-overlay"></div>
         <div class="hero-content text-center text-neutral-content relative z-10">
             <div class="max-w-3xl fade-up">
-                <div class="mb-8">
-                    <i class="fas fa-industry text-6xl md:text-7xl" style="color: #d4af37;"></i>
+                <div class="mb-8 flex justify-center">
+                    <img src="/images/logo.webp" alt="شعار جال للتجارة" class="hero-logo">
                 </div>
                 <h1 class="text-2xl md:text-4xl font-bold leading-tight text-gray-100 mb-8">
                     مرحبًا بكم في
                 </h1>
-                <h2 class=" text-4xl md:text-6xl font-extrabold mb-6 leading-relaxed">
+                <h2 class="text-4xl md:text-6xl font-extrabold mb-6 leading-relaxed gold-text">
                     جال للتجارة و توريدات المصانع
                 </h2>
                 <div class="flex justify-center items-center gap-3 mb-8">
@@ -140,7 +179,7 @@
 <footer class="footer footer-center p-12 glass-effect text-gray-300 relative overflow-hidden">
     <div class="mb-6 text-center">
         <div class="flex items-center justify-center gap-3 mb-2">
-            <i class="fas fa-industry text-4xl" style="color:#d4af37;"></i>
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
             <span class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
         <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
