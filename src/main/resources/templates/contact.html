@@ -4,121 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تواصل معنا - جال للتجارة والتوريدات</title>
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/contact.css">
 
-    <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            background-attachment: fixed;
-        }
-        .glass-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .glass-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
-            border-color: rgba(212, 175, 55, 0.4);
-        }
-        .btn-modern {
-            background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
-            color: #1a1a2e;
-            border: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .btn-modern:hover {
-            background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
-        }
-        .industrial-accent {
-            position: relative;
-            overflow: hidden;
-        }
-        .industrial-accent::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #d4af37, #ffd700, #d4af37);
-        }
-        .gold-border {
-            border: 2px solid rgba(212, 175, 55, 0.3);
-        }
-        .gold-border:focus {
-            border-color: #d4af37;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
-        }
-        input, textarea {
-            background: rgba(30, 41, 59, 0.5);
-            color: #e5e7eb;
-        }
-        input::placeholder, textarea::placeholder {
-            color: #9ca3af;
-        }
-        .social-icon {
-            background: rgba(30, 41, 59, 0.8);
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            color: #d4af37;
-            transition: all 0.3s ease;
-        }
-        .social-icon:hover {
-            background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
-            color: #1a1a2e;
-            border-color: #ffd700;
-            transform: scale(1.15) rotate(5deg);
-        }
-        .header-glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-        }
-        .gold-text {
-            color: #d4af37;
-        }
-        .fade-in {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .navbar-logo {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-        }
-        .footer-logo {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-        }
-        .map-container {
-            position: relative;
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.25);
-        }
-        .map-container::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 3px solid rgba(212, 175, 55, 0.3);
-            border-radius: 1rem;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .map-container iframe {
-            filter: grayscale(15%) contrast(1.1) brightness(0.95);
-        }
-    </style>
+
 </head>
 
 <body class="text-base-content">

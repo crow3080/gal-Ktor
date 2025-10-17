@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="luxury">
 <head>
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>كتالوج المنتجات - جال للتجارة</title>
@@ -9,58 +11,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/css/productCatalog.css">
 
-    <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-        }
-        .glass-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            transition: all 0.4s;
-        }
-        .glass-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
-            border-color: rgba(212, 175, 55, 0.5);
-        }
-        .product-image {
-            height: 200px;
-            object-fit: cover;
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .gold-text {
-            color: #d4af37;
-        }
-        .loading-spinner {
-            border: 3px solid rgba(212, 175, 55, 0.3);
-            border-top: 3px solid #d4af37;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .navbar-logo {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-}
 
-.footer-logo {
-    width: 70px;
-    height: 70px;
-    object-fit: contain;
-}
-    </style>
 </head>
 <body class="bg-base-100">
 
