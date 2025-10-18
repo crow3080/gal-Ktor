@@ -16,20 +16,30 @@ function productApp() {
 
         async loadCategories() {
             try {
-                const res = await fetch('/api/categories');
-                if (!res.ok) throw new Error('فشل في جلب التصنيفات');
+                const res = await fetch('/api/categories', { credentials: 'include' });
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.log('Load categories response:', text);
+                    throw new Error('فشل في جلب التصنيفات');
+                }
                 this.categories = await res.json();
             } catch (err) {
+                console.error('Load categories error:', err);
                 this.showAlert(err.message, 'error');
             }
         },
 
         async loadProducts() {
             try {
-                const res = await fetch('/api/products');
-                if (!res.ok) throw new Error('فشل في جلب المنتجات');
+                const res = await fetch('/api/products', { credentials: 'include' });
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.log('Load products response:', text);
+                    throw new Error('فشل في جلب المنتجات');
+                }
                 this.products = await res.json();
             } catch (err) {
+                console.error('Load products error:', err);
                 this.showAlert(err.message, 'error');
             }
         },
@@ -55,6 +65,7 @@ function productApp() {
             if (!this.validateProduct(this.newProduct)) return;
 
             try {
+                let data;
                 if (this.selectedFile) {
                     const formData = new FormData();
                     formData.append('name', this.newProduct.name);
@@ -65,38 +76,71 @@ function productApp() {
 
                     const res = await fetch('/api/products/with-image', {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        credentials: 'include'
                     });
-
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'فشل في إضافة المنتج');
-
-                    if (data.data) {
-                        this.products.push(data.data);
-                    } else {
-                        await this.loadProducts();
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Add product with image response:', text);
+                        throw new Error(text || 'فشل في إضافة المنتج');
                     }
+                    data = await res.json();
                 } else {
                     const res = await fetch('/api/products', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.newProduct)
+                        body: JSON.stringify(this.newProduct),
+                        credentials: 'include'
                     });
-
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'فشل في إضافة المنتج');
-
-                    if (data.data) {
-                        this.products.push(data.data);
-                    } else {
-                        await this.loadProducts();
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Add product response:', text);
+                        throw new Error(text || 'فشل في إضافة المنتج');
                     }
+                    data = await res.json();
                 }
 
+                if (data.data) {
+                    this.products.push(data.data);
+                } else {
+                    await this.loadProducts();
+                }
                 this.newProduct = { name: '', price: 0, description: '', categoryId: '' };
                 this.clearImage();
                 this.showAlert('✅ تمت الإضافة بنجاح', 'success');
             } catch (err) {
+                console.error('Add product error:', err);
+                this.showAlert(err.message, 'error');
+            }
+        },
+
+        async importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const res = await fetch('/api/products/import', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.log('Import CSV response:', text);
+                    throw new Error(text || 'فشل في استيراد الملف');
+                }
+                const data = await res.json();
+                if (data.data) {
+                    this.products.push(...data.data);
+                } else {
+                    await this.loadProducts();
+                }
+                this.showAlert(`✅ تم استيراد ${data.data?.length || 0} منتج بنجاح`, 'success');
+            } catch (err) {
+                console.error('Import CSV error:', err);
                 this.showAlert(err.message, 'error');
             }
         },
@@ -115,20 +159,23 @@ function productApp() {
                 const res = await fetch(`/api/products/${this.modal.product._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(this.modal.product)
+                    body: JSON.stringify(this.modal.product),
+                    credentials: 'include'
                 });
-
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.log('Update product response:', text);
+                    throw new Error(text || 'فشل في تحديث المنتج');
+                }
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'فشل في تحديث المنتج');
-
                 const index = this.products.findIndex(p => p._id === this.modal.product._id);
                 if (index !== -1) {
                     this.products[index] = { ...this.modal.product };
                 }
-
                 this.modal.show = false;
                 this.showAlert('✅ تم التحديث بنجاح', 'success');
             } catch (err) {
+                console.error('Update product error:', err);
                 this.showAlert(err.message, 'error');
             }
         },
@@ -138,18 +185,28 @@ function productApp() {
 
             try {
                 const res = await fetch(`/api/products/${id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
-
+                if (res.status === 204) {
+                    this.products = this.products.filter(p => p._id !== id);
+                    this.showAlert('✅ تم الحذف بنجاح', 'success');
+                    return;
+                }
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.log('Delete product response:', text);
+                    throw new Error(text || 'فشل في حذف المنتج');
+                }
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'فشل في حذف المنتج');
-
                 this.products = this.products.filter(p => p._id !== id);
                 this.showAlert('✅ تم الحذف بنجاح', 'success');
             } catch (err) {
+                console.error('Delete product error:', err);
                 this.showAlert(err.message, 'error');
             }
         },
+
         get filteredProducts() {
             const query = this.searchQuery.toLowerCase().trim();
             if (!query) return this.products;
@@ -186,6 +243,5 @@ function productApp() {
             this.alert = { show: true, message, type };
             setTimeout(() => this.alert.show = false, 4000);
         }
-    }
-
+    };
 }

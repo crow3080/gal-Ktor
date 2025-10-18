@@ -69,7 +69,17 @@
             </div>
         </form>
     </div>
+
     <div class="card bg-base-100 shadow-md p-4 mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-base-content">📋 المنتجات الموجودة</h2>
+            <div class="flex gap-2 items-center">
+                <input type="file" id="csvInput" @change="importCSV($event)" accept=".csv" class="hidden">
+                <button @click="document.getElementById('csvInput').click()" class="btn btn-secondary btn-sm">
+                    📂 استيراد CSV
+                </button>
+            </div>
+        </div>
         <input
                 type="text"
                 placeholder="🔍 ابحث باسم المنتج أو التصنيف"
@@ -144,7 +154,6 @@
     </div>
 
 </main>
-
 
 <script src="/js/product.js"></script>
 

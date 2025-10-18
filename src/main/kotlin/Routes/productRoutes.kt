@@ -11,20 +11,25 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
+import kotlinx.serialization.Serializable
 import java.io.File
+
+@Serializable
+data class ImportResponse(
+    val success: Boolean,
+    val message: String,
+    val data: List<Product>
+)
 
 fun Route.productRoutes(
     productService: ProductService,
     fileUploadService: FileUploadService
 ) {
 
-
     get("/products") {
         if (!call.ensureAdminSession()) return@get
         call.respond(ThymeleafContent("index", mapOf()))
     }
-
-
 
     route("/api/products") {
 
@@ -231,55 +236,143 @@ fun Route.productRoutes(
                 )
             }
         }
-    }
-    post("/import") {
-        try {
-            val multipart = call.receiveMultipart()
-            var csvFile: File? = null
 
-            multipart.forEachPart { part ->
-                if (part is PartData.FileItem) {
-                    val fileBytes = part.streamProvider().readBytes()
-                    val fileName = part.originalFileName ?: "products.csv"
-                    csvFile = File("uploads/temp/$fileName")
-                    csvFile!!.parentFile.mkdirs()
-                    csvFile!!.writeBytes(fileBytes)
+        // ✅ نقل endpoint الاستيراد هنا داخل route /api/products
+        post("/import") {
+            try {
+                val multipart = call.receiveMultipart()
+                var csvFile: File? = null
+
+                multipart.forEachPart { part ->
+                    if (part is PartData.FileItem) {
+                        val fileBytes = part.streamProvider().readBytes()
+                        val fileName = part.originalFileName ?: "products.csv"
+                        csvFile = File("uploads/temp/$fileName")
+                        csvFile!!.parentFile.mkdirs()
+                        csvFile!!.writeBytes(fileBytes)
+                    }
+                    part.dispose()
                 }
-                part.dispose()
-            }
 
-            if (csvFile == null) {
-                call.respond(HttpStatusCode.BadRequest, "ملف CSV مفقود")
-                return@post
-            }
+                if (csvFile == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ApiResponse(false, "ملف CSV مفقود")
+                    )
+                    return@post
+                }
 
-            val products = csvFile!!.readLines()
-                .drop(1) // تجاهل الصف الأول (العناوين)
-                .mapNotNull { line ->
-                    val parts = line.split(",")
-                    if (parts.size >= 5) {
+                val addedProducts = mutableListOf<Product>()
+                val errors = mutableListOf<String>()
+
+                val content = csvFile!!.readText(Charsets.UTF_8)
+                println("📄 محتوى الملف:")
+                println(content)
+
+                val lines = content.lines().filter { it.isNotBlank() }
+                println("📊 عدد الأسطر: ${lines.size}")
+
+                // تجاهل الصف الأول (العناوين)
+                for (i in 1 until lines.size) {
+                    try {
+                        val line = lines[i].trim()
+                        println("\n🔍 معالجة السطر $i: $line")
+
+                        val parts = line.split(",").map { it.trim() }
+                        println("   الأجزاء (${parts.size}): ${parts.joinToString(" | ")}")
+
+                        if (parts.size < 4) {
+                            val error = "السطر $i: عدد أعمدة غير كافي (${parts.size}/4)"
+                            errors.add(error)
+                            println("   ❌ $error")
+                            continue
+                        }
+
                         val name = parts[0]
-                        val price = parts[1].toDoubleOrNull() ?: 0.0
+                        val priceStr = parts[1]
                         val description = parts[2]
                         val categoryId = parts[3]
-                        val imageUrl = parts[4]
-                        Product(name = name, price = price, description = description, categoryId = categoryId, imageUrl = imageUrl)
-                    } else null
+                        val imageUrl = if (parts.size > 4 && parts[4].isNotBlank()) parts[4] else null
+
+                        println("   📦 اسم: $name")
+                        println("   💰 سعر: $priceStr")
+                        println("   📝 وصف: $description")
+                        println("   🏷️  تصنيف: $categoryId")
+                        println("   🖼️  صورة: $imageUrl")
+
+                        val price = priceStr.toDoubleOrNull()
+                        if (price == null || price <= 0) {
+                            val error = "السطر $i: السعر غير صحيح ($priceStr)"
+                            errors.add(error)
+                            println("   ❌ $error")
+                            continue
+                        }
+
+                        val product = Product(
+                            name = name,
+                            price = price,
+                            description = description,
+                            categoryId = categoryId,
+                            imageUrl = imageUrl
+                        )
+
+                        val validationError = productService.validateProduct(product)
+                        if (validationError != null) {
+                            val error = "السطر $i: $validationError"
+                            errors.add(error)
+                            println("   ❌ $error")
+                            continue
+                        }
+
+                        val categoryExists = productService.categoryExists(categoryId)
+                        println("   🔎 التصنيف موجود؟ $categoryExists")
+
+                        if (!categoryExists) {
+                            val error = "السطر $i: التصنيف '$categoryId' غير موجود"
+                            errors.add(error)
+                            println("   ❌ $error")
+                            continue
+                        }
+
+                        val newProduct = productService.createProduct(product)
+                        addedProducts.add(newProduct)
+                        println("   ✅ تم إضافة المنتج بنجاح!")
+
+                    } catch (e: Exception) {
+                        val error = "السطر $i: ${e.message}"
+                        errors.add(error)
+                        println("   ❌ خطأ: ${e.message}")
+                        e.printStackTrace()
+                    }
                 }
 
-            var addedCount = 0
-            for (product in products) {
-                val validationError = productService.validateProduct(product)
-                if (validationError == null && productService.categoryExists(product.categoryId)) {
-                    productService.createProduct(product)
-                    addedCount++
+                // حذف الملف المؤقت
+                csvFile!!.delete()
+
+                println("\n📊 النتيجة النهائية:")
+                println("   ✅ نجح: ${addedProducts.size}")
+                println("   ❌ فشل: ${errors.size}")
+
+                val message = if (errors.isNotEmpty()) {
+                    "تم استيراد ${addedProducts.size} منتج. فشل ${errors.size}: ${errors.take(3).joinToString("; ")}"
+                } else {
+                    "تم استيراد ${addedProducts.size} منتج بنجاح"
                 }
+
+                call.respond(
+                    HttpStatusCode.Created,
+                    ImportResponse(
+                        success = true,
+                        message = message,
+                        data = addedProducts
+                    )
+                )
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    ApiResponse(false, "خطأ في استيراد المنتجات: ${e.message}")
+                )
             }
-
-            call.respond(HttpStatusCode.Created, "تم استيراد $addedCount منتج بنجاح")
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, "خطأ في استيراد المنتجات: ${e.message}")
         }
     }
-
 }
