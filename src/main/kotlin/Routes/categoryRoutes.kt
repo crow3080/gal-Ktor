@@ -11,6 +11,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
+import java.io.File
 
 fun Route.categoryRoutes(
     categoryService: CategoryService,
@@ -175,4 +176,45 @@ fun Route.categoryRoutes(
             }
         }
     }
+    post("/api/categories/import") {
+        try {
+            val multipart = call.receiveMultipart()
+            var csvFile: File? = null
+
+            multipart.forEachPart { part ->
+                if (part is PartData.FileItem) {
+                    val fileBytes = part.streamProvider().readBytes()
+                    val fileName = part.originalFileName ?: "categories.csv"
+                    csvFile = File("uploads/temp/$fileName")
+                    csvFile!!.parentFile.mkdirs()
+                    csvFile!!.writeBytes(fileBytes)
+                }
+                part.dispose()
+            }
+
+            if (csvFile == null) {
+                call.respond(HttpStatusCode.BadRequest, "ملف CSV مفقود")
+                return@post
+            }
+
+            val categories = csvFile!!.readLines()
+                .drop(1)
+                .mapNotNull { line ->
+                    val parts = line.split(",")
+                    if (parts.size >= 2)
+                        Category(name = parts[0], imageUrl = parts[1])
+                    else null
+                }
+
+            categories.forEach {
+                // استبدل بدالة الحفظ الخاصة بك
+                categoryService.createCategory(it)
+            }
+
+            call.respond(HttpStatusCode.OK, "تم استيراد ${categories.size} تصنيف بنجاح ✅")
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, "خطأ أثناء الاستيراد: ${e.message}")
+        }
+    }
+
 }

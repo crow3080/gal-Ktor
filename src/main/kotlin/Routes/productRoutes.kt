@@ -11,6 +11,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
+import java.io.File
 
 fun Route.productRoutes(
     productService: ProductService,
@@ -231,4 +232,54 @@ fun Route.productRoutes(
             }
         }
     }
+    post("/import") {
+        try {
+            val multipart = call.receiveMultipart()
+            var csvFile: File? = null
+
+            multipart.forEachPart { part ->
+                if (part is PartData.FileItem) {
+                    val fileBytes = part.streamProvider().readBytes()
+                    val fileName = part.originalFileName ?: "products.csv"
+                    csvFile = File("uploads/temp/$fileName")
+                    csvFile!!.parentFile.mkdirs()
+                    csvFile!!.writeBytes(fileBytes)
+                }
+                part.dispose()
+            }
+
+            if (csvFile == null) {
+                call.respond(HttpStatusCode.BadRequest, "ملف CSV مفقود")
+                return@post
+            }
+
+            val products = csvFile!!.readLines()
+                .drop(1) // تجاهل الصف الأول (العناوين)
+                .mapNotNull { line ->
+                    val parts = line.split(",")
+                    if (parts.size >= 5) {
+                        val name = parts[0]
+                        val price = parts[1].toDoubleOrNull() ?: 0.0
+                        val description = parts[2]
+                        val categoryId = parts[3]
+                        val imageUrl = parts[4]
+                        Product(name = name, price = price, description = description, categoryId = categoryId, imageUrl = imageUrl)
+                    } else null
+                }
+
+            var addedCount = 0
+            for (product in products) {
+                val validationError = productService.validateProduct(product)
+                if (validationError == null && productService.categoryExists(product.categoryId)) {
+                    productService.createProduct(product)
+                    addedCount++
+                }
+            }
+
+            call.respond(HttpStatusCode.Created, "تم استيراد $addedCount منتج بنجاح")
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, "خطأ في استيراد المنتجات: ${e.message}")
+        }
+    }
+
 }
