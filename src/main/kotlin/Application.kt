@@ -7,7 +7,7 @@ import com.example.Service.FileUploadService
 import com.example.Service.ProductService
 import com.example.db.DatabaseConfig
 import com.example.di.appModules
-import com.example.utils.AdminSession
+import com.example.utils.session.AdminSession
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*

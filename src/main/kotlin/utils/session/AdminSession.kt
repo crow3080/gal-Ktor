@@ -1,4 +1,4 @@
-package com.example.utils
+package com.example.utils.session
 
 import kotlinx.serialization.Serializable
 

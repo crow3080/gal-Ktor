@@ -3,23 +3,18 @@ package com.example.Routes
 import com.example.Service.FileUploadService
 import com.example.Service.ProductService
 import com.example.db.models.Product
-import com.example.utils.ApiResponse
-import com.example.utils.ensureAdminSession
+import com.example.utils.Responses.ApiResponse
+import com.example.utils.Responses.ImportResponse
+import com.example.utils.session.ensureAdminSession
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
-import kotlinx.serialization.Serializable
 import java.io.File
 
-@Serializable
-data class ImportResponse(
-    val success: Boolean,
-    val message: String,
-    val data: List<Product>
-)
+
 
 fun Route.productRoutes(
     productService: ProductService,

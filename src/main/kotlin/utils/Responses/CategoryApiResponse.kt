@@ -1,4 +1,4 @@
-package com.example.utils
+package com.example.utils.Responses
 
 import com.example.db.models.Category
 import kotlinx.serialization.Serializable

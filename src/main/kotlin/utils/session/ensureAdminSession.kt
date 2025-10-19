@@ -1,4 +1,4 @@
-package com.example.utils
+package com.example.utils.session
 
 import io.ktor.server.application.*
 import io.ktor.server.response.*
