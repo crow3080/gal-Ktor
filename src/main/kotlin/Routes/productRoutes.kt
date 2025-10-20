@@ -14,8 +14,6 @@ import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
 import java.io.File
 
-
-
 fun Route.productRoutes(
     productService: ProductService,
     fileUploadService: FileUploadService
