@@ -12,13 +12,14 @@
     <link rel="icon" type="image/webp" href="/images/logo.webp">
     <link rel="apple-touch-icon" href="/images/logo.webp">
     <link rel="stylesheet" href="/css/cart.css">
+    <script defer src="/cart.js"></script>
     <style>
         body { font-family: "Cairo", sans-serif; }
         .gold-text { color: #d4af37; }
         .cart-badge {
             position: absolute;
             top: -8px;
-            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            inset-inline-end: -8px;
             background: #dc2626;
             color: white;
             border-radius: 50%;
@@ -27,10 +28,9 @@
             font-weight: bold;
             min-width: 20px;
             text-align: center;
-            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        /* تحسين توافق الـ badge في قائمة الموبايل */
         .dropdown .cart-badge {
             top: 0;
             inset-inline-end: 0;
@@ -177,9 +177,9 @@
                                     <span x-text="(item.price * item.quantity).toFixed(2)"></span> <span x-text="langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                                 </span>
                             </div>
+                            </div>
                         </div>
                     </div>
-                </div>
             </template>
         </div>
 
@@ -309,11 +309,40 @@
                             <i class="fas fa-mobile-alt ml-1"></i>
                             <span id="whatsappLabel">رقم الهاتف / واتساب</span>
                         </label>
-                        <input x-model="customerWhatsApp"
-                               type="tel"
-                               id="whatsappInput"
-                               placeholder="مثال: 01101234567 أو +201101234567"
-                               class="input input-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"/>
+                        <div class="flex gap-2">
+                            <select x-model="countryCode"
+                                    class="select select-bordered bg-base-200 text-gray-100"
+                                    style="max-width: 120px;">
+                                <option value="+966">🇸🇦 +966</option>
+                                <option value="+971">🇦🇪 +971</option>
+                                <option value="+965">🇰🇼 +965</option>
+                                <option value="+974">🇶🇦 +974</option>
+                                <option value="+973">🇧🇭 +973</option>
+                                <option value="+968">🇴🇲 +968</option>
+                                <option value="+962">🇯🇴 +962</option>
+                                <option value="+961">🇱🇧 +961</option>
+                                <option value="+970">🇵🇸 +970</option>
+                                <option value="+20">🇪🇬 +20</option>
+                                <option value="+212">🇲🇦 +212</option>
+                                <option value="+213">🇩🇿 +213</option>
+                                <option value="+216">🇹🇳 +216</option>
+                                <option value="+218">🇱🇾 +218</option>
+                                <option value="+249">🇸🇩 +249</option>
+                                <option value="+252">🇸🇴 +252</option>
+                                <option value="+269">🇰🇲 +269</option>
+                                <option value="+253">🇩🇯 +253</option>
+                                <option value="+222">🇲🇷 +222</option>
+                                <option value="+86">🇨🇳 +86</option>
+                                <option value="+33">🇫🇷 +33</option>
+                                <option value="+44">🇬🇧 +44</option>
+                                <option value="+1">🇺🇸 +1</option>
+                            </select>
+                            <input x-model="customerWhatsApp"
+                                   type="tel"
+                                   id="whatsappInput"
+                                   placeholder="01xxxxxxxxx"
+                                   class="input input-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"/>
+                        </div>
                     </div>
 
                     <div>
@@ -351,18 +380,11 @@
 
                 <!-- زر واتساب -->
                 <button @click="sendOrderViaWhatsApp()"
-                        class="btn btn-whatsapp w-full text-white font-bold text-lg">
+                        class="btn btn-whatsapp w-full text-white font-bold text-lg"
+                        style="background: #25D366; border: none;">
                     <i class="fab fa-whatsapp ml-2 text-2xl"></i>
                     <span id="sendViaWhatsApp">إرسال عبر واتساب</span>
-                    <span class="text-xs opacity-80 mr-2">(01104391245)</span>
-                </button>
-
-                <!-- زر تليجرام -->
-                <button @click="sendOrderViaTelegram()"
-                        class="btn btn-telegram w-full text-white font-bold text-lg">
-                    <i class="fab fa-telegram ml-2 text-2xl"></i>
-                    <span id="sendViaTelegram">إرسال عبر تليجرام</span>
-                    <span class="text-xs opacity-80 mr-2">(@GalTrading)</span>
+                    <span class="text-xs opacity-80 mr-2">(+201104391245)</span>
                 </button>
             </div>
 
@@ -393,7 +415,7 @@
             <img src="/images/logo.webp" alt="شعار" class="footer-logo" style="width: 70px; height: 70px; object-fit: contain;">
             <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
-        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
+        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصنائية بأعلى معايير الجودة</p>
     </div>
     <nav class="grid grid-flow-col gap-6 text-base">
         <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
@@ -401,7 +423,9 @@
             <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
             <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
         </a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
+        <a
+
+                href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
     <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
         <a href="#" class="hover:text-blue-600 transition-colors"><i class="fab fa-facebook"></i></a>
@@ -414,363 +438,340 @@
 
 <script>
     /* ==========================
-       Translations (UI only)
-       ========================== */
-    const langs = {
-        ar: {
-            brandName: "جال لتوريدات المصانع",
-            pageTitle: "سلة المشتريات - جال للتجارة",
-            cartTitle: "سلة المشتريات",
-            emptyCartTitle: "السلة فارغة",
-            emptyCartDesc: "لم تقم بإضافة أي منتجات بعد",
-            browseProducts: "تصفح المنتجات",
-            currency: "جنيه",
-            deleteBtn: "حذف",
-            itemTotalLabel: "الإجمالي:",
-            orderSummaryTitle: "ملخص الطلب",
-            totalItemsLabel: "عدد المنتجات:",
-            subtotalLabel: "الإجمالي:",
-            totalLabel: "الإجمالي:",
-            checkoutBtn: "إتمام الطلب",
-            clearCartBtn: "إفراغ السلة",
-            orderSuccessTitle: "تم استلام طلبك بنجاح! 🎉",
-            orderSuccessDesc: "اختر طريقة إرسال الطلب المفضلة لديك",
-            orderDetailsTitle: "تفاصيل الطلب",
-            orderNumberLabel: "رقم الطلب:",
-            subtotalLabelModal: "الإجمالي:",
-            totalLabelModal: "الإجمالي:",
-            contactInfoTitle: "معلومات الاتصال (اختياري)",
-            whatsappLabel: "رقم الهاتف / واتساب",
-            whatsappPlaceholder: "مثال: 01101234567 أو +201101234567",
-            nameLabel: "الاسم (اختياري)",
-            namePlaceholder: "أدخل اسمك",
-            notesLabel: "ملاحظات إضافية (اختياري)",
-            notesPlaceholder: "أي ملاحظات خاصة بالطلب...",
-            sendOrderTitle: "إرسال الطلب عبر:",
-            sendViaWhatsApp: "إرسال عبر واتساب",
-            sendViaTelegram: "إرسال عبر تليجرام",
-            continueShopping: "متابعة التسوق",
-            closeBtn: "إغلاق",
-            navProducts: "المنتجات",
-            navCart: "السلة",
-            navContact: "تواصل معنا",
-            navLogin: "تسجيل الدخول",
-            mnavProducts: "المنتجات",
-            mnavCart: "السلة",
-            mnavContact: "تواصل معنا",
-            mnavLogin: "تسجيل الدخول",
-            fnavProducts: "المنتجات",
-            fnavCart: "السلة",
-            fnavContact: "تواصل معنا",
-            footerBrand: "جال للتجارة",
-            footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
-            copyright: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة",
-            toastSuccess: "تمت العملية بنجاح",
-            toastError: "حدث خطأ أثناء العملية",
-            confirmClearCart: "هل أنت متأكد من إفراغ السلة؟"
-        },
-        en: {
-            brandName: "Gal Industrial Supplies",
-            pageTitle: "Shopping Cart - Gal Trading",
-            cartTitle: "Shopping Cart",
-            emptyCartTitle: "Your cart is empty",
-            emptyCartDesc: "You haven't added any products yet",
-            browseProducts: "Browse Products",
-            currency: "EGP",
-            deleteBtn: "Remove",
-            itemTotalLabel: "Total:",
-            orderSummaryTitle: "Order Summary",
-            totalItemsLabel: "Total Items:",
-            subtotalLabel: "Subtotal:",
-            totalLabel: "Total:",
-            checkoutBtn: "Proceed to Checkout",
-            clearCartBtn: "Clear Cart",
-            orderSuccessTitle: "Your order has been received successfully! 🎉",
-            orderSuccessDesc: "Choose your preferred method to send the order",
-            orderDetailsTitle: "Order Details",
-            orderNumberLabel: "Order Number:",
-            subtotalLabelModal: "Subtotal:",
-            totalLabelModal: "Total:",
-            contactInfoTitle: "Contact Information (Optional)",
-            whatsappLabel: "Phone / WhatsApp",
-            whatsappPlaceholder: "Example: 01101234567 or +201101234567",
-            nameLabel: "Name (Optional)",
-            namePlaceholder: "Enter your name",
-            notesLabel: "Additional Notes (Optional)",
-            notesPlaceholder: "Any special notes for the order...",
-            sendOrderTitle: "Send Order via:",
-            sendViaWhatsApp: "Send via WhatsApp",
-            sendViaTelegram: "Send via Telegram",
-            continueShopping: "Continue Shopping",
-            closeBtn: "Close",
-            navProducts: "Products",
-            navCart: "Cart",
-            navContact: "Contact",
-            navLogin: "Login",
-            mnavProducts: "Products",
-            mnavCart: "Cart",
-            mnavContact: "Contact",
-            mnavLogin: "Login",
-            fnavProducts: "Products",
-            fnavCart: "Cart",
-            fnavContact: "Contact",
-            footerBrand: "Gal Trading",
-            footerDesc: "Your trusted partner in supplying top-quality industrial products.",
-            copyright: "© 2025 Gal Trading & Supplies — All rights reserved",
-            toastSuccess: "Operation completed successfully",
-            toastError: "An error occurred during the operation",
-            confirmClearCart: "Are you sure you want to clear the cart?"
-        }
+   Translations (UI only)
+   ========================== */
+const langs = {
+    ar: {
+        brandName: "جال لتوريدات المصانع",
+        pageTitle: "سلة المشتريات - جال للتجارة",
+        cartTitle: "سلة المشتريات",
+        emptyCartTitle: "السلة فارغة",
+        emptyCartDesc: "لم تقم بإضافة أي منتجات بعد",
+        browseProducts: "تصفح المنتجات",
+        currency: "جنيه",
+        deleteBtn: "حذف",
+        itemTotalLabel: "الإجمالي:",
+        orderSummaryTitle: "ملخص الطلب",
+        totalItemsLabel: "عدد المنتجات:",
+        subtotalLabel: "الإجمالي:",
+        totalLabel: "الإجمالي:",
+        checkoutBtn: "إتمام الطلب",
+        clearCartBtn: "إفراغ السلة",
+        orderSuccessTitle: "تم استلام طلبك بنجاح! 🎉",
+        orderSuccessDesc: "اختر طريقة إرسال الطلب المفضلة لديك",
+        orderDetailsTitle: "تفاصيل الطلب",
+        orderNumberLabel: "رقم الطلب:",
+        subtotalLabelModal: "الإجمالي:",
+        totalLabelModal: "الإجمالي:",
+        contactInfoTitle: "معلومات الاتصال (اختياري)",
+        whatsappLabel: "رقم الهاتف / واتساب",
+        whatsappPlaceholder: "01xxxxxxxxx",
+        nameLabel: "الاسم (اختياري)",
+        namePlaceholder: "أدخل اسمك",
+        notesLabel: "ملاحظات إضافية (اختياري)",
+        notesPlaceholder: "أي ملاحظات خاصة بالطلب...",
+        sendOrderTitle: "إرسال الطلب عبر:",
+        sendViaWhatsApp: "إرسال عبر واتساب",
+        continueShopping: "متابعة التسوق",
+        closeBtn: "إغلاق",
+        navProducts: "المنتجات",
+        navCart: "السلة",
+        navContact: "تواصل معنا",
+        navLogin: "تسجيل الدخول",
+        mnavProducts: "المنتجات",
+        mnavCart: "السلة",
+        mnavContact: "تواصل معنا",
+        mnavLogin: "تسجيل الدخول",
+        fnavProducts: "المنتجات",
+        fnavCart: "السلة",
+        fnavContact: "تواصل معنا",
+        footerBrand: "جال للتجارة",
+        footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
+        copyright: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة",
+        toastSuccess: "تمت العملية بنجاح",
+        toastError: "حدث خطأ أثناء العملية",
+        confirmClearCart: "هل أنت متأكد من إفراغ السلة؟"
+    },
+    en: {
+        brandName: "Gal Industrial Supplies",
+        pageTitle: "Shopping Cart - Gal Trading",
+        cartTitle: "Shopping Cart",
+        emptyCartTitle: "Your cart is empty",
+        emptyCartDesc: "You haven't added any products yet",
+        browseProducts: "Browse Products",
+        currency: "EGP",
+        deleteBtn: "Remove",
+        itemTotalLabel: "Total:",
+        orderSummaryTitle: "Order Summary",
+        totalItemsLabel: "Total Items:",
+        subtotalLabel: "Subtotal:",
+        totalLabel: "Total:",
+        checkoutBtn: "Proceed to Checkout",
+        clearCartBtn: "Clear Cart",
+        orderSuccessTitle: "Your order has been received successfully! 🎉",
+        orderSuccessDesc: "Choose your preferred method to send the order",
+        orderDetailsTitle: "Order Details",
+        orderNumberLabel: "Order Number:",
+        subtotalLabelModal: "Subtotal:",
+        totalLabelModal: "Total:",
+        contactInfoTitle: "Contact Information (Optional)",
+        whatsappLabel: "Phone / WhatsApp",
+        whatsappPlaceholder: "01xxxxxxxxx",
+        nameLabel: "Name (Optional)",
+        namePlaceholder: "Enter your name",
+        notesLabel: "Additional Notes (Optional)",
+        notesPlaceholder: "Any special notes for the order...",
+        sendOrderTitle: "Send Order via:",
+        sendViaWhatsApp: "Send via WhatsApp",
+        continueShopping: "Continue Shopping",
+        closeBtn: "Close",
+        navProducts: "Products",
+        navCart: "Cart",
+        navContact: "Contact",
+        navLogin: "Login",
+        mnavProducts: "Products",
+        mnavCart: "Cart",
+        mnavContact: "Contact",
+        mnavLogin: "Login",
+        fnavProducts: "Products",
+        fnavCart: "Cart",
+        fnavContact: "Contact",
+        footerBrand: "Gal Trading",
+        footerDesc: "Your trusted partner in supplying top-quality industrial products.",
+        copyright: "© 2025 Gal Trading & Supplies — All rights reserved",
+        toastSuccess: "Operation completed successfully",
+        toastError: "An error occurred during the operation",
+        confirmClearCart: "Are you sure you want to clear the cart?"
+    }
+};
+
+function applyTranslations(lang) {
+    const t = langs[lang] || langs.ar;
+
+    const map = {
+        brandName: t.brandName,
+        pageTitle: t.pageTitle,
+        cartTitle: t.cartTitle,
+        emptyCartTitle: t.emptyCartTitle,
+        emptyCartDesc: t.emptyCartDesc,
+        browseProducts: t.browseProducts,
+        currencyLabel: t.currency,
+        currencyLabelItem: t.currency,
+        deleteBtn: t.deleteBtn,
+        itemTotalLabel: t.itemTotalLabel,
+        orderSummaryTitle: t.orderSummaryTitle,
+        totalItemsLabel: t.totalItemsLabel,
+        subtotalLabel: t.subtotalLabel,
+        totalLabel: t.totalLabel,
+        checkoutBtn: t.checkoutBtn,
+        clearCartBtn: t.clearCartBtn,
+        orderSuccessTitle: t.orderSuccessTitle,
+        orderSuccessDesc: t.orderSuccessDesc,
+        orderDetailsTitle: t.orderDetailsTitle,
+        orderNumberLabel: t.orderNumberLabel,
+        subtotalLabelModal: t.subtotalLabelModal,
+        totalLabelModal: t.totalLabelModal,
+        contactInfoTitle: t.contactInfoTitle,
+        whatsappLabel: t.whatsappLabel,
+        nameLabel: t.nameLabel,
+        notesLabel: t.notesLabel,
+        sendOrderTitle: t.sendOrderTitle,
+        sendViaWhatsApp: t.sendViaWhatsApp,
+        continueShopping: t.continueShopping,
+        closeBtn: t.closeBtn,
+        navProducts: t.navProducts,
+        navCart: t.navCart,
+        navContact: t.navContact,
+        navLogin: t.navLogin,
+        mnavProducts: t.mnavProducts,
+        mnavCart: t.mnavCart,
+        mnavContact: t.mnavContact,
+        mnavLogin: t.mnavLogin,
+        fnavProducts: t.fnavProducts,
+        fnavCart: t.fnavCart,
+        fnavContact: t.fnavContact,
+        footerBrand: t.footerBrand,
+        footerDesc: t.footerDesc,
+        copyrightText: t.copyright
     };
 
-    function applyTranslations(lang) {
-        const t = langs[lang] || langs.ar;
+    for (const id in map) {
+        const el = document.getElementById(id);
+        if (!el || map[id] === null) continue;
+        el.innerText = map[id];
+    }
 
-        const map = {
-            brandName: t.brandName,
-            pageTitle: t.pageTitle,
-            cartTitle: t.cartTitle,
-            emptyCartTitle: t.emptyCartTitle,
-            emptyCartDesc: t.emptyCartDesc,
-            browseProducts: t.browseProducts,
-            currencyLabel: t.currency,
-            currencyLabelItem: t.currency,
-            deleteBtn: t.deleteBtn,
-            itemTotalLabel: t.itemTotalLabel,
-            orderSummaryTitle: t.orderSummaryTitle,
-            totalItemsLabel: t.totalItemsLabel,
-            subtotalLabel: t.subtotalLabel,
-            totalLabel: t.totalLabel,
-            checkoutBtn: t.checkoutBtn,
-            clearCartBtn: t.clearCartBtn,
-            orderSuccessTitle: t.orderSuccessTitle,
-            orderSuccessDesc: t.orderSuccessDesc,
-            orderDetailsTitle: t.orderDetailsTitle,
-            orderNumberLabel: t.orderNumberLabel,
-            subtotalLabelModal: t.subtotalLabelModal,
-            totalLabelModal: t.totalLabelModal,
-            contactInfoTitle: t.contactInfoTitle,
-            whatsappLabel: t.whatsappLabel,
-            nameLabel: t.nameLabel,
-            notesLabel: t.notesLabel,
-            sendOrderTitle: t.sendOrderTitle,
-            sendViaWhatsApp: t.sendViaWhatsApp,
-            sendViaTelegram: t.sendViaTelegram,
-            continueShopping: t.continueShopping,
-            closeBtn: t.closeBtn,
-            navProducts: t.navProducts,
-            navCart: t.navCart,
-            navContact: t.navContact,
-            navLogin: t.navLogin,
-            mnavProducts: t.mnavProducts,
-            mnavCart: t.mnavCart,
-            mnavContact: t.mnavContact,
-            mnavLogin: t.mnavLogin,
-            fnavProducts: t.fnavProducts,
-            fnavCart: t.fnavCart,
-            fnavContact: t.fnavContact,
-            footerBrand: t.footerBrand,
-            footerDesc: t.footerDesc,
-            copyrightText: t.copyright
-        };
+    const inputs = {
+        whatsappInput: t.whatsappPlaceholder,
+        nameInput: t.namePlaceholder,
+        notesInput: t.notesPlaceholder
+    };
 
-        for (const id in map) {
-            const el = document.getElementById(id);
-            if (!el || map[id] === null) continue;
-            el.innerText = map[id];
+    for (const id in inputs) {
+        const el = document.getElementById(id);
+        if (el) el.placeholder = inputs[id];
+    }
+
+    const curr = document.getElementById('current-lang');
+    if (curr) curr.innerText = lang.toUpperCase();
+
+    document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+    document.documentElement.lang = (lang === 'ar') ? 'ar' : 'en';
+    document.title = t.pageTitle;
+
+    localStorage.setItem('lang', lang);
+}
+
+function loadSavedLang() {
+    const saved = localStorage.getItem('lang') || 'ar';
+    applyTranslations(saved);
+}
+
+function changeLang(lang) {
+    applyTranslations(lang);
+}
+
+function headerManager() {
+    return {
+        cartCount: 0,
+        init() {
+            this.loadCartCount();
+            window.addEventListener('storage', () => this.loadCartCount());
+            window.addEventListener('cartUpdated', () => this.loadCartCount());
+        },
+        loadCartCount() {
+            const cart = localStorage.getItem('cart');
+            const items = cart ? JSON.parse(cart) : [];
+            this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
         }
+    };
+}
 
-        const inputs = {
-            whatsappInput: t.whatsappPlaceholder,
-            nameInput: t.namePlaceholder,
-            notesInput: t.notesPlaceholder
-        };
+function cartManager() {
+    return {
+        cartItems: [],
+        showToast: false,
+        toastMessage: '',
+        toastType: 'success',
+        showCheckoutModal: false,
+        completedOrder: [],
+        orderNumber: '',
+        customerWhatsApp: '',
+        customerName: '',
+        customerNotes: '',
+        countryCode: '+20',
 
-        for (const id in inputs) {
-            const el = document.getElementById(id);
-            if (el) el.placeholder = inputs[id];
-        }
+        init() {
+            this.loadCart();
+        },
 
-        const curr = document.getElementById('current-lang');
-        if (curr) curr.innerText = lang.toUpperCase();
+        loadCart() {
+            const cart = localStorage.getItem('cart');
+            this.cartItems = cart ? JSON.parse(cart) : [];
+        },
 
-        document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
-        document.documentElement.lang = (lang === 'ar') ? 'ar' : 'en';
-        document.title = t.pageTitle;
+        increaseQuantity(index) {
+            this.cartItems[index].quantity += 1;
+            this.saveCart();
+            this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
+        },
 
-        localStorage.setItem('lang', lang);
-    }
-
-    function loadSavedLang() {
-        const saved = localStorage.getItem('lang') || 'ar';
-        applyTranslations(saved);
-    }
-
-    function changeLang(lang) {
-        applyTranslations(lang);
-    }
-
-    function headerManager() {
-        return {
-            cartCount: 0,
-            init() {
-                this.loadCartCount();
-                window.addEventListener('storage', () => this.loadCartCount());
-                // الاستماع إلى الحدث المخصص لتحديثات السلة في نفس علامة التبويب
-                window.addEventListener('cartUpdated', () => this.loadCartCount());
-            },
-            loadCartCount() {
-                const cart = localStorage.getItem('cart');
-                const items = cart ? JSON.parse(cart) : [];
-                this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+        decreaseQuantity(index) {
+            if (this.cartItems[index].quantity > 1) {
+                this.cartItems[index].quantity -= 1;
+                this.saveCart();
+                this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
+            } else {
+                this.removeItem(index);
             }
-        };
-    }
+        },
 
-    document.addEventListener('DOMContentLoaded', loadSavedLang);
-</script>
+        removeItem(index) {
+            this.cartItems.splice(index, 1);
+            this.saveCart();
+            this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
+        },
 
-<script>
-    /* مكون cartManager (افتراضي بناءً على الوظائف المستخدمة) */
-    function cartManager() {
-        return {
-            cartItems: [],
-            showToast: false,
-            toastMessage: '',
-            toastType: 'success',
-            showCheckoutModal: false,
-            completedOrder: [],
-            orderNumber: '',
-            customerWhatsApp: '',
-            customerName: '',
-            customerNotes: '',
-
-            init() {
-                this.loadCart();
-            },
-
-            loadCart() {
-                const cart = localStorage.getItem('cart');
-                this.cartItems = cart ? JSON.parse(cart) : [];
-            },
-
-            increaseQuantity(index) {
-                this.cartItems[index].quantity += 1;
-                this.saveCart();
-                this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
-            },
-
-            decreaseQuantity(index) {
-                if (this.cartItems[index].quantity > 1) {
-                    this.cartItems[index].quantity -= 1;
-                    this.saveCart();
-                    this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
-                } else {
-                    this.removeItem(index);
-                }
-            },
-
-            removeItem(index) {
-                this.cartItems.splice(index, 1);
-                this.saveCart();
-                this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
-            },
-
-            clearCart() {
-                const lang = localStorage.getItem('lang') || 'ar';
-                if (confirm(this.getTranslation('confirmClearCart'))) {
-                    this.cartItems = [];
-                    this.saveCart();
-                    this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
-                }
-            },
-
-            saveCart() {
-                localStorage.setItem('cart', JSON.stringify(this.cartItems));
-                // إطلاق حدث مخصص لتحديث الـ badge
-                const cartEvent = new Event('cartUpdated');
-                window.dispatchEvent(cartEvent);
-            },
-
-            getTotalItems() {
-                return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
-            },
-
-            getSubtotal() {
-                return this.cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            },
-
-            getOrderSubtotal() {
-                return this.completedOrder.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            },
-
-            checkout() {
-                if (this.cartItems.length === 0) {
-                    this.showToastMessage(this.getTranslation('toastError'), 'error');
-                    return;
-                }
-                this.completedOrder = [...this.cartItems];
-                this.orderNumber = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-                this.showCheckoutModal = true;
-            },
-
-            closeCheckoutModal() {
-                this.showCheckoutModal = false;
-                this.customerWhatsApp = '';
-                this.customerName = '';
-                this.customerNotes = '';
+        clearCart() {
+            const lang = localStorage.getItem('lang') || 'ar';
+            if (confirm(this.getTranslation('confirmClearCart'))) {
                 this.cartItems = [];
-                this.completedOrder = [];
-                this.orderNumber = '';
                 this.saveCart();
-            },
-
-            sendOrderViaWhatsApp() {
-                const lang = localStorage.getItem('lang') || 'ar';
-                let message = `${this.getTranslation('orderDetailsTitle')} (${this.orderNumber})\n\n`;
-                this.completedOrder.forEach(item => {
-                    message += `${item.name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
-                });
-                message += `\n${this.getTranslation('totalLabelModal')}: ${this.getOrderSubtotal().toFixed(2)} ${this.getTranslation('currency')}\n`;
-                if (this.customerName) message += `${this.getTranslation('nameLabel')}: ${this.customerName}\n`;
-                if (this.customerWhatsApp) message += `${this.getTranslation('whatsappLabel')}: ${this.customerWhatsApp}\n`;
-                if (this.customerNotes) message += `${this.getTranslation('notesLabel')}: ${this.customerNotes}\n`;
-                const encodedMessage = encodeURIComponent(message);
-                const whatsappUrl = `https://wa.me/201104391245?text=${encodedMessage}`;
-                window.open(whatsappUrl, '_blank');
-                this.closeCheckoutModal();
-            },
-
-            sendOrderViaTelegram() {
-                const lang = localStorage.getItem('lang') || 'ar';
-                let message = `${this.getTranslation('orderDetailsTitle')} (${this.orderNumber})\n\n`;
-                this.completedOrder.forEach(item => {
-                    message += `${item.name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
-                });
-                message += `\n${this.getTranslation('totalLabelModal')}: ${this.getOrderSubtotal().toFixed(2)} ${this.getTranslation('currency')}\n`;
-                if (this.customerName) message += `${this.getTranslation('nameLabel')}: ${this.customerName}\n`;
-                if (this.customerWhatsApp) message += `${this.getTranslation('whatsappLabel')}: ${this.customerWhatsApp}\n`;
-                if (this.customerNotes) message += `${this.getTranslation('notesLabel')}: ${this.customerNotes}\n`;
-                const encodedMessage = encodeURIComponent(message);
-                const telegramUrl = `https://t.me/GalTrading?text=${encodedMessage}`;
-                window.open(telegramUrl, '_blank');
-                this.closeCheckoutModal();
-            },
-
-            showToastMessage(message, type) {
-                this.toastMessage = message;
-                this.toastType = type;
-                this.showToast = true;
-                setTimeout(() => { this.showToast = false; }, 3000);
-            },
-
-            getTranslation(key) {
-                const lang = localStorage.getItem('lang') || 'ar';
-                return langs[lang][key] || langs.ar[key] || '';
+                this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
             }
-        };
-    }
-</script>
+        },
 
+        saveCart() {
+            localStorage.setItem('cart', JSON.stringify(this.cartItems));
+            const cartEvent = new Event('cartUpdated');
+            window.dispatchEvent(cartEvent);
+        },
+
+        getTotalItems() {
+            return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        },
+
+        getSubtotal() {
+            return this.cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        },
+
+        getOrderSubtotal() {
+            return this.completedOrder.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        },
+
+        checkout() {
+            if (this.cartItems.length === 0) {
+                this.showToastMessage(this.getTranslation('toastError'), 'error');
+                return;
+            }
+            this.completedOrder = [...this.cartItems];
+            this.orderNumber = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            this.showCheckoutModal = true;
+        },
+
+        closeCheckoutModal() {
+            this.showCheckoutModal = false;
+            this.customerWhatsApp = '';
+            this.customerName = '';
+            this.customerNotes = '';
+            this.countryCode = '+966';
+            this.cartItems = [];
+            this.completedOrder = [];
+            this.orderNumber = '';
+            this.saveCart();
+        },
+
+        sendOrderViaWhatsApp() {
+            const lang = localStorage.getItem('lang') || 'ar';
+            let message = `${this.getTranslation('orderDetailsTitle')} (${this.orderNumber})\n\n`;
+            this.completedOrder.forEach(item => {
+                message += `${item.name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
+            });
+            message += `\n${this.getTranslation('totalLabelModal')}: ${this.getOrderSubtotal().toFixed(2)} ${this.getTranslation('currency')}\n`;
+            if (this.customerName) message += `${this.getTranslation('nameLabel')}: ${this.customerName}\n`;
+            if (this.customerWhatsApp) message += `${this.getTranslation('whatsappLabel')}: ${this.countryCode}${this.customerWhatsApp}\n`;
+            if (this.customerNotes) message += `${this.getTranslation('notesLabel')}: ${this.customerNotes}\n`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/+201104391245?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
+            this.closeCheckoutModal();
+        },
+
+        showToastMessage(message, type) {
+            this.toastMessage = message;
+            this.toastType = type;
+            this.showToast = true;
+            setTimeout(() => { this.showToast = false; }, 3000);
+        },
+
+        getTranslation(key) {
+            const lang = localStorage.getItem('lang') || 'ar';
+            return langs[lang][key] || langs.ar[key] || '';
+        }
+    };
+}
+
+document.addEventListener('DOMContentLoaded', loadSavedLang);
+</script>
 </body>
 </html>
