@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="luxury">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">طلب عرض سعر - جال للتجارة</title>
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body { font-family: "Cairo", sans-serif; }
+        .gold-text { color: #d4af37; }
+        .glass-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            inset-inline-end: -8px;
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .dropdown .cart-badge {
+            top: 0;
+            inset-inline-end: 0;
+            transform: translate(50%, -50%);
+        }
+        .selected-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+            z-index: 10;
+        }
+        .product-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+        }
+        .product-card.selected {
+            border: 3px solid #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .loading-spinner {
+            border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-base-100">
+
+<!-- Navbar -->
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
+    <div class="flex-1">
+        <a href="/" class="flex items-center gap-3">
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
+            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+        </a>
+    </div>
+
+    <nav class="hidden md:flex gap-3">
+        <a href="/productCatalog" class="btn btn-ghost btn-sm">
+            <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
+        </a>
+        <a href="/cart" class="btn btn-ghost btn-sm relative">
+            <i class="fas fa-shopping-cart ml-1"></i>
+            <span id="navCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="btn btn-ghost btn-sm">
+            <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
+        </a>
+    </nav>
+
+    <div class="dropdown dropdown-end md:hidden relative">
+        <button tabindex="0" class="btn btn-ghost btn-lg">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
+            <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span></a></li>
+            <li><a href="/cart" class="py-4 relative"><i class="fas fa-shopping-cart ml-2 text-xl"></i><span id="mnavCart">السلة</span><span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span></a></li>
+            <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span></a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown dropdown-end ml-2">
+        <label tabindex="0" class="btn btn-ghost">🌐 <span id="current-lang">AR</span></label>
+        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
+            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
+            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
+        </ul>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto p-6 min-h-screen" x-data="priceRequestApp()" x-init="init()">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 gold-text">
+            <i class="fas fa-file-invoice-dollar ml-2"></i>
+            <span id="mainTitle">طلب عرض سعر</span>
+        </h1>
+        <p id="mainDesc" class="text-gray-300 text-lg">اختر المنتجات التي تحتاجها وسنرسل لك عرض سعر مفصل</p>
+    </div>
+
+    <!-- Selected Counter -->
+    <div x-show="selectedProducts.length > 0" class="glass-card p-4 rounded-2xl mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-check-circle text-2xl text-green-500"></i>
+            <span class="text-lg font-bold text-gray-100">
+                <span id="selectedLabel">تم اختيار</span>
+                <span x-text="selectedProducts.length" class="gold-text mx-2"></span>
+                <span id="productLabel">منتج</span>
+            </span>
+        </div>
+        <button @click="clearSelection()" class="btn btn-sm btn-outline" style="border-color: #dc2626; color: #dc2626;">
+            <i class="fas fa-times ml-1"></i>
+            <span id="clearBtn">مسح الكل</span>
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="glass-card p-6 rounded-2xl mb-8">
+        <div class="form-control">
+            <label class="label">
+                <span id="searchLabel" class="label-text text-gray-300">بحث عن المنتجات</span>
+            </label>
+            <div class="relative">
+                <input type="text"
+                       x-model="searchQuery"
+                       @input.debounce.300ms="filterProducts()"
+                       id="searchInput"
+                       placeholder="ابحث باسم المنتج أو الوصف..."
+                       class="input input-bordered w-full bg-base-200 text-gray-100 pr-10">
+                <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Filter -->
+    <div class="glass-card p-6 rounded-2xl mb-8">
+        <h2 class="text-2xl font-bold mb-4 text-gray-100 flex items-center gap-2">
+            <i class="fas fa-filter gold-text"></i>
+            <span id="filterTitle">تصفية حسب التصنيف</span>
+        </h2>
+
+        <div class="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+            <button @click="selectedCategory = ''; filterProducts()"
+                    :class="selectedCategory === '' ? 'ring-2 ring-[#d4af37]' : ''"
+                    class="btn btn-sm whitespace-nowrap"
+                    style="background: rgba(212, 175, 55, 0.2); color: #d4af37;">
+                <i class="fas fa-th-large ml-1"></i>
+                <span id="allCat">جميع التصنيفات</span>
+                <span class="badge badge-sm ml-1" x-text="products.length"></span>
+            </button>
+
+            <template x-for="cat in categories" :key="cat._id">
+                <button @click="selectedCategory = cat._id; filterProducts()"
+                        :class="selectedCategory === cat._id ? 'ring-2 ring-[#d4af37]' : ''"
+                        class="btn btn-sm whitespace-nowrap"
+                        style="background: rgba(212, 175, 55, 0.1); color: #d4af37;">
+                    <span x-text="cat.name"></span>
+                    <span class="badge badge-sm ml-1" x-text="getCategoryCount(cat._id)"></span>
+                </button>
+            </template>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div x-show="loading" class="flex justify-center py-20">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Products Grid -->
+    <div x-show="!loading && filteredProducts.length > 0"
+         class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+        <template x-for="product in filteredProducts" :key="product._id">
+            <div @click="toggleProduct(product)"
+                 :class="isSelected(product._id) ? 'selected' : ''"
+                 class="product-card glass-card rounded-2xl overflow-hidden shadow-xl">
+
+                <!-- Selected Badge -->
+                <div x-show="isSelected(product._id)" class="selected-badge">
+                    <i class="fas fa-check ml-1"></i>
+                    <span id="selectedBadge">محدد</span>
+                </div>
+
+                <!-- Product Image -->
+                <div class="relative h-48 overflow-hidden bg-base-300">
+                    <img :src="product.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'"
+                         :alt="product.name"
+                         class="w-full h-full object-cover">
+                </div>
+
+                <!-- Product Info -->
+                <div class="p-5">
+                    <h3 class="text-lg font-bold mb-2 text-gray-100 line-clamp-2" x-text="product.name"></h3>
+                    <p class="text-gray-400 text-sm mb-3 line-clamp-2" x-text="product.description"></p>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">
+                            <i class="fas fa-layer-group gold-text ml-1"></i>
+                            <span x-text="getCategoryName(product.categoryId)"></span>
+                        </span>
+
+                        <div x-show="isSelected(product._id)">
+                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- No Products -->
+    <div x-show="!loading && filteredProducts.length === 0" class="text-center py-20">
+        <div class="glass-card rounded-3xl p-12 max-w-md mx-auto">
+            <i class="fas fa-box-open text-6xl gold-text mb-4"></i>
+            <h3 id="noProductsTitle" class="text-2xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
+            <p id="noProductsDesc" class="text-gray-400">جرب اختيار تصنيف آخر أو تعديل البحث</p>
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div x-show="selectedProducts.length > 0"
+         class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
+        <button @click="openWhatsAppDialog()"
+                class="btn btn-lg text-slate-900 font-bold shadow-2xl pulse-button"
+                style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
+            <i class="fas fa-paper-plane ml-2 text-xl"></i>
+            <span id="submitBtn">إرسال الطلب</span>
+            <span class="badge badge-lg ml-2" style="background: #1a1a2e; color: #d4af37;" x-text="selectedProducts.length"></span>
+        </button>
+    </div>
+
+    <!-- WhatsApp Dialog -->
+    <div x-show="showDialog"
+         x-transition
+         @click="showDialog = false"
+         class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div @click.stop
+             x-transition
+             class="glass-card rounded-3xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
+
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 flex items-center gap-3">
+                <i class="fab fa-whatsapp text-green-500 text-4xl"></i>
+                <span id="dialogTitle">إرسال الطلب عبر واتساب</span>
+            </h2>
+
+            <!-- Customer Info Form -->
+            <div class="space-y-4 mb-6">
+                <div class="form-control">
+                    <label class="label">
+                        <span id="nameLabel" class="label-text text-gray-300">الاسم</span>
+                    </label>
+                    <input type="text"
+                           x-model="customerName"
+                           id="nameInput"
+                           placeholder="اسمك الكامل"
+                           class="input input-bordered w-full bg-base-200 text-gray-100">
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span id="phoneLabel" class="label-text text-gray-300">رقم الهاتف</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <select x-model="countryCode"
+                                class="select select-bordered bg-base-200 text-gray-100"
+                                style="max-width: 120px;">
+                            <option value="+966">🇸🇦 +966</option>
+                            <option value="+971">🇦🇪 +971</option>
+                            <option value="+965">🇰🇼 +965</option>
+                            <option value="+974">🇶🇦 +974</option>
+                            <option value="+973">🇧🇭 +973</option>
+                            <option value="+968">🇴🇲 +968</option>
+                            <option value="+962">🇯🇴 +962</option>
+                            <option value="+961">🇱🇧 +961</option>
+                            <option value="+970">🇵🇸 +970</option>
+                            <option value="+20">🇪🇬 +20</option>
+                            <option value="+212">🇲🇦 +212</option>
+                            <option value="+213">🇩🇿 +213</option>
+                            <option value="+216">🇹🇳 +216</option>
+                            <option value="+218">🇱🇾 +218</option>
+                            <option value="+249">🇸🇩 +249</option>
+                            <option value="+252">🇸🇴 +252</option>
+                            <option value="+269">🇰🇲 +269</option>
+                            <option value="+253">🇩🇯 +253</option>
+                            <option value="+222">🇲🇷 +222</option>
+                            <option value="+86">🇨🇳 +86</option>
+                            <option value="+33">🇫🇷 +33</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+1">🇺🇸 +1</option>
+                        </select>
+                        <input type="tel"
+                               x-model="customerPhone"
+                               id="phoneInput"
+                               placeholder="01xxxxxxxxx"
+                               class="input input-bordered w-full bg-base-200 text-gray-100">
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span id="notesLabel" class="label-text text-gray-300">ملاحظات إضافية (اختياري)</span>
+                    </label>
+                    <textarea x-model="customerNotes"
+                              id="notesInput"
+                              placeholder="أي تفاصيل إضافية..."
+                              class="textarea textarea-bordered w-full bg-base-200 text-gray-100 h-24"></textarea>
+                </div>
+            </div>
+
+            <!-- Selected Products Preview -->
+            <div class="mb-6">
+                <h3 id="selectedItemsTitle" class="font-bold mb-3 text-gray-200 flex items-center gap-2">
+                    <i class="fas fa-list gold-text"></i>
+                    المنتجات المحددة (<span x-text="selectedProducts.length"></span>)
+                </h3>
+                <div class="space-y-2 max-h-60 overflow-y-auto">
+                    <template x-for="product in selectedProducts" :key="product._id">
+                        <div class="flex items-center gap-3 p-3
+
+ bg-base-200 rounded-lg">
+                            <img :src="product.imageUrl || 'https://via.placeholder.com/50'"
+                                 class="w-12 h-12 object-cover rounded-lg">
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-100 text-sm" x-text="product.name"></p>
+                                <p class="text-xs text-gray-400" x-text="getCategoryName(product.categoryId)"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button @click="sendToWhatsApp()"
+                        :disabled="!customerName || !customerPhone"
+                        :class="(!customerName || !customerPhone) ? 'opacity-50 cursor-not-allowed' : ''"
+                        class="btn flex-1 text-white font-bold"
+                        style="background: #25D366; border: none;">
+                    <i class="fab fa-whatsapp ml-2 text-xl"></i>
+                    <span id="sendWhatsAppBtn">إرسال عبر واتساب</span>
+                </button>
+                <button @click="showDialog = false"
+                        class="btn btn-outline"
+                        style="border-color: #d4af37; color: #d4af37;">
+                    <span id="cancelBtn">إلغاء</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer footer-center p-12 glass-card text-gray-300 mt-20" x-data="headerManager()">
+    <div class="mb-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+            <img src="/images/logo.webp" alt="شعار" style="width: 100px;">
+            <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
+        </div>
+        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية</p>
+    </div>
+    <nav class="grid grid-flow-col gap-6">
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative"><i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span><span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span></a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
+    </nav>
+    <p id="copyrightText" class="text-gray-400 mt-4">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+</footer>
+<script >
+    // Translations
+const langs = {
+    ar: {
+        brandName: "جال لتوريدات المصانع",
+        pageTitle: "طلب عرض سعر - جال للتجارة",
+        mainTitle: "طلب عرض سعر",
+        mainDesc: "اختر المنتجات التي تحتاجها وسنرسل لك عرض سعر مفصل",
+        selectedLabel: "تم اختيار",
+        productLabel: "منتج",
+        clearBtn: "مسح الكل",
+        filterTitle: "تصفية حسب التصنيف",
+        allCat: "جميع التصنيفات",
+        selectedBadge: "محدد",
+        noProductsTitle: "لا توجد منتجات",
+        noProductsDesc: "جرب اختيار تصنيف آخر أو تعديل البحث",
+        submitBtn: "إرسال الطلب",
+        dialogTitle: "إرسال الطلب عبر واتساب",
+        nameLabel: "الاسم",
+        nameInput: "اسمك الكامل",
+        phoneLabel: "رقم الهاتف",
+        phoneInput: "01xxxxxxxxx",
+        notesLabel: "ملاحظات إضافية (اختياري)",
+        notesInput: "أي تفاصيل إضافية...",
+        selectedItemsTitle: "المنتجات المحددة",
+        sendWhatsAppBtn: "إرسال عبر واتساب",
+        cancelBtn: "إلغاء",
+        navProducts: "المنتجات",
+        navCart: "السلة",
+        navContact: "تواصل معنا",
+        mnavProducts: "المنتجات",
+        mnavCart: "السلة",
+        mnavContact: "تواصل معنا",
+        fnavProducts: "المنتجات",
+        fnavCart: "السلة",
+        fnavContact: "تواصل معنا",
+        footerBrand: "جال للتجارة",
+        footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية",
+        copyrightText: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة",
+        searchLabel: "بحث عن المنتجات",
+        searchInput: "ابحث باسم المنتج أو الوصف..."
+    },
+    en: {
+        brandName: "Gal Industrial Supplies",
+        pageTitle: "Price Request - Gal Trading",
+        mainTitle: "Request a Quote",
+        mainDesc: "Select the products you need and we'll send you a detailed quote",
+        selectedLabel: "Selected",
+        productLabel: "product(s)",
+        clearBtn: "Clear All",
+        filterTitle: "Filter by Category",
+        allCat: "All Categories",
+        selectedBadge: "Selected",
+        noProductsTitle: "No Products Found",
+        noProductsDesc: "Try selecting another category or modifying your search",
+        submitBtn: "Submit Request",
+        dialogTitle: "Send Request via WhatsApp",
+        nameLabel: "Name",
+        nameInput: "Your full name",
+        phoneLabel: "Phone Number",
+        phoneInput: "01xxxxxxxxx",
+        notesLabel: "Additional Notes (Optional)",
+        notesInput: "Any additional details...",
+        selectedItemsTitle: "Selected Products",
+        sendWhatsAppBtn: "Send via WhatsApp",
+        cancelBtn: "Cancel",
+        navProducts: "Products",
+        navCart: "Cart",
+        navContact: "Contact",
+        mnavProducts: "Products",
+        mnavCart: "Cart",
+        mnavContact: "Contact",
+        fnavProducts: "Products",
+        fnavCart: "Cart",
+        fnavContact: "Contact",
+        footerBrand: "Gal Trading",
+        footerDesc: "Your trusted partner in industrial supplies",
+        copyrightText: "© 2025 Gal Trading & Supplies — All rights reserved",
+        searchLabel: "Search Products",
+        searchInput: "Search by product name or description..."
+    }
+};
+
+function applyTranslations(lang) {
+    const t = langs[lang] || langs.ar;
+    const map = {
+        brandName: t.brandName,
+        pageTitle: t.pageTitle,
+        mainTitle: t.mainTitle,
+        mainDesc: t.mainDesc,
+        selectedLabel: t.selectedLabel,
+        productLabel: t.productLabel,
+        clearBtn: t.clearBtn,
+        filterTitle: t.filterTitle,
+        allCat: t.allCat,
+        selectedBadge: t.selectedBadge,
+        noProductsTitle: t.noProductsTitle,
+        noProductsDesc: t.noProductsDesc,
+        submitBtn: t.submitBtn,
+        dialogTitle: t.dialogTitle,
+        nameLabel: t.nameLabel,
+        phoneLabel: t.phoneLabel,
+        notesLabel: t.notesLabel,
+        selectedItemsTitle: t.selectedItemsTitle,
+        sendWhatsAppBtn: t.sendWhatsAppBtn,
+        cancelBtn: t.cancelBtn,
+        navProducts: t.navProducts,
+        navCart: t.navCart,
+        navContact: t.navContact,
+        mnavProducts: t.mnavProducts,
+        mnavCart: t.mnavCart,
+        mnavContact: t.mnavContact,
+        fnavProducts: t.fnavProducts,
+        fnavCart: t.fnavCart,
+        fnavContact: t.fnavContact,
+        footerBrand: t.footerBrand,
+        footerDesc: t.footerDesc,
+        copyrightText: t.copyrightText,
+        searchLabel: t.searchLabel,
+        searchInput: t.searchInput
+    };
+
+    for (const id in map) {
+        const el = document.getElementById(id);
+        if (el && map[id]) el.innerText = map[id];
+    }
+
+    // Placeholders
+    const nameInput = document.getElementById('nameInput');
+    const phoneInput = document.getElementById('phoneInput');
+    const notesInput = document.getElementById('notesInput');
+    const searchInput = document.getElementById('searchInput');
+    if (nameInput) nameInput.placeholder = t.nameInput;
+    if (phoneInput) phoneInput.placeholder = t.phoneInput;
+    if (notesInput) notesInput.placeholder = t.notesInput;
+    if (searchInput) searchInput.placeholder = t.searchInput;
+
+    document.title = t.pageTitle;
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    document.getElementById("current-lang").innerText = lang.toUpperCase();
+    localStorage.setItem("lang", lang);
+}
+
+function changeLang(lang) {
+    applyTranslations(lang);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem("lang") || "ar";
+    applyTranslations(saved);
+});
+
+function headerManager() {
+    return {
+        cartCount: 0,
+        init() {
+            this.loadCartCount();
+            window.addEventListener('storage', () => this.loadCartCount());
+            window.addEventListener('cartUpdated', () => this.loadCartCount());
+        },
+        loadCartCount() {
+            const cart = localStorage.getItem('cart');
+            const items = cart ? JSON.parse(cart) : [];
+            this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+        }
+    };
+}
+
+function priceRequestApp() {
+    return {
+        products: [],
+        categories: [],
+        filteredProducts: [],
+        selectedProducts: [],
+        selectedCategory: '',
+        searchQuery: '',
+        loading: true,
+        showDialog: false,
+        customerName: '',
+        customerPhone: '',
+        countryCode: '+20',
+        customerNotes: '',
+
+        async init() {
+            await this.loadCategories();
+            await this.loadProducts();
+        },
+
+        async loadProducts() {
+            try {
+                this.loading = true;
+                const response = await fetch('/api/products');
+                if (!response.ok) throw new Error('Failed to load products');
+                this.products = await response.json();
+                this.filteredProducts = this.products;
+            } catch (err) {
+                console.error('Error loading products:', err);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async loadCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                if (!response.ok) throw new Error('Failed to load categories');
+                this.categories = await response.json();
+            } catch (err) {
+                console.error('Error loading categories:', err);
+            }
+        },
+
+        filterProducts() {
+            let filtered = this.products;
+
+            // Filter by category
+            if (this.selectedCategory) {
+                filtered = filtered.filter(p => p.categoryId === this.selectedCategory);
+            }
+
+            // Filter by search query
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes(query) ||
+                    (p.description && p.description.toLowerCase().includes(query))
+                );
+            }
+
+            this.filteredProducts = filtered;
+        },
+
+        toggleProduct(product) {
+            const index = this.selectedProducts.findIndex(p => p._id === product._id);
+            if (index > -1) {
+                this.selectedProducts.splice(index, 1);
+            } else {
+                this.selectedProducts.push(product);
+            }
+        },
+
+        isSelected(productId) {
+            return this.selectedProducts.some(p => p._id === productId);
+        },
+
+        clearSelection() {
+            this.selectedProducts = [];
+        },
+
+        getCategoryName(categoryId) {
+            const cat = this.categories.find(c => c._id === categoryId);
+            return cat ? cat.name : (localStorage.getItem('lang') === 'en' ? 'Unspecified' : 'غير محدد');
+        },
+
+        getCategoryCount(categoryId) {
+            return this.products.filter(p => p.categoryId === categoryId).length;
+        },
+
+        openWhatsAppDialog() {
+            this.showDialog = true;
+        },
+
+        sendToWhatsApp() {
+            if (!this.customerName || !this.customerPhone) {
+                const lang = localStorage.getItem('lang') || 'ar';
+                alert(lang === 'en' ? 'Please fill in name and phone number' : 'يرجى ملء الاسم ورقم الهاتف');
+                return;
+            }
+
+            // Build WhatsApp message
+            const lang = localStorage.getItem('lang') || 'ar';
+            let message = lang === 'en'
+                ? `*Price Request*\n\n*Customer Name:* ${this.customerName}\n*Phone:* ${this.countryCode}${this.customerPhone}\n\n*Selected Products:*\n\n`
+                : `*طلب عرض سعر*\n\n*اسم العميل:* ${this.customerName}\n*الهاتف:* ${this.countryCode}${this.customerPhone}\n\n*المنتجات المطلوبة:*\n\n`;
+
+            this.selectedProducts.forEach((product, index) => {
+                message += `${index + 1}. ${product.name}\n`;
+                message += `   ${lang === 'en' ? 'Category' : 'التصنيف'}: ${this.getCategoryName(product.categoryId)}\n`;
+                if (product.description) {
+                    message += `   ${lang === 'en' ? 'Details' : 'الوصف'}: ${product.description}\n`;
+                }
+                message += `\n`;
+            });
+
+            if (this.customerNotes) {
+                message += lang === 'en'
+                    ? `\n*Additional Notes:*\n${this.customerNotes}`
+                    : `\n*ملاحظات إضافية:*\n${this.customerNotes}`;
+            }
+
+            // Company WhatsApp number
+            const whatsappNumber = '+201104391245';
+            const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+            window.open(url, '_blank');
+
+            // Reset form
+            this.showDialog = false;
+            this.customerName = '';
+            this.customerPhone = '';
+            this.countryCode = '+966';
+            this.customerNotes = '';
+            this.selectedProducts = [];
+        }
+    };
+}
+</script>
+</body>
+</html>

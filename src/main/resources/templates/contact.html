@@ -3,35 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تواصل معنا - جال للتجارة والتوريدات</title>
+    <title id="pageTitle">تواصل معنا - جال للتجارة والتوريدات</title>
     <link rel="icon" type="image/webp" href="/images/logo.webp">
     <link rel="apple-touch-icon" href="/images/logo.webp">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="/css/contact.css">
-
-
+    <style>
+        body { font-family: "Cairo", sans-serif; }
+        .gold-text { color: #d4af37; }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        /* تحسين توافق الـ badge في قائمة الموبايل */
+        .dropdown .cart-badge {
+            top: 0;
+            inset-inline-end: 0;
+            transform: translate(50%, -50%);
+        }
+    </style>
 </head>
 
 <body class="text-base-content">
 
 <!-- الهيدر -->
-<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
     <div class="flex-1">
         <a href="/" class="flex items-center gap-3">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo">
-            <span class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
+            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
         </a>
     </div>
 
     <!-- قائمة Desktop -->
     <nav class="hidden md:flex gap-3">
-        <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
-        <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
-        <a href="/contact" class="btn btn-ghost btn-sm"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
-        <a href="/clientLogin" class="btn btn-primary btn-sm">تسجيل الدخول</a>
+        <a href="/productCatalog" class="btn btn-ghost btn-sm">
+            <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
+        </a>
+        <a href="/cart" class="btn btn-ghost btn-sm relative">
+            <i class="fas fa-shopping-cart ml-1"></i>
+            <span id="navCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="btn btn-ghost btn-sm">
+            <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
+        </a>
     </nav>
 
     <!-- Dropdown للموبايل -->
@@ -39,18 +70,39 @@
         <button tabindex="0" class="btn btn-ghost btn-lg">
             <i class="fas fa-bars text-2xl"></i>
         </button>
-        <ul tabindex="0"
-            class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
-            <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> المنتجات</a></li>
-            <li><a href="/cart" class="py-4"><i class="fas fa-shopping-cart ml-2 text-xl"></i> السلة</a></li>
-            <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> تواصل معنا</a></li>
-            <li><a href="/clientLogin" class="py-4 text-[#d4af37]"><i class="fas fa-sign-in-alt ml-2 text-xl"></i> تسجيل
-                الدخول</a></li>
+        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
+            <li>
+                <a href="/productCatalog" class="py-4">
+                    <i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span>
+                </a>
+            </li>
+            <li>
+                <a href="/cart" class="py-4 relative">
+                    <i class="fas fa-shopping-cart ml-2 text-xl"></i>
+                    <span id="mnavCart">السلة</span>
+                    <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+                </a>
+            </li>
+            <li>
+                <a href="/contact" class="py-4">
+                    <i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- زر اللغة -->
+    <div class="dropdown dropdown-end ml-2">
+        <label tabindex="0" class="btn btn-ghost">
+            🌐 <span id="current-lang">AR</span>
+        </label>
+        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
+            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
+            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
         </ul>
     </div>
 </header>
 
-<!-- المحتوى -->
 <main class="max-w-6xl mx-auto p-6 md:p-10 py-12 space-y-12">
 
     <!-- Hero -->
@@ -58,180 +110,180 @@
         <div class="inline-block glass-card rounded-full p-8 shadow-2xl industrial-accent">
             <i class="fas fa-comments text-6xl gold-text"></i>
         </div>
-        <h1 class="text-5xl md:text-6xl font-bold mt-6 gradient-text">
-            نسعد بتواصلك معنا
-        </h1>
-        <p class="text-xl mt-4 text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            فريقنا من المهندسين والمتخصصين جاهز لخدمتك والإجابة على جميع استفساراتك 💬
-        </p>
+        <h1 id="contactTitle" class="text-5xl md:text-6xl font-bold mt-6 gradient-text"></h1>
+        <p id="contactDesc" class="text-xl mt-4 text-gray-300 max-w-2xl mx-auto leading-relaxed"></p>
     </section>
 
-    <!-- Content -->
+    <!-- نموذج الاتصال -->
     <section class="grid md:grid-cols-2 gap-10">
 
         <!-- Form -->
         <div class="glass-card rounded-3xl p-8 shadow-2xl industrial-accent fade-in">
-            <h2 class="text-3xl font-bold mb-6 flex items-center gap-3 text-gray-100">
-                <i class="fas fa-envelope gold-text"></i> أرسل لنا رسالة
-            </h2>
+            <h2 id="sendMsg" class="text-3xl font-bold mb-6 flex items-center gap-3 text-gray-100"></h2>
 
             <form onsubmit="handleSubmit(event)" class="space-y-5">
-                <input type="text" placeholder="اسمك الكامل" class="input gold-border w-full focus:gold-border"
-                       required>
-                <input type="email" placeholder="بريدك الإلكتروني" class="input gold-border w-full" required>
-                <input type="tel" placeholder="رقم الهاتف (اختياري)" class="input gold-border w-full">
-                <textarea placeholder="اكتب رسالتك هنا..." class="textarea gold-border w-full h-36" required></textarea>
-                <button type="submit" class="btn btn-modern w-full text-lg">
-                    <i class="fas fa-paper-plane ml-2"></i> إرسال الرسالة
+                <input id="inputName" type="text" class="input gold-border w-full" required>
+                <input id="inputEmail" type="email" class="input gold-border w-full" required>
+                <input id="inputPhone" type="tel" class="input gold-border w-full">
+                <textarea id="inputMsg" class="textarea gold-border w-full h-36" required></textarea>
+                <button id="sendBtn" type="submit" class="btn btn-modern w-full text-lg">
+                    <i class="fas fa-paper-plane ml-2"></i> <span id="sendBtnText"></span>
                 </button>
             </form>
         </div>
 
         <!-- Info -->
         <div class="space-y-8 fade-in">
-
-            <!-- Social -->
-            <div class="glass-card rounded-3xl p-8 shadow-2xl industrial-accent">
-                <h2 class="text-3xl font-bold mb-6 flex items-center gap-3 text-gray-100">
-                    <i class="fas fa-share-nodes gold-text"></i> تابعنا
-                </h2>
-                <div class="grid grid-cols-3 sm:grid-cols-6 gap-4">
-                    <a href="#" class="social-icon btn btn-circle text-xl">
-                        <i class="fab fa-tiktok"></i>
-                    </a>
-                    <a href="#" class="social-icon btn btn-circle text-xl">
-                        <i class="fab fa-facebook"></i>
-                    </a>
-                    <a href="#" class="social-icon btn btn-circle text-xl">
-                        <i class="fab fa-linkedin"></i>
-                    </a>
-                    <a href="mailto:info@jal-trading.com" class="social-icon btn btn-circle text-xl">
-                        <i class="fas fa-envelope"></i>
-                    </a>
-                    <a href="#" class="social-icon btn btn-circle text-xl">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Contact Info -->
             <div class="glass-card rounded-3xl p-8 shadow-2xl text-gray-100 industrial-accent">
-                <h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
-                    <i class="fas fa-info-circle gold-text"></i> معلومات التواصل
+                <h2 id="infoTitle" class="text-3xl font-bold mb-6 flex items-center gap-3">
+                    <i class="fas fa-info-circle gold-text"></i>
                 </h2>
                 <ul class="space-y-5">
-                    <li class="flex items-center gap-4 text-lg">
-                        <i class="fas fa-location-dot text-2xl gold-text"></i>
-                        <span>27 شارع الجبرونى - وسط البلد - القاهره - مصر</span>
-                    </li>
-                    <li class="flex items-center gap-4 text-lg">
-                        <i class="fas fa-phone text-2xl gold-text"></i>
-                        <span>01050006099</span>
-                    </li>
-                    <li class="flex items-center gap-4 text-lg">
-                        <i class="fas fa-phone text-2xl gold-text"></i>
-                        <span>01127342197</span>
-                    </li>
-                    <li class="flex items-center gap-4 text-lg">
-                        <i class="fas fa-phone text-2xl gold-text"></i>
-                        <span>01002491168</span>
-                    </li>
-                    <li class="flex items-center gap-4 text-lg">
-                        <i class="fas fa-clock text-2xl gold-text"></i>
-                        <span>الإثنين - السبت: 8ص - 5م</span>
-                    </li>
+                    <li><i class="fas fa-location-dot text-2xl gold-text"></i> <span id="address"></span></li>
+                    <li><i class="fas fa-phone text-2xl gold-text"></i> 01050006099</li>
+                    <li><i class="fas fa-clock text-2xl gold-text"></i> <span id="workHours"></span></li>
                 </ul>
             </div>
         </div>
     </section>
-
-    <!-- Map Section -->
-    <section class="glass-card rounded-3xl p-8 shadow-2xl industrial-accent fade-in">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-3 text-gray-100 justify-center">
-            <i class="fas fa-map-marker-alt gold-text"></i> موقعنا على الخريطة
-        </h2>
-        <div class="map-container" style="height: 450px;">
-            <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123456789012!2d31.234567890123!3d30.123456789012!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDA3JzI0LjQiTiAzMcKwMTQnMDQuNCJF!5e0!3m2!1sen!2seg!4v1234567890123!5m2!1sen!2seg"
-                    width="100%"
-                    height="100%"
-                    style="border:0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
-        </div>
-        <div class="mt-6 text-center">
-            <a href="https://maps.app.goo.gl/MHXBQTsgRiDSsijb8"
-               target="_blank"
-               class="btn btn-modern text-lg inline-flex items-center gap-2">
-                <i class="fas fa-directions"></i>
-                احصل على الاتجاهات
-            </a>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <div class="text-center glass-card rounded-3xl p-8 shadow-2xl industrial-accent fade-in">
-        <p class="text-2xl font-bold mb-3 text-gray-100">
-            <i class="fas fa-headset gold-text ml-2"></i>
-            تحتاج مساعدة فورية؟
-        </p>
-        <p class="text-gray-300 text-lg">فريق الدعم الفني متاح دائماً لمساعدتك في اختيار المنتجات المناسبة ✨</p>
-    </div>
 </main>
 
 <!-- Footer -->
-<footer class="footer footer-center p-12 header-glass text-gray-300 relative overflow-hidden">
-    <div class="absolute top-0 left-0 right-0 h-1"
-         style="background: linear-gradient(90deg, transparent, #d4af37, #ffd700, #d4af37, transparent);"></div>
-    <div class="mb-6">
-        <div class="flex items-center gap-3 justify-center mb-4">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
-            <span class="text-3xl font-bold gradient-text">جال للتجارة</span>
-        </div>
-        <p class="text-gray-400 max-w-md">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
+<footer class="footer footer-center p-12 header-glass text-gray-300 relative overflow-hidden" x-data="headerManager()">
+    <div class="flex items-center justify-center gap-3 mb-4">
+        <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
+        <span id="footerBrand" class="text-3xl font-bold gradient-text"></span>
     </div>
+    <p id="footerDesc" class="text-gray-400 max-w-md mx-auto"></p>
     <nav class="grid grid-flow-col gap-6 text-base">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37] transition-colors">
-            <i class="fas fa-box-open ml-1"></i> المنتجات
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative">
+            <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
         </a>
-        <a href="/cart" class="link link-hover hover:text-[#d4af37] transition-colors">
-            <i class="fas fa-shopping-cart ml-1"></i> السلة
-        </a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37] transition-colors">
-            <i class="fas fa-phone-alt ml-1"></i> تواصل معنا
-        </a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
-    <div class="flex justify-center gap-6 text-2xl mt-6">
-        <a href="#" class="hover:text-[#d4af37] transform hover:scale-125 transition-all duration-300">
-            <i class="fab fa-facebook"></i>
-        </a>
-        <a href="#" class="hover:text-[#d4af37] transform hover:scale-125 transition-all duration-300">
-            <i class="fab fa-instagram"></i>
-        </a>
-        <a href="#" class="hover:text-[#d4af37] transform hover:scale-125 transition-all duration-300">
-            <i class="fab fa-whatsapp"></i>
-        </a>
-        <a href="#" class="hover:text-[#d4af37] transform hover:scale-125 transition-all duration-300">
-            <i class="fab fa-linkedin"></i>
-        </a>
-    </div>
-    <div class="mt-8 pt-6 border-t border-gray-700/50 w-full text-center">
-        <p class="text-gray-400">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
-        <p class="text-sm text-gray-500 mt-2">
-            <i class="fas fa-shield-alt ml-1 gold-text"></i>
-            خبرة 77 عامًا في خدمة الصناعة المصرية
-        </p>
-    </div>
+    <p class="text-gray-400 mt-6 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
 
 <script>
+    const langs = {
+        ar: {
+            brandName: "جال لتوريدات المصانع",
+            pageTitle: "تواصل معنا - جال للتجارة والتوريدات",
+            contactTitle: "نسعد بتواصلك معنا",
+            contactDesc: "فريقنا من المهندسين والمتخصصين جاهز لخدمتك والإجابة على جميع استفساراتك 💬",
+            sendMsg: "📨 أرسل لنا رسالة",
+            sendBtnText: "إرسال الرسالة",
+            infoTitle: "معلومات التواصل",
+            address: "27 شارع الجبرونى - وسط البلد - القاهرة - مصر",
+            workHours: "الإثنين - السبت: 8ص - 5م",
+            footerBrand: "جال للتجارة",
+            footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
+            navProducts: "المنتجات",
+            navCart: "السلة",
+            navContact: "تواصل معنا",
+            navLogin: "تسجيل الدخول",
+            mnavProducts: "المنتجات",
+            mnavCart: "السلة",
+            mnavContact: "تواصل معنا",
+            mnavLogin: "تسجيل الدخول",
+            fnavProducts: "المنتجات",
+            fnavCart: "السلة",
+            fnavContact: "تواصل معنا",
+            submitSuccess: "شكراً لتواصلك معنا! سنرد عليك في أقرب وقت ممكن.",
+            placeholders: {
+                inputName: "اسمك الكامل",
+                inputEmail: "بريدك الإلكتروني",
+                inputPhone: "رقم الهاتف (اختياري)",
+                inputMsg: "اكتب رسالتك هنا..."
+            }
+        },
+        en: {
+            brandName: "Gal Industrial Supplies",
+            pageTitle: "Contact Us - Gal Trading & Supplies",
+            contactTitle: "We’d Love to Hear From You",
+            contactDesc: "Our team of engineers and experts is ready to assist you and answer all your questions 💬",
+            sendMsg: "📨 Send Us a Message",
+            sendBtnText: "Send Message",
+            infoTitle: "Contact Information",
+            address: "27 El-Gabrani St, Downtown, Cairo, Egypt",
+            workHours: "Mon - Sat: 8 AM - 5 PM",
+            footerBrand: "Gal Trading",
+            footerDesc: "Your trusted partner in supplying top-quality industrial products.",
+            navProducts: "Products",
+            navCart: "Cart",
+            navContact: "Contact Us",
+            navLogin: "Login",
+            mnavProducts: "Products",
+            mnavCart: "Cart",
+            mnavContact: "Contact Us",
+            mnavLogin: "Login",
+            fnavProducts: "Products",
+            fnavCart: "Cart",
+            fnavContact: "Contact Us",
+            submitSuccess: "Thank you for contacting us! We’ll get back to you soon.",
+            placeholders: {
+                inputName: "Full Name",
+                inputEmail: "Email Address",
+                inputPhone: "Phone Number (Optional)",
+                inputMsg: "Write your message here..."
+            }
+        }
+    };
+
+    function loadLang(lang) {
+        const t = langs[lang] || langs.ar;
+        for (const key in t) {
+            if (key === 'placeholders') continue;
+            const el = document.getElementById(key);
+            if (el && typeof t[key] === "string") el.innerText = t[key];
+        }
+
+        // تحديث placeholders
+        const ph = t.placeholders;
+        for (const id in ph) {
+            const input = document.getElementById(id);
+            if (input) input.placeholder = ph[id];
+        }
+
+        document.title = t.pageTitle;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+        document.getElementById("current-lang").innerText = lang.toUpperCase();
+        localStorage.setItem("lang", lang);
+    }
+
+    function changeLang(lang) {
+        loadLang(lang);
+    }
+
+    function headerManager() {
+        return {
+            cartCount: 0,
+            init() {
+                this.loadCartCount();
+                window.addEventListener('storage', () => this.loadCartCount());
+            },
+            loadCartCount() {
+                const cart = localStorage.getItem('cart');
+                const items = cart ? JSON.parse(cart) : [];
+                this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+            }
+        };
+    }
+
     function handleSubmit(event) {
         event.preventDefault();
-        alert('شكراً لتواصلك معنا! سنرد عليك في أقرب وقت ممكن.');
+        const lang = localStorage.getItem("lang") || "ar";
+        alert(langs[lang].submitSuccess);
         event.target.reset();
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem("lang") || "ar";
+        loadLang(saved);
+    });
 </script>
 
 </body>

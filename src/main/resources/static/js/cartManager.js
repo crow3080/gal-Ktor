@@ -14,11 +14,13 @@ function cartManager() {
         // إعدادات التاجر
         merchantWhatsAppRaw: '01104391245',
         merchantWhatsAppIntl: '201104391245',
-        merchantTelegramUsername: 'GalTrading', // ضع username تليجرام هنا
-        merchantTelegramChatId: '', // اختياري: إذا كان لديك Chat ID
+        merchantTelegramUsername: 'GalTrading',
+        merchantTelegramChatId: '',
 
         init() {
             this.loadCart();
+            const lang = localStorage.getItem('lang') || 'ar';
+            if (typeof applyTranslations === 'function') applyTranslations(lang);
         },
 
         loadCart() {
@@ -44,16 +46,18 @@ function cartManager() {
 
         removeItem(index) {
             const itemName = this.cartItems[index].name;
+            const lang = localStorage.getItem('lang') || 'ar';
             this.cartItems.splice(index, 1);
             this.saveCart();
-            this.showToastMessage(`تم حذف "${itemName}" من السلة`, 'success');
+            this.showToastMessage(langs[lang].toastSuccess, 'success');
         },
 
         clearCart() {
-            if (confirm('هل أنت متأكد من إفراغ السلة؟')) {
+            const lang = localStorage.getItem('lang') || 'ar';
+            if (confirm(langs[lang].confirmClearCart)) {
                 this.cartItems = [];
                 this.saveCart();
-                this.showToastMessage('تم إفراغ السلة بنجاح', 'success');
+                this.showToastMessage(langs[lang].toastSuccess, 'success');
             }
         },
 
@@ -73,8 +77,9 @@ function cartManager() {
         },
 
         async checkout() {
+            const lang = localStorage.getItem('lang') || 'ar';
             if (this.cartItems.length === 0) {
-                this.showToastMessage('السلة فارغة!', 'error');
+                this.showToastMessage(langs[lang].toastError, 'error');
                 return;
             }
 
@@ -109,6 +114,8 @@ function cartManager() {
         },
 
         buildOrderMessage() {
+            const lang = localStorage.getItem('lang') || 'ar';
+            const t = langs[lang];
             const lines = [];
             const emoji = {
                 box: '📦',
@@ -121,24 +128,24 @@ function cartManager() {
                 line: '─────────────────'
             };
 
-            lines.push(`${emoji.box} طلب جديد من جال للتجارة`);
+            lines.push(`${emoji.box} ${t.orderDetailsTitle}`);
             lines.push(emoji.line);
-            lines.push(`${emoji.cart} رقم الطلب: ${this.orderNumber}`);
+            lines.push(`${emoji.cart} ${t.orderNumberLabel} ${this.orderNumber}`);
             lines.push('');
 
             // معلومات العميل
             if (this.customerName) {
-                lines.push(`${emoji.user} العميل: ${this.customerName}`);
+                lines.push(`${emoji.user} ${t.nameLabel} ${this.customerName}`);
             }
             if (this.customerWhatsApp) {
-                lines.push(`${emoji.phone} الهاتف: ${this.customerWhatsApp}`);
+                lines.push(`${emoji.phone} ${t.whatsappLabel} ${this.customerWhatsApp}`);
             }
             if (this.customerName || this.customerWhatsApp) {
                 lines.push('');
             }
 
             // المنتجات
-            lines.push('📋 المنتجات المطلوبة:');
+            lines.push(`${t.orderDetailsTitle}:`);
             lines.push('');
 
             const orderItems = this.completedOrder.length > 0 ? this.completedOrder : this.cartItems;
@@ -146,8 +153,8 @@ function cartManager() {
             orderItems.forEach((item, idx) => {
                 const itemTotal = item.price * item.quantity;
                 lines.push(`${idx + 1}. ${item.name}`);
-                lines.push(`   الكمية: ${item.quantity} × ${item.price.toFixed(2)} جنيه`);
-                lines.push(`   الإجمالي: ${itemTotal.toFixed(2)} جنيه`);
+                lines.push(`   ${t.quantityLabel || 'الكمية'}: ${item.quantity} × ${item.price.toFixed(2)} ${t.currency}`);
+                lines.push(`   ${t.itemTotalLabel} ${itemTotal.toFixed(2)} ${t.currency}`);
                 lines.push('');
             });
 
@@ -155,29 +162,30 @@ function cartManager() {
             const total = this.getOrderSubtotal();
 
             lines.push(emoji.line);
-            lines.push(`${emoji.money} الملخص المالي:`);
-            lines.push(`   ${emoji.check} الإجمالي النهائي: ${total.toFixed(2)} جنيه`);
+            lines.push(`${emoji.money} ${t.totalLabelModal}`);
+            lines.push(`   ${emoji.check} ${t.totalLabel} ${total.toFixed(2)} ${t.currency}`);
 
             // ملاحظات
             if (this.customerNotes) {
                 lines.push('');
-                lines.push(`${emoji.note} ملاحظات العميل:`);
+                lines.push(`${emoji.note} ${t.notesLabel}:`);
                 lines.push(`   ${this.customerNotes}`);
             }
 
             lines.push('');
             lines.push(emoji.line);
-            lines.push('⏰ يرجى التواصل مع العميل لتأكيد الطلب');
+            lines.push(t.orderSuccessDesc);
 
             return lines.join('\n');
         },
 
         sendOrderViaWhatsApp() {
+            const lang = localStorage.getItem('lang') || 'ar';
             const input = this.customerWhatsApp ? this.customerWhatsApp.trim() : '';
             if (input) {
                 const normalized = this.normalizeWhatsAppNumber(input);
                 if (!/^[0-9]{8,15}$/.test(normalized)) {
-                    this.showToastMessage('رقم واتساب غير صحيح. استخدم مثال: 01101234567', 'error');
+                    this.showToastMessage(langs[lang].toastError, 'error');
                     return;
                 }
             }
@@ -187,7 +195,7 @@ function cartManager() {
             const waLink = `https://wa.me/${merchant}?text=${message}`;
 
             window.open(waLink, '_blank');
-            this.showToastMessage('تم فتح واتساب لإرسال الطلب ✅', 'success');
+            this.showToastMessage(langs[lang].toastSuccess, 'success');
 
             setTimeout(() => {
                 this.closeCheckoutModal();
@@ -195,21 +203,16 @@ function cartManager() {
         },
 
         sendOrderViaTelegram() {
+            const lang = localStorage.getItem('lang') || 'ar';
             const message = encodeURIComponent(this.buildOrderMessage());
-
-            // يمكنك استخدام أحد الطريقتين:
-            // 1. إرسال إلى username معين
             const telegramLink = `https://t.me/${this.merchantTelegramUsername}?text=${message}`;
 
-            // 2. أو إذا كان لديك bot وتريد إرسال مباشر إلى chat_id
-            // const telegramLink = `https://t.me/share/url?url=&text=${message}`;
-
             window.open(telegramLink, '_blank');
-            this.showToastMessage('تم فتح تليجرام لإرسال الطلب ✅', 'success');
+            this.showToastMessage(langs[lang].toastSuccess, 'success');
 
             setTimeout(() => {
                 this.closeCheckoutModal();
             }, 1500);
         }
-    }
+    };
 }

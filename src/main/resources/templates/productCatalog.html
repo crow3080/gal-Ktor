@@ -1,47 +1,103 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="luxury">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="pageTitle">كتالوج المنتجات - جال للتجارة</title>
     <link rel="icon" type="image/webp" href="/images/logo.webp">
     <link rel="apple-touch-icon" href="/images/logo.webp">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كتالوج المنتجات - جال للتجارة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="/css/productCatalog.css">
-
-
+    <style>
+        body { font-family: "Cairo", sans-serif; }
+        .gold-text { color: #d4af37; }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        /* تحسين توافق الـ badge في قائمة الموبايل */
+        .dropdown .cart-badge {
+            top: 0;
+            inset-inline-end: 0;
+            transform: translate(50%, -50%);
+        }
+    </style>
 </head>
 <body class="bg-base-100">
 
 <!-- الهيدر -->
-<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
     <div class="flex-1">
         <a href="/" class="flex items-center gap-3">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo">
-            <span class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
+            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
         </a>
     </div>
 
+    <!-- قائمة Desktop -->
     <nav class="hidden md:flex gap-3">
-        <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
-        <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
-        <a href="/contact" class="btn btn-ghost btn-sm"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
-        <a href="/clientLogin" class="btn btn-primary btn-sm">تسجيل الدخول</a>
+        <a href="/productCatalog" class="btn btn-ghost btn-sm">
+            <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
+        </a>
+        <a href="/cart" class="btn btn-ghost btn-sm relative">
+            <i class="fas fa-shopping-cart ml-1"></i>
+            <span id="navCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="btn btn-ghost btn-sm">
+            <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
+        </a>
     </nav>
 
+    <!-- Dropdown للموبايل -->
     <div class="dropdown dropdown-end md:hidden relative">
         <button tabindex="0" class="btn btn-ghost btn-lg">
             <i class="fas fa-bars text-2xl"></i>
         </button>
         <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
-            <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> المنتجات</a></li>
-            <li><a href="/cart" class="py-4"><i class="fas fa-shopping-cart ml-2 text-xl"></i> السلة</a></li>
-            <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> تواصل معنا</a></li>
-            <li><a href="/clientLogin" class="py-4 text-[#d4af37]"><i class="fas fa-sign-in-alt ml-2 text-xl"></i> تسجيل الدخول</a></li>
+            <li>
+                <a href="/productCatalog" class="py-4">
+                    <i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span>
+                </a>
+            </li>
+            <li>
+                <a href="/cart" class="py-4 relative">
+                    <i class="fas fa-shopping-cart ml-2 text-xl"></i>
+                    <span id="mnavCart">السلة</span>
+                    <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+                </a>
+            </li>
+            <li>
+                <a href="/contact" class="py-4">
+                    <i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- زر اللغة -->
+    <div class="dropdown dropdown-end ml-2">
+        <label tabindex="0" class="btn btn-ghost">
+            🌐 <span id="current-lang">AR</span>
+        </label>
+        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
+            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
+            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
         </ul>
     </div>
 </header>
@@ -51,8 +107,8 @@
 
     <!-- العنوان والبحث -->
     <div class="mb-8">
-        <h1 class="text-4xl font-bold mb-6 text-center" style="color: #d4af37;">
-            <i class="fas fa-box-open ml-2"></i> كتالوج المنتجات
+        <h1 id="catalogTitle" class="text-4xl font-bold mb-6 text-center" style="color: #d4af37;">
+            <i class="fas fa-box-open ml-2"></i> <span id="catalogTitleText">كتالوج المنتجات</span>
         </h1>
 
         <!-- شريط البحث والفلاتر -->
@@ -61,7 +117,7 @@
                 <!-- البحث -->
                 <div class="form-control">
                     <div class="input-group">
-                        <input type="text"
+                        <input id="searchInput" type="text"
                                x-model="searchQuery"
                                @input="filterProducts()"
                                placeholder="ابحث عن منتج..."
@@ -73,22 +129,22 @@
                 </div>
 
                 <!-- فلتر السعر -->
-                <select x-model="sortBy"
+                <select id="sortSelect" x-model="sortBy"
                         @change="sortProducts()"
                         class="select select-bordered bg-base-200 text-gray-200">
-                    <option value="">ترتيب حسب</option>
-                    <option value="price-asc">السعر: من الأقل للأعلى</option>
-                    <option value="price-desc">السعر: من الأعلى للأقل</option>
-                    <option value="name">الاسم</option>
+                    <option id="sortDefault" value="">ترتيب حسب</option>
+                    <option id="sortPriceAsc" value="price-asc">السعر: من الأقل للأعلى</option>
+                    <option id="sortPriceDesc" value="price-desc">السعر: من الأعلى للأقل</option>
+                    <option id="sortName" value="name">الاسم</option>
                 </select>
             </div>
         </div>
 
         <!-- شريط التصنيفات الأفقي -->
         <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-gray-100 flex items-center gap-2">
+            <h2 id="categoriesTitle" class="text-2xl font-bold mb-4 text-gray-100 flex items-center gap-2">
                 <i class="fas fa-layer-group gold-text"></i>
-                التصنيفات
+                <span id="categoriesTitleText">التصنيفات</span>
             </h2>
 
             <div class="relative">
@@ -108,7 +164,6 @@
                 <div x-ref="categoriesScroll"
                      class="flex gap-4 overflow-x-auto pb-4 px-2 scroll-smooth hide-scrollbar"
                      style="scrollbar-width: none; -ms-overflow-style: none;">
-
                     <!-- تصنيف "الكل" -->
                     <div @click="selectedCategory = ''; filterProducts()"
                          :class="selectedCategory === '' ? 'ring-4 ring-[#d4af37]' : ''"
@@ -117,9 +172,9 @@
                             <i class="fas fa-th-large text-4xl text-slate-900"></i>
                         </div>
                         <div class="p-3 text-center">
-                            <h3 class="font-bold text-gray-100 text-sm">الكل</h3>
+                            <h3 class="font-bold text-gray-100 text-sm" id="allLabel">الكل</h3>
                             <p class="text-xs text-gray-400 mt-1">
-                                <span x-text="products.length"></span> منتج
+                                <span x-text="products.length"></span> <span id="productLabel">منتج</span>
                             </p>
                         </div>
                     </div>
@@ -137,7 +192,7 @@
                             <div class="p-3 text-center">
                                 <h3 class="font-bold text-gray-100 text-sm line-clamp-1" x-text="cat.name"></h3>
                                 <p class="text-xs text-gray-400 mt-1">
-                                    <span x-text="getCategoryProductCount(cat._id)"></span> منتج
+                                    <span x-text="getCategoryProductCount(cat._id)"></span> <span id="productLabelCat">منتج</span>
                                 </p>
                             </div>
                         </div>
@@ -171,7 +226,7 @@
                          class="w-full product-image">
                     <div class="absolute top-2 right-2">
                         <span class="badge badge-lg" style="background: #d4af37; color: #1a1a2e; font-weight: bold;">
-                            <span x-text="product.price"></span> جنيه
+                            <span x-text="product.price"></span> <span id="currencyLabel">جنيه</span>
                         </span>
                     </div>
                 </div>
@@ -191,12 +246,12 @@
                                 class="btn btn-sm flex-1 text-slate-900 font-bold hover:scale-105 transition-transform"
                                 style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
                             <i class="fas fa-cart-plus"></i>
-                            أضف للسلة
+                            <span class="ml-2" id="addToCartBtn">أضف للسلة</span>
                         </button>
                         <button @click="showProductDetails(product)"
                                 class="btn btn-sm btn-outline"
                                 style="border-color: #d4af37; color: #d4af37;">
-                            <i class="fas fa-eye"></i>
+                            <i class="fas fa-eye"></i> <span class="ml-2" id="viewBtn">عرض</span>
                         </button>
                     </div>
                 </div>
@@ -210,8 +265,8 @@
          x-transition>
         <div class="glass-card rounded-3xl p-12 max-w-md mx-auto">
             <i class="fas fa-box-open text-6xl gold-text mb-4"></i>
-            <h3 class="text-2xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
-            <p class="text-gray-400">جرب البحث بكلمات مختلفة أو تصفح جميع التصنيفات</p>
+            <h3 id="noProductsTitle" class="text-2xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
+            <p id="noProductsDesc" class="text-gray-400">جرب البحث بكلمات مختلفة أو تصفح جميع التصنيفات</p>
         </div>
     </div>
 
@@ -228,31 +283,28 @@
                     <img :src="selectedProduct.imageUrl || 'https://via.placeholder.com/600x400'"
                          :alt="selectedProduct.name"
                          class="w-full h-64 object-cover rounded-2xl mb-6">
-
                     <h2 class="text-3xl font-bold mb-4 text-gray-100" x-text="selectedProduct.name"></h2>
                     <p class="text-gray-300 mb-4" x-text="selectedProduct.description"></p>
-
                     <div class="flex items-center gap-4 mb-6">
                         <span class="text-3xl font-bold gold-text">
-                            <span x-text="selectedProduct.price"></span> جنيه
+                            <span x-text="selectedProduct.price"></span> <span id="currencyLabelModal">جنيه</span>
                         </span>
                         <span class="badge badge-lg" style="background: rgba(212, 175, 55, 0.2); color: #d4af37;">
                             <i class="fas fa-layer-group ml-1"></i>
                             <span x-text="getCategoryName(selectedProduct.categoryId)"></span>
                         </span>
                     </div>
-
                     <div class="flex gap-3">
                         <button @click="addToCart(selectedProduct); showModal = false"
                                 class="btn flex-1 text-slate-900 font-bold"
                                 style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
                             <i class="fas fa-cart-plus ml-2"></i>
-                            أضف للسلة
+                            <span id="addToCartModalBtn">أضف للسلة</span>
                         </button>
                         <button @click="showModal = false"
                                 class="btn btn-outline"
                                 style="border-color: #d4af37; color: #d4af37;">
-                            إغلاق
+                            <span id="closeBtn">إغلاق</span>
                         </button>
                     </div>
                 </div>
@@ -272,18 +324,21 @@
 </main>
 
 <!-- الفوتر -->
-<footer class="footer footer-center p-12 glass-card text-gray-300 relative overflow-hidden mt-12">
+<footer class="footer footer-center p-12 glass-card text-gray-300 relative overflow-hidden mt-12" x-data="headerManager()">
     <div class="mb-6 text-center">
         <div class="flex items-center justify-center gap-3 mb-2">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
-            <span class="text-3xl font-bold gold-text">جال للتجارة</span>
+            <img src="/images/logo.webp" alt="شعار" class="footer-logo">
+            <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
-        <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
+        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
     </div>
     <nav class="grid grid-flow-col gap-6 text-base">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
-        <a href="/cart" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative">
+            <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
     <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
         <a href="#" class="hover:text-blue-600"><i class="fab fa-facebook"></i></a>
@@ -291,10 +346,330 @@
         <a href="#" class="hover:text-green-500"><i class="fab fa-whatsapp"></i></a>
         <a href="#" class="hover:text-blue-700"><i class="fab fa-linkedin"></i></a>
     </div>
-    <p class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p id="copyrightText" class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
 
-<script src="/js/productCatalog.js"></script>
+<script>
+    /* ==========================
+       Translations (UI only)
+       ========================== */
+    const langs = {
+        ar: {
+            brandName: "جال لتوريدات المصانع",
+            pageTitle: "كتالوج المنتجات - جال للتجارة",
+            catalogTitle: "كتالوج المنتجات",
+            searchPlaceholder: "ابحث عن منتج...",
+            sortDefault: "ترتيب حسب",
+            sortPriceAsc: "السعر: من الأقل للأعلى",
+            sortPriceDesc: "السعر: من الأعلى للأقل",
+            sortName: "الاسم",
+            categoriesTitle: "التصنيفات",
+            allLabel: "الكل",
+            productWord: "منتج",
+            addToCartBtn: "أضف للسلة",
+            viewBtn: "عرض",
+            noProductsTitle: "لا توجد منتجات",
+            noProductsDesc: "جرب البحث بكلمات مختلفة أو تصفح جميع التصنيفات",
+            currency: "جنيه",
+            addToCartToast: 'تمت إضافة "{name}" للسلة',
+            navProducts: "المنتجات",
+            navCart: "السلة",
+            navContact: "تواصل معنا",
+            navLogin: "تسجيل الدخول",
+            mnavProducts: "المنتجات",
+            mnavCart: "السلة",
+            mnavContact: "تواصل معنا",
+            mnavLogin: "تسجيل الدخول",
+            fnavProducts: "المنتجات",
+            fnavCart: "السلة",
+            fnavContact: "تواصل معنا",
+            footerBrand: "جال للتجارة",
+            footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
+            copyright: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة"
+        },
+        en: {
+            brandName: "Gal Industrial Supplies",
+            pageTitle: "Product Catalog - Gal Trading",
+            catalogTitle: "Product Catalog",
+            searchPlaceholder: "Search for a product...",
+            sortDefault: "Sort by",
+            sortPriceAsc: "Price: low to high",
+            sortPriceDesc: "Price: high to low",
+            sortName: "Name",
+            categoriesTitle: "Categories",
+            allLabel: "All",
+            productWord: "product",
+            addToCartBtn: "Add to cart",
+            viewBtn: "View",
+            noProductsTitle: "No products found",
+            noProductsDesc: "Try different keywords or browse categories",
+            currency: "EGP",
+            addToCartToast: 'Added "{name}" to cart',
+            navProducts: "Products",
+            navCart: "Cart",
+            navContact: "Contact",
+            navLogin: "Login",
+            mnavProducts: "Products",
+            mnavCart: "Cart",
+            mnavContact: "Contact",
+            mnavLogin: "Login",
+            fnavProducts: "Products",
+            fnavCart: "Cart",
+            fnavContact: "Contact",
+            footerBrand: "Gal Trading",
+            footerDesc: "Your trusted partner in supplying top-quality industrial products.",
+            copyright: "© 2025 Gal Trading & Supplies — All rights reserved"
+        }
+    };
+
+    function applyTranslations(lang) {
+        const t = langs[lang] || langs.ar;
+
+        // text mapping by element id
+        const map = {
+            brandName: t.brandName,
+            pageTitle: t.pageTitle,
+            catalogTitleText: t.catalogTitle,
+            searchInput: null, // placeholder handled separately
+            sortDefault: t.sortDefault,
+            sortPriceAsc: t.sortPriceAsc,
+            sortPriceDesc: t.sortPriceDesc,
+            sortName: t.sortName,
+            categoriesTitleText: t.categoriesTitle,
+            allLabel: t.allLabel,
+            productLabel: t.productWord,
+            productLabelCat: t.productWord,
+            addToCartBtn: t.addToCartBtn,
+            addToCartModalBtn: t.addToCartBtn,
+            viewBtn: t.viewBtn,
+            noProductsTitle: t.noProductsTitle,
+            noProductsDesc: t.noProductsDesc,
+            currencyLabel: t.currency,
+            currencyLabelModal: t.currency,
+            navProducts: t.navProducts,
+            navCart: t.navCart,
+            navContact: t.navContact,
+            navLogin: t.navLogin,
+            mnavProducts: t.navProducts,
+            mnavCart: t.navCart,
+            mnavContact: t.navContact,
+            mnavLogin: t.navLogin,
+            fnavProducts: t.navProducts,
+            fnavCart: t.navCart,
+            fnavContact: t.navContact,
+            footerBrand: t.footerBrand,
+            footerDesc: t.footerDesc,
+            copyrightText: t.copyright
+        };
+
+        for (const id in map) {
+            const el = document.getElementById(id);
+            if (!el || map[id] === null) continue;
+            el.innerText = map[id];
+        }
+
+        // placeholders
+        const searchEl = document.getElementById('searchInput');
+        if (searchEl) searchEl.placeholder = t.searchPlaceholder;
+
+        // update current-lang display
+        const curr = document.getElementById('current-lang');
+        if (curr) curr.innerText = lang.toUpperCase();
+
+        // direction & lang attributes
+        document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+        document.documentElement.lang = (lang === 'ar') ? 'ar' : 'en';
+        document.title = t.pageTitle;
+
+        // save
+        localStorage.setItem('lang', lang);
+    }
+
+    function loadSavedLang() {
+        const saved = localStorage.getItem('lang') || 'ar';
+        applyTranslations(saved);
+    }
+
+    function changeLang(lang) {
+        applyTranslations(lang);
+    }
+
+    /* apply on initial load */
+    document.addEventListener('DOMContentLoaded', loadSavedLang);
+
+    /* ==========================
+       productCatalog Alpine component
+       ========================== */
+    function productCatalog() {
+        return {
+            products: [],
+            categories: [],
+            filteredProducts: [],
+            loading: true,
+            error: '',
+            searchQuery: '',
+            selectedCategory: '',
+            sortBy: '',
+            showModal: false,
+            selectedProduct: null,
+            showToast: false,
+            toastMessage: '',
+
+            async init() {
+                // load translations immediate (in case called before DOMContentLoaded)
+                const lang = localStorage.getItem('lang') || 'ar';
+                if (typeof applyTranslations === 'function') applyTranslations(lang);
+
+                await this.loadCategories();
+                await this.loadProducts();
+            },
+
+            async loadProducts() {
+                try {
+                    this.loading = true;
+                    this.error = '';
+
+                    const response = await fetch('/api/products');
+                    if (!response.ok) throw new Error('فشل تحميل المنتجات');
+
+                    const data = await response.json();
+                    this.products = data;
+                    this.filteredProducts = data;
+                } catch (err) {
+                    this.error = (localStorage.getItem('lang') === 'en') ? 'Failed to load products' : 'حدث خطأ في تحميل المنتجات';
+                    console.error(err);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async loadCategories() {
+                try {
+                    const response = await fetch('/api/categories');
+                    if (!response.ok) throw new Error('فشل تحميل التصنيفات');
+
+                    const data = await response.json();
+                    this.categories = data;
+                } catch (err) {
+                    console.error('خطأ في تحميل التصنيفات:', err);
+                }
+            },
+
+            filterProducts() {
+                let result = [...this.products];
+
+                // فلترة حسب البحث
+                if (this.searchQuery) {
+                    const query = this.searchQuery.toLowerCase();
+                    result = result.filter(p =>
+                        (p.name && p.name.toLowerCase().includes(query)) ||
+                        (p.description && p.description.toLowerCase().includes(query))
+                    );
+                }
+
+                // فلترة حسب التصنيف
+                if (this.selectedCategory) {
+                    result = result.filter(p => p.categoryId === this.selectedCategory);
+                }
+
+                this.filteredProducts = result;
+                this.sortProducts();
+            },
+
+            sortProducts() {
+                if (!this.sortBy) return;
+
+                const sorted = [...this.filteredProducts];
+
+                switch(this.sortBy) {
+                    case 'price-asc':
+                        sorted.sort((a, b) => a.price - b.price);
+                        break;
+                    case 'price-desc':
+                        sorted.sort((a, b) => b.price - a.price);
+                        break;
+                    case 'name':
+                        const lang = localStorage.getItem('lang') || 'ar';
+                        sorted.sort((a, b) => {
+                            const an = (a.name || '').toString();
+                            const bn = (b.name || '').toString();
+                            return an.localeCompare(bn, lang);
+                        });
+                        break;
+                }
+
+                this.filteredProducts = sorted;
+            },
+
+            getCategoryName(categoryId) {
+                const category = this.categories.find(c => c._id === categoryId);
+                return category ? category.name : (localStorage.getItem('lang') === 'en' ? 'Unspecified' : 'غير محدد');
+            },
+
+            getCategoryProductCount(categoryId) {
+                return this.products.filter(p => p.categoryId === categoryId).length;
+            },
+
+            scrollCategories(direction) {
+                const container = this.$refs.categoriesScroll;
+                const scrollAmount = 300;
+
+                if (!container) return;
+                if (direction === 'left') {
+                    container.scrollLeft -= scrollAmount;
+                } else {
+                    container.scrollLeft += scrollAmount;
+                }
+            },
+
+            showProductDetails(product) {
+                this.selectedProduct = product;
+                this.showModal = true;
+            },
+
+            addToCart(product) {
+                // حفظ في localStorage
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                const existingItem = cart.find(item => item._id === product._id);
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({...product, quantity: 1});
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                // إطلاق حدث مخصص لتحديث الـ badge
+                const cartEvent = new Event('cartUpdated');
+                window.dispatchEvent(cartEvent);
+
+                // إظهار Toast باستخدام الترجمة
+                const lang = localStorage.getItem('lang') || 'ar';
+                const template = langs[lang]?.addToCartToast || 'تمت إضافة "{name}" للسلة';
+                this.toastMessage = template.replace('{name}', product.name);
+                this.showToast = true;
+                setTimeout(() => { this.showToast = false; }, 3000);
+            }
+        };
+    }
+
+    function headerManager() {
+        return {
+            cartCount: 0,
+            init() {
+                this.loadCartCount();
+                // الاستماع إلى حدث storage للتغييرات عبر علامات التبويب
+                window.addEventListener('storage', () => this.loadCartCount());
+                // الاستماع إلى الحدث المخصص لتحديثات السلة في نفس علامة التبويب
+                window.addEventListener('cartUpdated', () => this.loadCartCount());
+            },
+            loadCartCount() {
+                const cart = localStorage.getItem('cart');
+                const items = cart ? JSON.parse(cart) : [];
+                this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+            }
+        };
+    }
+</script>
 
 </body>
 </html>

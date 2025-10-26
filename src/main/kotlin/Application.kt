@@ -100,6 +100,9 @@ fun Application.module() {
         get("/cart") {
             call.respond(ThymeleafContent("cart", mapOf()))
         }
+        get("/priceReq") {
+            call.respond(ThymeleafContent("priceReq", mapOf()))
+        }
 
         get("/productCatalog") {
             call.respond(ThymeleafContent("productCatalog", mapOf()))

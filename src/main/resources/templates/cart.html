@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سلة المشتريات - جال للتجارة</title>
+    <title id="pageTitle">سلة المشتريات - جال للتجارة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,24 +12,56 @@
     <link rel="icon" type="image/webp" href="/images/logo.webp">
     <link rel="apple-touch-icon" href="/images/logo.webp">
     <link rel="stylesheet" href="/css/cart.css">
-
+    <style>
+        body { font-family: "Cairo", sans-serif; }
+        .gold-text { color: #d4af37; }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        /* تحسين توافق الـ badge في قائمة الموبايل */
+        .dropdown .cart-badge {
+            top: 0;
+            inset-inline-end: 0;
+            transform: translate(50%, -50%);
+        }
+    </style>
 </head>
 <body class="bg-base-100">
 
 <!-- الهيدر -->
-<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
     <div class="flex-1">
         <a href="/" class="flex items-center gap-3">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo">
-            <span class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
+            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
         </a>
     </div>
 
+    <!-- قائمة Desktop -->
     <nav class="hidden md:flex gap-3">
-        <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
-        <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
-        <a href="/contact" class="btn btn-ghost btn-sm"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
-        <a href="/clientLogin" class="btn btn-primary btn-sm">تسجيل الدخول</a>
+        <a href="/productCatalog" class="btn btn-ghost btn-sm">
+            <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
+        </a>
+        <a href="/cart" class="btn btn-ghost btn-sm relative">
+            <i class="fas fa-shopping-cart ml-1"></i>
+            <span id="navCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="btn btn-ghost btn-sm">
+            <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
+        </a>
     </nav>
 
     <!-- Dropdown للموبايل -->
@@ -37,13 +69,35 @@
         <button tabindex="0" class="btn btn-ghost btn-lg">
             <i class="fas fa-bars text-2xl"></i>
         </button>
-        <ul tabindex="0"
-            class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
-            <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> المنتجات</a></li>
-            <li><a href="/cart" class="py-4"><i class="fas fa-shopping-cart ml-2 text-xl"></i> السلة</a></li>
-            <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> تواصل معنا</a></li>
-            <li><a href="/clientLogin" class="py-4 text-[#d4af37]"><i class="fas fa-sign-in-alt ml-2 text-xl"></i> تسجيل
-                الدخول</a></li>
+        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
+            <li>
+                <a href="/productCatalog" class="py-4">
+                    <i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span>
+                </a>
+            </li>
+            <li>
+                <a href="/cart" class="py-4 relative">
+                    <i class="fas fa-shopping-cart ml-2 text-xl"></i>
+                    <span id="mnavCart">السلة</span>
+                    <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+                </a>
+            </li>
+            <li>
+                <a href="/contact" class="py-4">
+                    <i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- زر اللغة -->
+    <div class="dropdown dropdown-end ml-2">
+        <label tabindex="0" class="btn btn-ghost">
+            🌐 <span id="current-lang">AR</span>
+        </label>
+        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
+            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
+            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
         </ul>
     </div>
 </header>
@@ -52,19 +106,19 @@
 <main class="max-w-6xl mx-auto p-6 min-h-[70vh]" x-data="cartManager()" x-init="init()">
 
     <h1 class="text-4xl font-bold mb-8 text-center gold-text">
-        <i class="fas fa-shopping-cart ml-2"></i> سلة المشتريات
+        <i class="fas fa-shopping-cart ml-2"></i> <span id="cartTitle">سلة المشتريات</span>
     </h1>
 
     <!-- السلة الفارغة -->
     <div x-show="cartItems.length === 0" x-transition class="text-center py-16">
         <div class="glass-card rounded-3xl p-12 max-w-md mx-auto">
             <i class="fas fa-shopping-cart text-7xl gold-text mb-6"></i>
-            <h2 class="text-2xl font-bold mb-4 text-gray-100">السلة فارغة</h2>
-            <p class="text-gray-400 mb-6">لم تقم بإضافة أي منتجات بعد</p>
+            <h2 id="emptyCartTitle" class="text-2xl font-bold mb-4 text-gray-100">السلة فارغة</h2>
+            <p id="emptyCartDesc" class="text-gray-400 mb-6">لم تقم بإضافة أي منتجات بعد</p>
             <a href="/productCatalog" class="btn text-slate-900 font-bold"
                style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
                 <i class="fas fa-box-open ml-2"></i>
-                تصفح المنتجات
+                <span id="browseProducts">تصفح المنتجات</span>
             </a>
         </div>
     </div>
@@ -90,7 +144,7 @@
                             <div class="flex items-center justify-between flex-wrap gap-3">
                                 <!-- السعر -->
                                 <div class="text-2xl font-bold gold-text">
-                                    <span x-text="item.price"></span> جنيه
+                                    <span x-text="item.price"></span> <span x-text="langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                                 </div>
 
                                 <!-- الكمية -->
@@ -112,15 +166,15 @@
                                 <button @click="removeItem(index)"
                                         class="btn btn-sm btn-error">
                                     <i class="fas fa-trash"></i>
-                                    حذف
+                                    <span id="deleteBtn">حذف</span>
                                 </button>
                             </div>
 
                             <!-- الإجمالي للمنتج -->
                             <div class="mt-3 text-left">
-                                <span class="text-gray-400">الإجمالي: </span>
+                                <span id="itemTotalLabel" class="text-gray-400">الإجمالي: </span>
                                 <span class="text-xl font-bold gold-text">
-                                    <span x-text="(item.price * item.quantity).toFixed(2)"></span> جنيه
+                                    <span x-text="(item.price * item.quantity).toFixed(2)"></span> <span x-text="langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                                 </span>
                             </div>
                         </div>
@@ -134,25 +188,25 @@
             <div class="glass-card rounded-2xl p-6 sticky top-24">
                 <h2 class="text-2xl font-bold mb-6 text-gray-100">
                     <i class="fas fa-receipt ml-2 gold-text"></i>
-                    ملخص الطلب
+                    <span id="orderSummaryTitle">ملخص الطلب</span>
                 </h2>
 
                 <div class="space-y-4 mb-6">
                     <div class="flex justify-between text-gray-300">
-                        <span>عدد المنتجات:</span>
+                        <span id="totalItemsLabel">عدد المنتجات:</span>
                         <span class="font-bold" x-text="getTotalItems()"></span>
                     </div>
 
                     <div class="flex justify-between text-gray-300">
-                        <span>الإجمالي:</span>
-                        <span class="font-bold" x-text="getSubtotal().toFixed(2) + ' جنيه'"></span>
+                        <span id="subtotalLabel">الإجمالي:</span>
+                        <span class="font-bold" x-text="getSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="flex justify-between text-xl">
-                        <span class="font-bold text-gray-100">الإجمالي:</span>
-                        <span class="font-bold text-2xl gold-text" x-text="getSubtotal().toFixed(2) + ' جنيه'"></span>
+                        <span id="totalLabel" class="font-bold text-gray-100">الإجمالي:</span>
+                        <span class="font-bold text-2xl gold-text" x-text="getSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                     </div>
                 </div>
 
@@ -160,14 +214,14 @@
                         class="btn w-full text-slate-900 font-bold text-lg mb-3"
                         style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
                     <i class="fas fa-check-circle ml-2"></i>
-                    إتمام الطلب
+                    <span id="checkoutBtn">إتمام الطلب</span>
                 </button>
 
                 <button @click="clearCart()"
                         class="btn btn-outline w-full"
                         style="border-color: #dc2626; color: #dc2626;">
                     <i class="fas fa-trash ml-2"></i>
-                    إفراغ السلة
+                    <span id="clearCartBtn">إفراغ السلة</span>
                 </button>
             </div>
         </div>
@@ -193,24 +247,23 @@
         <div @click.stop
              x-transition
              class="glass-card rounded-3xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
-
             <!-- Header -->
             <div class="text-center mb-6">
                 <i class="fas fa-check-circle text-6xl gold-text mb-4"></i>
-                <h2 class="text-3xl font-bold text-gray-100 mb-2">تم استلام طلبك بنجاح! 🎉</h2>
-                <p class="text-gray-400">اختر طريقة إرسال الطلب المفضلة لديك</p>
+                <h2 id="orderSuccessTitle" class="text-3xl font-bold text-gray-100 mb-2">تم استلام طلبك بنجاح! 🎉</h2>
+                <p id="orderSuccessDesc" class="text-gray-400">اختر طريقة إرسال الطلب المفضلة لديك</p>
             </div>
 
             <!-- تفاصيل الطلب -->
             <div class="glass-card p-5 rounded-2xl mb-6 border border-[#d4af37]/30">
                 <h3 class="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
                     <i class="fas fa-clipboard-list gold-text"></i>
-                    تفاصيل الطلب
+                    <span id="orderDetailsTitle">تفاصيل الطلب</span>
                 </h3>
 
                 <div class="space-y-3 mb-4">
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-400">رقم الطلب:</span>
+                        <span id="orderNumberLabel" class="text-gray-400">رقم الطلب:</span>
                         <span class="font-bold gold-text text-lg" x-text="orderNumber"></span>
                     </div>
 
@@ -223,22 +276,22 @@
                                 <span class="text-gray-200 font-semibold" x-text="item.name"></span>
                                 <span class="text-gray-400 mr-2">×<span x-text="item.quantity"></span></span>
                             </div>
-                            <span class="text-gray-200 font-bold" x-text="(item.price * item.quantity).toFixed(2) + ' ج'"></span>
+                            <span class="text-gray-200 font-bold" x-text="(item.price * item.quantity).toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                         </div>
                     </template>
 
                     <div class="divider my-2"></div>
 
                     <div class="flex justify-between text-gray-400">
-                        <span>الإجمالي:</span>
-                        <span x-text="getOrderSubtotal().toFixed(2) + ' جنيه'"></span>
+                        <span id="subtotalLabelModal">الإجمالي:</span>
+                        <span x-text="getOrderSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                     </div>
 
                     <div class="divider my-2"></div>
 
                     <div class="flex justify-between items-center">
-                        <span class="text-xl font-bold text-gray-100">الإجمالي:</span>
-                        <span class="text-2xl font-bold gold-text" x-text="getOrderSubtotal().toFixed(2) + ' جنيه'"></span>
+                        <span id="totalLabelModal" class="text-xl font-bold text-gray-100">الإجمالي:</span>
+                        <span class="text-2xl font-bold gold-text" x-text="getOrderSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                     </div>
                 </div>
             </div>
@@ -247,17 +300,18 @@
             <div class="glass-card p-5 rounded-2xl mb-6 border border-[#d4af37]/30">
                 <h3 class="text-lg font-bold text-gray-100 mb-3 flex items-center gap-2">
                     <i class="fas fa-user gold-text"></i>
-                    معلومات الاتصال (اختياري)
+                    <span id="contactInfoTitle">معلومات الاتصال (اختياري)</span>
                 </h3>
 
                 <div class="space-y-3">
                     <div>
                         <label class="block text-gray-300 mb-2 text-sm font-semibold">
                             <i class="fas fa-mobile-alt ml-1"></i>
-                            رقم الهاتف / واتساب
+                            <span id="whatsappLabel">رقم الهاتف / واتساب</span>
                         </label>
                         <input x-model="customerWhatsApp"
                                type="tel"
+                               id="whatsappInput"
                                placeholder="مثال: 01101234567 أو +201101234567"
                                class="input input-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"/>
                     </div>
@@ -265,10 +319,11 @@
                     <div>
                         <label class="block text-gray-300 mb-2 text-sm font-semibold">
                             <i class="fas fa-user ml-1"></i>
-                            الاسم (اختياري)
+                            <span id="nameLabel">الاسم (اختياري)</span>
                         </label>
                         <input x-model="customerName"
                                type="text"
+                               id="nameInput"
                                placeholder="أدخل اسمك"
                                class="input input-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"/>
                     </div>
@@ -276,10 +331,11 @@
                     <div>
                         <label class="block text-gray-300 mb-2 text-sm font-semibold">
                             <i class="fas fa-comment-alt ml-1"></i>
-                            ملاحظات إضافية (اختياري)
+                            <span id="notesLabel">ملاحظات إضافية (اختياري)</span>
                         </label>
                         <textarea x-model="customerNotes"
                                   rows="2"
+                                  id="notesInput"
                                   placeholder="أي ملاحظات خاصة بالطلب..."
                                   class="textarea textarea-bordered w-full bg-transparent text-gray-100 border-[#d4af37]/30 focus:border-[#d4af37]"></textarea>
                     </div>
@@ -290,14 +346,14 @@
             <div class="space-y-3 mb-4">
                 <h3 class="text-lg font-bold text-gray-100 mb-3 flex items-center gap-2">
                     <i class="fas fa-paper-plane gold-text"></i>
-                    إرسال الطلب عبر:
+                    <span id="sendOrderTitle">إرسال الطلب عبر:</span>
                 </h3>
 
                 <!-- زر واتساب -->
                 <button @click="sendOrderViaWhatsApp()"
                         class="btn btn-whatsapp w-full text-white font-bold text-lg">
                     <i class="fab fa-whatsapp ml-2 text-2xl"></i>
-                    إرسال عبر واتساب
+                    <span id="sendViaWhatsApp">إرسال عبر واتساب</span>
                     <span class="text-xs opacity-80 mr-2">(01104391245)</span>
                 </button>
 
@@ -305,7 +361,7 @@
                 <button @click="sendOrderViaTelegram()"
                         class="btn btn-telegram w-full text-white font-bold text-lg">
                     <i class="fab fa-telegram ml-2 text-2xl"></i>
-                    إرسال عبر تليجرام
+                    <span id="sendViaTelegram">إرسال عبر تليجرام</span>
                     <span class="text-xs opacity-80 mr-2">(@GalTrading)</span>
                 </button>
             </div>
@@ -316,14 +372,14 @@
                    class="btn flex-1 font-semibold"
                    style="background: #d4af37; color: #1a1a2e; border: none;">
                     <i class="fas fa-shopping-bag ml-2"></i>
-                    متابعة التسوق
+                    <span id="continueShopping">متابعة التسوق</span>
                 </a>
 
                 <button @click="closeCheckoutModal"
                         class="btn btn-outline flex-1 font-semibold"
                         style="border-color: #d4af37; color: #d4af37;">
                     <i class="fas fa-times ml-2"></i>
-                    إغلاق
+                    <span id="closeBtn">إغلاق</span>
                 </button>
             </div>
         </div>
@@ -331,20 +387,21 @@
 </main>
 
 <!-- الفوتر -->
-<footer class="footer footer-center p-12 glass-card text-gray-300 relative overflow-hidden mt-12">
+<footer class="footer footer-center p-12 glass-card text-gray-300 relative overflow-hidden mt-12" x-data="headerManager()">
     <div class="mb-6 text-center">
         <div class="flex items-center justify-center gap-3 mb-2">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo" style="width: 70px; height: 70px; object-fit: contain;">
-            <span class="text-3xl font-bold gold-text">جال للتجارة</span>
+            <img src="/images/logo.webp" alt="شعار" class="footer-logo" style="width: 70px; height: 70px; object-fit: contain;">
+            <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
-        <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير
-            الجودة</p>
+        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
     </div>
     <nav class="grid grid-flow-col gap-6 text-base">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i>
-            المنتجات</a>
-        <a href="/cart" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative">
+            <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
     <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
         <a href="#" class="hover:text-blue-600 transition-colors"><i class="fab fa-facebook"></i></a>
@@ -352,10 +409,368 @@
         <a href="#" class="hover:text-green-500 transition-colors"><i class="fab fa-whatsapp"></i></a>
         <a href="#" class="hover:text-blue-700 transition-colors"><i class="fab fa-linkedin"></i></a>
     </div>
-    <p class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p id="copyrightText" class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
 
-<script src="/js/cartManager.js"></script>
+<script>
+    /* ==========================
+       Translations (UI only)
+       ========================== */
+    const langs = {
+        ar: {
+            brandName: "جال لتوريدات المصانع",
+            pageTitle: "سلة المشتريات - جال للتجارة",
+            cartTitle: "سلة المشتريات",
+            emptyCartTitle: "السلة فارغة",
+            emptyCartDesc: "لم تقم بإضافة أي منتجات بعد",
+            browseProducts: "تصفح المنتجات",
+            currency: "جنيه",
+            deleteBtn: "حذف",
+            itemTotalLabel: "الإجمالي:",
+            orderSummaryTitle: "ملخص الطلب",
+            totalItemsLabel: "عدد المنتجات:",
+            subtotalLabel: "الإجمالي:",
+            totalLabel: "الإجمالي:",
+            checkoutBtn: "إتمام الطلب",
+            clearCartBtn: "إفراغ السلة",
+            orderSuccessTitle: "تم استلام طلبك بنجاح! 🎉",
+            orderSuccessDesc: "اختر طريقة إرسال الطلب المفضلة لديك",
+            orderDetailsTitle: "تفاصيل الطلب",
+            orderNumberLabel: "رقم الطلب:",
+            subtotalLabelModal: "الإجمالي:",
+            totalLabelModal: "الإجمالي:",
+            contactInfoTitle: "معلومات الاتصال (اختياري)",
+            whatsappLabel: "رقم الهاتف / واتساب",
+            whatsappPlaceholder: "مثال: 01101234567 أو +201101234567",
+            nameLabel: "الاسم (اختياري)",
+            namePlaceholder: "أدخل اسمك",
+            notesLabel: "ملاحظات إضافية (اختياري)",
+            notesPlaceholder: "أي ملاحظات خاصة بالطلب...",
+            sendOrderTitle: "إرسال الطلب عبر:",
+            sendViaWhatsApp: "إرسال عبر واتساب",
+            sendViaTelegram: "إرسال عبر تليجرام",
+            continueShopping: "متابعة التسوق",
+            closeBtn: "إغلاق",
+            navProducts: "المنتجات",
+            navCart: "السلة",
+            navContact: "تواصل معنا",
+            navLogin: "تسجيل الدخول",
+            mnavProducts: "المنتجات",
+            mnavCart: "السلة",
+            mnavContact: "تواصل معنا",
+            mnavLogin: "تسجيل الدخول",
+            fnavProducts: "المنتجات",
+            fnavCart: "السلة",
+            fnavContact: "تواصل معنا",
+            footerBrand: "جال للتجارة",
+            footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
+            copyright: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة",
+            toastSuccess: "تمت العملية بنجاح",
+            toastError: "حدث خطأ أثناء العملية",
+            confirmClearCart: "هل أنت متأكد من إفراغ السلة؟"
+        },
+        en: {
+            brandName: "Gal Industrial Supplies",
+            pageTitle: "Shopping Cart - Gal Trading",
+            cartTitle: "Shopping Cart",
+            emptyCartTitle: "Your cart is empty",
+            emptyCartDesc: "You haven't added any products yet",
+            browseProducts: "Browse Products",
+            currency: "EGP",
+            deleteBtn: "Remove",
+            itemTotalLabel: "Total:",
+            orderSummaryTitle: "Order Summary",
+            totalItemsLabel: "Total Items:",
+            subtotalLabel: "Subtotal:",
+            totalLabel: "Total:",
+            checkoutBtn: "Proceed to Checkout",
+            clearCartBtn: "Clear Cart",
+            orderSuccessTitle: "Your order has been received successfully! 🎉",
+            orderSuccessDesc: "Choose your preferred method to send the order",
+            orderDetailsTitle: "Order Details",
+            orderNumberLabel: "Order Number:",
+            subtotalLabelModal: "Subtotal:",
+            totalLabelModal: "Total:",
+            contactInfoTitle: "Contact Information (Optional)",
+            whatsappLabel: "Phone / WhatsApp",
+            whatsappPlaceholder: "Example: 01101234567 or +201101234567",
+            nameLabel: "Name (Optional)",
+            namePlaceholder: "Enter your name",
+            notesLabel: "Additional Notes (Optional)",
+            notesPlaceholder: "Any special notes for the order...",
+            sendOrderTitle: "Send Order via:",
+            sendViaWhatsApp: "Send via WhatsApp",
+            sendViaTelegram: "Send via Telegram",
+            continueShopping: "Continue Shopping",
+            closeBtn: "Close",
+            navProducts: "Products",
+            navCart: "Cart",
+            navContact: "Contact",
+            navLogin: "Login",
+            mnavProducts: "Products",
+            mnavCart: "Cart",
+            mnavContact: "Contact",
+            mnavLogin: "Login",
+            fnavProducts: "Products",
+            fnavCart: "Cart",
+            fnavContact: "Contact",
+            footerBrand: "Gal Trading",
+            footerDesc: "Your trusted partner in supplying top-quality industrial products.",
+            copyright: "© 2025 Gal Trading & Supplies — All rights reserved",
+            toastSuccess: "Operation completed successfully",
+            toastError: "An error occurred during the operation",
+            confirmClearCart: "Are you sure you want to clear the cart?"
+        }
+    };
+
+    function applyTranslations(lang) {
+        const t = langs[lang] || langs.ar;
+
+        const map = {
+            brandName: t.brandName,
+            pageTitle: t.pageTitle,
+            cartTitle: t.cartTitle,
+            emptyCartTitle: t.emptyCartTitle,
+            emptyCartDesc: t.emptyCartDesc,
+            browseProducts: t.browseProducts,
+            currencyLabel: t.currency,
+            currencyLabelItem: t.currency,
+            deleteBtn: t.deleteBtn,
+            itemTotalLabel: t.itemTotalLabel,
+            orderSummaryTitle: t.orderSummaryTitle,
+            totalItemsLabel: t.totalItemsLabel,
+            subtotalLabel: t.subtotalLabel,
+            totalLabel: t.totalLabel,
+            checkoutBtn: t.checkoutBtn,
+            clearCartBtn: t.clearCartBtn,
+            orderSuccessTitle: t.orderSuccessTitle,
+            orderSuccessDesc: t.orderSuccessDesc,
+            orderDetailsTitle: t.orderDetailsTitle,
+            orderNumberLabel: t.orderNumberLabel,
+            subtotalLabelModal: t.subtotalLabelModal,
+            totalLabelModal: t.totalLabelModal,
+            contactInfoTitle: t.contactInfoTitle,
+            whatsappLabel: t.whatsappLabel,
+            nameLabel: t.nameLabel,
+            notesLabel: t.notesLabel,
+            sendOrderTitle: t.sendOrderTitle,
+            sendViaWhatsApp: t.sendViaWhatsApp,
+            sendViaTelegram: t.sendViaTelegram,
+            continueShopping: t.continueShopping,
+            closeBtn: t.closeBtn,
+            navProducts: t.navProducts,
+            navCart: t.navCart,
+            navContact: t.navContact,
+            navLogin: t.navLogin,
+            mnavProducts: t.mnavProducts,
+            mnavCart: t.mnavCart,
+            mnavContact: t.mnavContact,
+            mnavLogin: t.mnavLogin,
+            fnavProducts: t.fnavProducts,
+            fnavCart: t.fnavCart,
+            fnavContact: t.fnavContact,
+            footerBrand: t.footerBrand,
+            footerDesc: t.footerDesc,
+            copyrightText: t.copyright
+        };
+
+        for (const id in map) {
+            const el = document.getElementById(id);
+            if (!el || map[id] === null) continue;
+            el.innerText = map[id];
+        }
+
+        const inputs = {
+            whatsappInput: t.whatsappPlaceholder,
+            nameInput: t.namePlaceholder,
+            notesInput: t.notesPlaceholder
+        };
+
+        for (const id in inputs) {
+            const el = document.getElementById(id);
+            if (el) el.placeholder = inputs[id];
+        }
+
+        const curr = document.getElementById('current-lang');
+        if (curr) curr.innerText = lang.toUpperCase();
+
+        document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+        document.documentElement.lang = (lang === 'ar') ? 'ar' : 'en';
+        document.title = t.pageTitle;
+
+        localStorage.setItem('lang', lang);
+    }
+
+    function loadSavedLang() {
+        const saved = localStorage.getItem('lang') || 'ar';
+        applyTranslations(saved);
+    }
+
+    function changeLang(lang) {
+        applyTranslations(lang);
+    }
+
+    function headerManager() {
+        return {
+            cartCount: 0,
+            init() {
+                this.loadCartCount();
+                window.addEventListener('storage', () => this.loadCartCount());
+                // الاستماع إلى الحدث المخصص لتحديثات السلة في نفس علامة التبويب
+                window.addEventListener('cartUpdated', () => this.loadCartCount());
+            },
+            loadCartCount() {
+                const cart = localStorage.getItem('cart');
+                const items = cart ? JSON.parse(cart) : [];
+                this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+            }
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSavedLang);
+</script>
+
+<script>
+    /* مكون cartManager (افتراضي بناءً على الوظائف المستخدمة) */
+    function cartManager() {
+        return {
+            cartItems: [],
+            showToast: false,
+            toastMessage: '',
+            toastType: 'success',
+            showCheckoutModal: false,
+            completedOrder: [],
+            orderNumber: '',
+            customerWhatsApp: '',
+            customerName: '',
+            customerNotes: '',
+
+            init() {
+                this.loadCart();
+            },
+
+            loadCart() {
+                const cart = localStorage.getItem('cart');
+                this.cartItems = cart ? JSON.parse(cart) : [];
+            },
+
+            increaseQuantity(index) {
+                this.cartItems[index].quantity += 1;
+                this.saveCart();
+                this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
+            },
+
+            decreaseQuantity(index) {
+                if (this.cartItems[index].quantity > 1) {
+                    this.cartItems[index].quantity -= 1;
+                    this.saveCart();
+                    this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
+                } else {
+                    this.removeItem(index);
+                }
+            },
+
+            removeItem(index) {
+                this.cartItems.splice(index, 1);
+                this.saveCart();
+                this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
+            },
+
+            clearCart() {
+                const lang = localStorage.getItem('lang') || 'ar';
+                if (confirm(this.getTranslation('confirmClearCart'))) {
+                    this.cartItems = [];
+                    this.saveCart();
+                    this.showToastMessage(this.getTranslation('toastSuccess'), 'success');
+                }
+            },
+
+            saveCart() {
+                localStorage.setItem('cart', JSON.stringify(this.cartItems));
+                // إطلاق حدث مخصص لتحديث الـ badge
+                const cartEvent = new Event('cartUpdated');
+                window.dispatchEvent(cartEvent);
+            },
+
+            getTotalItems() {
+                return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            },
+
+            getSubtotal() {
+                return this.cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            },
+
+            getOrderSubtotal() {
+                return this.completedOrder.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            },
+
+            checkout() {
+                if (this.cartItems.length === 0) {
+                    this.showToastMessage(this.getTranslation('toastError'), 'error');
+                    return;
+                }
+                this.completedOrder = [...this.cartItems];
+                this.orderNumber = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                this.showCheckoutModal = true;
+            },
+
+            closeCheckoutModal() {
+                this.showCheckoutModal = false;
+                this.customerWhatsApp = '';
+                this.customerName = '';
+                this.customerNotes = '';
+                this.cartItems = [];
+                this.completedOrder = [];
+                this.orderNumber = '';
+                this.saveCart();
+            },
+
+            sendOrderViaWhatsApp() {
+                const lang = localStorage.getItem('lang') || 'ar';
+                let message = `${this.getTranslation('orderDetailsTitle')} (${this.orderNumber})\n\n`;
+                this.completedOrder.forEach(item => {
+                    message += `${item.name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
+                });
+                message += `\n${this.getTranslation('totalLabelModal')}: ${this.getOrderSubtotal().toFixed(2)} ${this.getTranslation('currency')}\n`;
+                if (this.customerName) message += `${this.getTranslation('nameLabel')}: ${this.customerName}\n`;
+                if (this.customerWhatsApp) message += `${this.getTranslation('whatsappLabel')}: ${this.customerWhatsApp}\n`;
+                if (this.customerNotes) message += `${this.getTranslation('notesLabel')}: ${this.customerNotes}\n`;
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappUrl = `https://wa.me/201104391245?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+                this.closeCheckoutModal();
+            },
+
+            sendOrderViaTelegram() {
+                const lang = localStorage.getItem('lang') || 'ar';
+                let message = `${this.getTranslation('orderDetailsTitle')} (${this.orderNumber})\n\n`;
+                this.completedOrder.forEach(item => {
+                    message += `${item.name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
+                });
+                message += `\n${this.getTranslation('totalLabelModal')}: ${this.getOrderSubtotal().toFixed(2)} ${this.getTranslation('currency')}\n`;
+                if (this.customerName) message += `${this.getTranslation('nameLabel')}: ${this.customerName}\n`;
+                if (this.customerWhatsApp) message += `${this.getTranslation('whatsappLabel')}: ${this.customerWhatsApp}\n`;
+                if (this.customerNotes) message += `${this.getTranslation('notesLabel')}: ${this.customerNotes}\n`;
+                const encodedMessage = encodeURIComponent(message);
+                const telegramUrl = `https://t.me/GalTrading?text=${encodedMessage}`;
+                window.open(telegramUrl, '_blank');
+                this.closeCheckoutModal();
+            },
+
+            showToastMessage(message, type) {
+                this.toastMessage = message;
+                this.toastType = type;
+                this.showToast = true;
+                setTimeout(() => { this.showToast = false; }, 3000);
+            },
+
+            getTranslation(key) {
+                const lang = localStorage.getItem('lang') || 'ar';
+                return langs[lang][key] || langs.ar[key] || '';
+            }
+        };
+    }
+</script>
 
 </body>
 </html>

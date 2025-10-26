@@ -1,36 +1,106 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="luxury">
 <head>
-    <link rel="icon" type="image/webp" href="/images/logo.webp">
-    <link rel="apple-touch-icon" href="/images/logo.webp">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جال للتجارة و توريدات المصانع</title>
+    <title id="pageTitle">جال للتجارة و توريدات المصانع</title>
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/app.css">
-
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style rel="./app.css">
+        body { font-family: "Cairo", sans-serif; }
+        .gold-text { color: #d4af37; }
+        .hero-logo { width: 150px; height: auto; }
+        .footer-logo { width: 100px; height: auto; }
+        .glass-effect { background: rgba(255,255,255,0.05); backdrop-filter: blur(6px); }
+        .pulse-button { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(212,175,55, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(212,175,55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212,175,55, 0); }
+        }
+        /* تأثير الفلتر والتدرج على صورة الـ hero */
+        .hero-overlay {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .hero {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            filter: blur(3px);
+            background: inherit;
+            z-index: 0;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        /* تحسين توافق الـ badge في قائمة الموبايل */
+        .dropdown .cart-badge {
+            top: 0;
+            inset-inline-end: 0;
+            transform: translate(50%, -50%);
+        }
+    </style>
 </head>
 
 <body class="bg-base-100">
 
 <!-- Navbar -->
-<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
     <div class="flex-1">
         <a href="/" class="flex items-center gap-3">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo">
-            <span class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
+            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
         </a>
     </div>
 
     <!-- قائمة Desktop -->
     <nav class="hidden md:flex gap-3">
-        <a href="/productCatalog" class="btn btn-ghost btn-sm"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
-        <a href="/cart" class="btn btn-ghost btn-sm"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
-        <a href="/contact" class="btn btn-ghost btn-sm"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
-        <a href="/clientLogin" class="btn btn-primary btn-sm">تسجيل الدخول</a>
+        <a href="/productCatalog" class="btn btn-ghost btn-sm">
+            <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
+        </a>
+        <a href="/cart" class="btn btn-ghost btn-sm relative">
+            <i class="fas fa-shopping-cart ml-1"></i>
+            <span id="navCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="btn btn-ghost btn-sm">
+            <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
+        </a>
     </nav>
 
     <!-- Dropdown للموبايل -->
@@ -39,10 +109,34 @@
             <i class="fas fa-bars text-2xl"></i>
         </button>
         <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
-            <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> المنتجات</a></li>
-            <li><a href="/cart" class="py-4"><i class="fas fa-shopping-cart ml-2 text-xl"></i> السلة</a></li>
-            <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> تواصل معنا</a></li>
-            <li><a href="/clientLogin" class="py-4 text-[#d4af37]"><i class="fas fa-sign-in-alt ml-2 text-xl"></i> تسجيل الدخول</a></li>
+            <li>
+                <a href="/productCatalog" class="py-4">
+                    <i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span>
+                </a>
+            </li>
+            <li>
+                <a href="/cart" class="py-4 relative">
+                    <i class="fas fa-shopping-cart ml-2 text-xl"></i>
+                    <span id="mnavCart">السلة</span>
+                    <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+                </a>
+            </li>
+            <li>
+                <a href="/contact" class="py-4">
+                    <i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- زر اللغة -->
+    <div class="dropdown dropdown-end ml-2">
+        <label tabindex="0" class="btn btn-ghost">
+            🌐 <span id="current-lang">AR</span>
+        </label>
+        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
+            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
+            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
         </ul>
     </div>
 </header>
@@ -51,35 +145,25 @@
 <main class="min-h-screen">
     <section class="hero min-h-screen" style="background-image: url('/images/background.jpg');">
         <div class="hero-overlay"></div>
-        <div class="hero-content text-center text-neutral-content relative z-10">
+        <div class="hero-content text-center text-neutral-content">
             <div class="max-w-3xl fade-up">
                 <div class="mb-8 flex justify-center">
                     <img src="/images/logo.webp" alt="شعار جال للتجارة" class="hero-logo">
                 </div>
-                <h1 class="text-2xl md:text-4xl font-bold leading-tight text-gray-100 mb-8">
-                    مرحبًا بكم في
-                </h1>
-                <h2 class="text-4xl md:text-6xl font-extrabold mb-6 leading-relaxed gold-text">
-                    جال للتجارة و توريدات المصانع
-                </h2>
+                <h1 id="welcome" class="text-2xl md:text-4xl font-bold leading-tight text-gray-100 mb-8"></h1>
+                <h2 id="subtitle" class="text-4xl md:text-6xl font-extrabold mb-6 leading-relaxed gold-text"></h2>
                 <div class="flex justify-center items-center gap-3 mb-8">
                     <div class="h-0.5 w-20 md:w-32 bg-gradient-to-r from-transparent via-[#d4af37] to-[#d4af37]"></div>
                     <i class="fas fa-star text-[#d4af37] text-xl"></i>
                     <div class="h-0.5 w-20 md:w-32 bg-gradient-to-l from-transparent via-[#d4af37] to-[#d4af37]"></div>
                 </div>
-                <p class="mb-10 text-base md:text-xl text-gray-200 leading-relaxed max-w-2xl mx-auto">
-                    <span class="text-[#d4af37] font-bold">شريكك الموثوق</span> في توفير أفضل المنتجات الصناعية وقطع الغيار بأعلى جودة وأفضل الأسعار
-                    <br>
-                    <span class="inline-block mt-3 text-gray-300">
-                        خبرة تمتد لأكثر من <strong class="text-[#ffd700] text-2xl">77 عامًا</strong> في خدمة المصانع المصرية
-                    </span>
-                </p>
+                <p id="description" class="mb-10 text-base md:text-xl text-gray-200 leading-relaxed max-w-2xl mx-auto"></p>
                 <div class="flex gap-4 justify-center flex-wrap">
                     <a href="/productCatalog" class="btn btn-lg pulse-button text-slate-900 font-bold" style="background: linear-gradient(135deg,#d4af37 0%,#ffd700 100%); border:none;">
-                        <i class="fas fa-box-open ml-2"></i> تصفح المنتجات
+                        <i class="fas fa-box-open ml-2"></i> <span id="browseProducts"></span>
                     </a>
-                    <a href="/contact" class="btn btn-lg glass-effect text-gray-200 hover:text-[#d4af37] border-[#d4af37] hover:border-[#ffd700] transition-all">
-                        <i class="fas fa-phone-volume ml-2"></i> اطلب عرض سعر
+                    <a href="/priceReq" class="btn btn-lg glass-effect text-gray-200 hover:text-[#d4af37] border-[#d4af37] hover:border-[#ffd700] transition-all">
+                        <i class="fas fa-phone-volume ml-2"></i> <span id="contactUs"></span>
                     </a>
                 </div>
             </div>
@@ -90,30 +174,30 @@
     <section class="py-20 relative" style="background: linear-gradient(135deg,#0f3460 0%,#16213e 100%);">
         <div class="max-w-6xl mx-auto px-6 relative z-10">
             <div class="text-center mb-12 fade-up">
-                <h2 class="text-4xl md:text-5xl font-bold gold-text mb-4">لماذا نحن الأفضل؟</h2>
-                <p class="text-gray-300 text-lg">التزام بالجودة والاحترافية في كل خطوة</p>
+                <h2 id="bestWhy" class="text-4xl md:text-5xl font-bold gold-text mb-4"></h2>
+                <p id="whyDesc" class="text-gray-300 text-lg"></p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="feature-card p-8 rounded-xl shadow-2xl text-center industrial-accent">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,215,0,0.1));">
                         <i class="fas fa-certificate text-5xl" style="color: #d4af37;"></i>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 text-gray-100">جودة معتمدة</h3>
-                    <p class="text-gray-300 leading-relaxed">منتجات مصنّعة بأحدث المعايير العالمية ISO لضمان أفضل أداء وعمر افتراضي طويل.</p>
+                    <h3 id="quality" class="text-2xl font-bold mb-3 text-gray-100"></h3>
+                    <p id="qualityDesc" class="text-gray-300 leading-relaxed"></p>
                 </div>
                 <div class="feature-card p-8 rounded-xl shadow-2xl text-center industrial-accent">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,215,0,0.1));">
                         <i class="fas fa-shipping-fast text-5xl" style="color: #d4af37;"></i>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 text-gray-100">توصيل احترافي</h3>
-                    <p class="text-gray-300 leading-relaxed">خدمة لوجستية متكاملة وشحن سريع وآمن لجميع المحافظات مع ضمان سلامة المنتج.</p>
+                    <h3 id="delivery" class="text-2xl font-bold mb-3 text-gray-100"></h3>
+                    <p id="deliveryDesc" class="text-gray-300 leading-relaxed"></p>
                 </div>
                 <div class="feature-card p-8 rounded-xl shadow-2xl text-center industrial-accent">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,215,0,0.1));">
                         <i class="fas fa-headset text-5xl" style="color: #d4af37;"></i>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 text-gray-100">دعم فني متخصص</h3>
-                    <p class="text-gray-300 leading-relaxed">فريق من المهندسين والفنيين المتخصصين لخدمتكم والرد على استفساراتكم على مدار الساعة.</p>
+                    <h3 id="support" class="text-2xl font-bold mb-3 text-gray-100"></h3>
+                    <p id="supportDesc" class="text-gray-300 leading-relaxed"></p>
                 </div>
             </div>
         </div>
@@ -125,23 +209,164 @@
     <div class="mb-6 text-center">
         <div class="flex items-center justify-center gap-3 mb-2">
             <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
-            <span class="text-3xl font-bold gold-text">جال للتجارة</span>
+            <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
-        <p class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
+        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto"></p>
     </div>
     <nav class="grid grid-flow-col gap-6 text-base">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> المنتجات</a>
-        <a href="/cart" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-shopping-cart ml-1"></i> السلة</a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> تواصل معنا</a>
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative">
+            <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
+            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+        </a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
     <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
-        <a href="#" class="hover:text-blue-600"><i class="fab fa-facebook"></i></a>
-        <a href="#" class="hover:text-pink-500"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="hover:text-green-500"><i class="fab fa-whatsapp"></i></a>
-        <a href="#" class="hover:text-blue-700"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="hover:text-blue-600 transition-colors"><i class="fab fa-facebook"></i></a>
+        <a href="#" class="hover:text-pink-500 transition-colors"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="hover:text-green-500 transition-colors"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="hover:text-blue-700 transition-colors"><i class="fab fa-linkedin"></i></a>
     </div>
-    <p class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p id="copyrightText" class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
+
+<!-- 🧠 اللغة -->
+<script>
+    const langs = {
+        ar: {
+            brandName: "جال لتوريدات المصانع",
+            pageTitle: "جال للتجارة و توريدات المصانع",
+            welcome: "مرحبًا بكم في",
+            subtitle: "جال للتجارة و توريدات المصانع",
+            description: "شريكك الموثوق في توفير أفضل المنتجات الصناعية وقطع الغيار بأعلى جودة وأفضل الأسعار. خبرة تمتد لأكثر من 77 عامًا في خدمة المصانع المصرية.",
+            browseProducts: "تصفح المنتجات",
+            contactUs: "اطلب عرض سعر",
+            bestWhy: "لماذا نحن الأفضل؟",
+            whyDesc: "التزام بالجودة والاحترافية في كل خطوة",
+            quality: "جودة معتمدة",
+            qualityDesc: "منتجات مصنّعة بأحدث المعايير العالمية ISO لضمان أفضل أداء وعمر افتراضي طويل.",
+            delivery: "توصيل احترافي",
+            deliveryDesc: "خدمة لوجستية متكاملة وشحن سريع وآمن لجميع المحافظات مع ضمان سلامة المنتج.",
+            support: "دعم فني متخصص",
+            supportDesc: "فريق من المهندسين والفنيين لخدمتكم على مدار الساعة.",
+            footerBrand: "جال للتجارة",
+            footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
+            copyrightText: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة",
+            navProducts: "المنتجات",
+            navCart: "السلة",
+            navContact: "تواصل معنا",
+            navLogin: "تسجيل الدخول",
+            mnavProducts: "المنتجات",
+            mnavCart: "السلة",
+            mnavContact: "تواصل معنا",
+            mnavLogin: "تسجيل الدخول",
+            fnavProducts: "المنتجات",
+            fnavCart: "السلة",
+            fnavContact: "تواصل معنا"
+        },
+        en: {
+            brandName: "Gal Industrial Supplies",
+            pageTitle: "Gal Trading & Industrial Supplies",
+            welcome: "Welcome to",
+            subtitle: "Gal Trading & Industrial Supplies",
+            description: "Your trusted partner in providing top-quality industrial products and spare parts. Over 77 years of experience serving Egyptian factories.",
+            browseProducts: "Browse Products",
+            contactUs: "Request a Quote",
+            bestWhy: "Why Choose Us?",
+            whyDesc: "Commitment to quality and professionalism every step of the way",
+            quality: "Certified Quality",
+            qualityDesc: "Products manufactured according to global ISO standards for best performance and long lifespan.",
+            delivery: "Professional Delivery",
+            deliveryDesc: "Comprehensive logistics and safe, fast shipping across all governorates.",
+            support: "Technical Support",
+            supportDesc: "A team of engineers and technicians available 24/7 to assist you.",
+            footerBrand: "Gal Trading",
+            footerDesc: "Your trusted partner in supplying industrial equipment and products with top quality.",
+            copyrightText: "© 2025 Gal Trading & Supplies — All rights reserved",
+            navProducts: "Products",
+            navCart: "Cart",
+            navContact: "Contact Us",
+            navLogin: "Login",
+            mnavProducts: "Products",
+            mnavCart: "Cart",
+            mnavContact: "Contact Us",
+            mnavLogin: "Login",
+            fnavProducts: "Products",
+            fnavCart: "Cart",
+            fnavContact: "Contact Us"
+        }
+    };
+
+    function applyTranslations(lang) {
+        const t = langs[lang] || langs.ar;
+        const map = {
+            brandName: t.brandName,
+            pageTitle: t.pageTitle,
+            welcome: t.welcome,
+            subtitle: t.subtitle,
+            description: t.description,
+            browseProducts: t.browseProducts,
+            contactUs: t.contactUs,
+            bestWhy: t.bestWhy,
+            whyDesc: t.whyDesc,
+            quality: t.quality,
+            qualityDesc: t.qualityDesc,
+            delivery: t.delivery,
+            deliveryDesc: t.deliveryDesc,
+            support: t.support,
+            supportDesc: t.supportDesc,
+            footerBrand: t.footerBrand,
+            footerDesc: t.footerDesc,
+            copyrightText: t.copyrightText,
+            navProducts: t.navProducts,
+            navCart: t.navCart,
+            navContact: t.navContact,
+            navLogin: t.navLogin,
+            mnavProducts: t.mnavProducts,
+            mnavCart: t.mnavCart,
+            mnavContact: t.mnavContact,
+            mnavLogin: t.mnavLogin,
+            fnavProducts: t.fnavProducts,
+            fnavCart: t.fnavCart,
+            fnavContact: t.fnavContact
+        };
+
+        for (const id in map) {
+            const el = document.getElementById(id);
+            if (el && map[id]) el.innerText = map[id];
+        }
+
+        document.title = t.pageTitle;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+        document.getElementById("current-lang").innerText = lang.toUpperCase();
+        localStorage.setItem("lang", lang);
+    }
+
+    function changeLang(lang) {
+        applyTranslations(lang);
+    }
+
+    function headerManager() {
+        return {
+            cartCount: 0,
+            init() {
+                this.loadCartCount();
+                window.addEventListener('storage', () => this.loadCartCount());
+            },
+            loadCartCount() {
+                const cart = localStorage.getItem('cart');
+                const items = cart ? JSON.parse(cart) : [];
+                this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+            }
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem("lang") || "ar";
+        applyTranslations(saved);
+    });
+</script>
 
 </body>
 </html>
