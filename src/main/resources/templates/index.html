@@ -72,7 +72,10 @@
 
     <div class="card bg-base-100 shadow-md p-4 mb-8">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-base-content">📋 المنتجات الموجودة</h2>
+            <h2 class="text-xl font-semibold text-base-content">
+                📋 المنتجات الموجودة
+                <span class="badge badge-primary" x-text="`${pagination.total} منتج`"></span>
+            </h2>
             <div class="flex gap-2 items-center">
                 <input type="file" id="csvInput" @change="importCSV($event)" accept=".csv" class="hidden">
                 <button @click="document.getElementById('csvInput').click()" class="btn btn-secondary btn-sm">
@@ -80,16 +83,30 @@
                 </button>
             </div>
         </div>
-        <input
-                type="text"
-                placeholder="🔍 ابحث باسم المنتج أو التصنيف"
-                x-model="searchQuery"
-                class="input input-bordered w-full"
-        >
+
+        <div class="flex gap-2 items-center">
+            <input
+                    type="text"
+                    placeholder="🔍 ابحث باسم المنتج أو الوصف"
+                    x-model="searchQuery"
+                    @input.debounce.500ms="searchProducts()"
+                    class="input input-bordered flex-1"
+            >
+            <select x-model="pagination.limit" @change="changeLimit()" class="select select-bordered">
+                <option value="12">12 منتج</option>
+                <option value="24">24 منتج</option>
+                <option value="48">48 منتج</option>
+                <option value="100">100 منتج</option>
+            </select>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <template x-for="product in filteredProducts" :key="product._id">
+    <div x-show="loading" class="flex justify-center items-center py-20">
+        <div class="loading loading-spinner loading-lg text-primary"></div>
+    </div>
+
+    <div x-show="!loading && products.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="product in products" :key="product._id">
             <div class="card bg-base-100 shadow-md overflow-hidden">
                 <figure x-show="product.imageUrl" class="h-48 bg-base-300">
                     <img :src="product.imageUrl" :alt="product.name" class="w-full h-full object-cover">
@@ -118,14 +135,45 @@
         </template>
     </div>
 
-    <div x-show="products.length === 0" class="text-center py-20">
+    <div x-show="!loading && products.length === 0" class="text-center py-20">
         <div class="text-8xl mb-4">📦</div>
         <h3 class="text-2xl font-semibold text-base-content mb-2">لا توجد منتجات</h3>
-        <p class="text-base-content/70">ابدأ بإضافة منتج جديد</p>
+        <p class="text-base-content/70">ابدأ بإضافة منتج جديد أو جرب البحث</p>
     </div>
 
+    <!-- Pagination Controls -->
+    <div x-show="!loading && pagination.totalPages > 1" class="flex justify-center items-center gap-2 mt-8">
+        <button @click="goToPage(1)" :disabled="pagination.page === 1" class="btn btn-sm">
+            «
+        </button>
+        <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1" class="btn btn-sm">
+            ‹
+        </button>
+
+        <template x-for="pageNum in visiblePages" :key="pageNum">
+            <button
+                    @click="goToPage(pageNum)"
+                    :class="pageNum === pagination.page ? 'btn-primary' : 'btn-ghost'"
+                    class="btn btn-sm"
+                    x-text="pageNum"
+            ></button>
+        </template>
+
+        <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">
+            ›
+        </button>
+        <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">
+            »
+        </button>
+
+        <span class="text-sm text-base-content/70 mr-4">
+            صفحة <span x-text="pagination.page"></span> من <span x-text="pagination.totalPages"></span>
+        </span>
+    </div>
+
+    <!-- Edit Product Modal -->
     <div x-show="modal.show" x-transition @click="modal.show = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6">
+        <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 class="text-xl font-semibold text-base-content mb-4">تعديل المنتج</h3>
             <div class="form-control space-y-4">
                 <input type="text" x-model="modal.product.name" placeholder="اسم المنتج" class="input input-bordered w-full" required>
@@ -140,9 +188,30 @@
 
                 <textarea x-model="modal.product.description" placeholder="وصف المنتج" rows="3" class="textarea textarea-bordered w-full resize-none" required></textarea>
 
-                <div x-show="modal.product.imageUrl" class="flex items-center gap-3">
-                    <img :src="modal.product.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg">
-                    <span class="text-sm text-base-content/70">الصورة الحالية</span>
+                <!-- Current Image Display -->
+                <div x-show="modal.product.imageUrl && !modal.removeCurrentImageFlag" class="border rounded-lg p-3 bg-base-200">
+                    <p class="text-sm font-medium mb-2">الصورة الحالية:</p>
+                    <div class="flex items-center gap-3">
+                        <img :src="modal.product.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg">
+                        <button type="button" @click="removeCurrentImage()" class="btn btn-error btn-sm">🗑️ إزالة الصورة</button>
+                    </div>
+                </div>
+
+                <!-- New Image Upload -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">تغيير الصورة (اختياري)</span>
+                    </label>
+                    <input type="file" @change="handleEditFileSelect($event)" accept="image/*" class="file-input file-input-bordered w-full" id="editImageInput">
+                </div>
+
+                <!-- New Image Preview -->
+                <div x-show="modal.imagePreview" class="border rounded-lg p-3 bg-base-200">
+                    <p class="text-sm font-medium mb-2">معاينة الصورة الجديدة:</p>
+                    <div class="flex items-center gap-3">
+                        <img :src="modal.imagePreview" alt="Preview" class="w-20 h-20 object-cover rounded-lg">
+                        <button type="button" @click="clearEditImage()" class="btn btn-error btn-sm">إزالة</button>
+                    </div>
                 </div>
 
                 <div class="flex gap-3 pt-2">
@@ -155,7 +224,354 @@
 
 </main>
 
-<script src="/js/product.js"></script>
+<script>
+    function productApp() {
+        return {
+            products: [],
+            categories: [],
+            newProduct: { name: '', price: 0, description: '', categoryId: '' },
+            selectedFile: null,
+            imagePreview: null,
+            modal: {
+                show: false,
+                product: {},
+                selectedFile: null,
+                imagePreview: null,
+                removeCurrentImageFlag: false
+            },
+            alert: { show: false, message: '', type: 'success' },
+            searchQuery: '',
+            loading: false,
+            pagination: {
+                page: 1,
+                limit: 12,
+                total: 0,
+                totalPages: 0
+            },
+
+            get visiblePages() {
+                const current = this.pagination.page;
+                const total = this.pagination.totalPages;
+                const pages = [];
+
+                let start = Math.max(1, current - 2);
+                let end = Math.min(total, current + 2);
+
+                if (end - start < 4) {
+                    if (start === 1) {
+                        end = Math.min(total, start + 4);
+                    } else if (end === total) {
+                        start = Math.max(1, end - 4);
+                    }
+                }
+
+                for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                }
+
+                return pages;
+            },
+
+            async init() {
+                await this.loadCategories();
+                await this.loadProducts();
+            },
+
+            async loadCategories() {
+                try {
+                    const res = await fetch('/api/categories', { credentials: 'include' });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Load categories response:', text);
+                        throw new Error('فشل في جلب التصنيفات');
+                    }
+                    this.categories = await res.json();
+                } catch (err) {
+                    console.error('Load categories error:', err);
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            async loadProducts() {
+                this.loading = true;
+                try {
+                    const params = new URLSearchParams({
+                        page: this.pagination.page,
+                        limit: this.pagination.limit,
+                        search: this.searchQuery
+                    });
+
+                    const res = await fetch(`/api/products?${params}`, { credentials: 'include' });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Load products response:', text);
+                        throw new Error('فشل في جلب المنتجات');
+                    }
+                    const data = await res.json();
+                    this.products = data.data;
+                    this.pagination.total = data.total;
+                    this.pagination.totalPages = data.totalPages;
+                    this.pagination.page = data.page;
+                } catch (err) {
+                    console.error('Load products error:', err);
+                    this.showAlert(err.message, 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async searchProducts() {
+                this.pagination.page = 1;
+                await this.loadProducts();
+            },
+
+            async goToPage(page) {
+                if (page < 1 || page > this.pagination.totalPages) return;
+                this.pagination.page = page;
+                await this.loadProducts();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            async changeLimit() {
+                this.pagination.page = 1;
+                await this.loadProducts();
+            },
+
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.selectedFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.imagePreview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            handleEditFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.modal.selectedFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.modal.imagePreview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            clearImage() {
+                this.selectedFile = null;
+                this.imagePreview = null;
+            },
+
+            clearEditImage() {
+                this.modal.selectedFile = null;
+                this.modal.imagePreview = null;
+                document.getElementById('editImageInput').value = '';
+            },
+
+            removeCurrentImage() {
+                this.modal.removeCurrentImageFlag = true;
+                this.modal.product.imageUrl = null;
+                this.clearEditImage();
+            },
+
+            async addProduct() {
+                if (!this.validateProduct(this.newProduct)) return;
+
+                try {
+                    let data;
+                    if (this.selectedFile) {
+                        const formData = new FormData();
+                        formData.append('name', this.newProduct.name);
+                        formData.append('price', this.newProduct.price);
+                        formData.append('description', this.newProduct.description);
+                        formData.append('categoryId', this.newProduct.categoryId);
+                        formData.append('image', this.selectedFile);
+
+                        const res = await fetch('/api/products/with-image', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'include'
+                        });
+                        if (!res.ok) {
+                            const text = await res.text();
+                            console.log('Add product with image response:', text);
+                            throw new Error(text || 'فشل في إضافة المنتج');
+                        }
+                        data = await res.json();
+                    } else {
+                        const res = await fetch('/api/products', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newProduct),
+                            credentials: 'include'
+                        });
+                        if (!res.ok) {
+                            const text = await res.text();
+                            console.log('Add product response:', text);
+                            throw new Error(text || 'فشل في إضافة المنتج');
+                        }
+                        data = await res.json();
+                    }
+
+                    this.newProduct = { name: '', price: 0, description: '', categoryId: '' };
+                    this.clearImage();
+                    await this.loadProducts();
+                    this.showAlert('✅ تمت الإضافة بنجاح', 'success');
+                } catch (err) {
+                    console.error('Add product error:', err);
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            async importCSV(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const res = await fetch('/api/products/import', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Import CSV response:', text);
+                        throw new Error(text || 'فشل في استيراد الملف');
+                    }
+                    const data = await res.json();
+                    await this.loadProducts();
+                    this.showAlert(`✅ تم استيراد ${data.data?.length || 0} منتج بنجاح`, 'success');
+                } catch (err) {
+                    console.error('Import CSV error:', err);
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            openEditModal(product) {
+                this.modal = {
+                    show: true,
+                    product: { ...product },
+                    selectedFile: null,
+                    imagePreview: null,
+                    removeCurrentImageFlag: false
+                };
+            },
+
+            async updateProduct() {
+                if (!this.validateProduct(this.modal.product)) return;
+
+                try {
+                    let data;
+                    if (this.modal.selectedFile || this.modal.removeCurrentImageFlag) {
+                        const formData = new FormData();
+                        formData.append('name', this.modal.product.name);
+                        formData.append('price', this.modal.product.price);
+                        formData.append('description', this.modal.product.description);
+                        formData.append('categoryId', this.modal.product.categoryId);
+                        if (this.modal.selectedFile) {
+                            formData.append('image', this.modal.selectedFile);
+                        }
+                        if (this.modal.removeCurrentImageFlag) {
+                            formData.append('removeImage', 'true');
+                        }
+
+                        const res = await fetch(`/api/products/${this.modal.product._id}/with-image`, {
+                            method: 'PUT',
+                            body: formData,
+                            credentials: 'include'
+                        });
+
+                        if (!res.ok) {
+                            const text = await res.text();
+                            console.log('Update product with image response:', text);
+                            throw new Error(text || 'فشل في تحديث المنتج');
+                        }
+                        data = await res.json();
+                    } else {
+                        const res = await fetch(`/api/products/${this.modal.product._id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.modal.product),
+                            credentials: 'include'
+                        });
+                        if (!res.ok) {
+                            const text = await res.text();
+                            console.log('Update product response:', text);
+                            throw new Error(text || 'فشل في تحديث المنتج');
+                        }
+                        data = await res.json();
+                    }
+
+                    await this.loadProducts();
+                    this.modal.show = false;
+                    this.showAlert('✅ تم التحديث بنجاح', 'success');
+                } catch (err) {
+                    console.error('Update product error:', err);
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            async deleteProduct(id) {
+                if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+
+                try {
+                    const res = await fetch(`/api/products/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    if (res.status === 204) {
+                        await this.loadProducts();
+                        this.showAlert('✅ تم الحذف بنجاح', 'success');
+                        return;
+                    }
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Delete product response:', text);
+                        throw new Error(text || 'فشل في حذف المنتج');
+                    }
+                    const data = await res.json();
+                    await this.loadProducts();
+                    this.showAlert('✅ تم الحذف بنجاح', 'success');
+                } catch (err) {
+                    console.error('Delete product error:', err);
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            validateProduct(product) {
+                if (!product.name.trim()) {
+                    this.showAlert('⚠️ اسم المنتج مطلوب', 'error');
+                    return false;
+                }
+                if (!product.price || product.price <= 0) {
+                    this.showAlert('⚠️ السعر يجب أن يكون أكبر من صفر', 'error');
+                    return false;
+                }
+                if (!product.description.trim()) {
+                    this.showAlert('⚠️ وصف المنتج مطلوب', 'error');
+                    return false;
+                }
+                if (!product.categoryId) {
+                    this.showAlert('⚠️ يجب اختيار تصنيف', 'error');
+                    return false;
+                }
+                return true;
+            },
+
+            showAlert(message, type = 'success') {
+                this.alert = { show: true, message, type };
+                setTimeout(() => this.alert.show = false, 4000);
+            }
+        };
+    }
+</script>
 
 </body>
 </html>

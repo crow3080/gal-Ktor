@@ -2,16 +2,49 @@ package com.example.Service
 
 import com.example.db.DatabaseConfig
 import com.example.db.models.Product
+import com.example.utils.Responses.PaginatedResponse
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.toList
+import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 
 class ProductService(private val collection: MongoCollection<Product>) {
 
     suspend fun getAllProducts(): List<Product> {
         return collection.find().toList()
+    }
+
+    suspend fun getProductsPaginated(page: Int, limit: Int, search: String): PaginatedResponse<Product> {
+        val skip = (page - 1) * limit
+
+        // بناء فلتر البحث
+        val filter: Bson = if (search.isNotEmpty()) {
+            Filters.or(
+                Filters.regex("name", search, "i"),
+                Filters.regex("description", search, "i")
+            )
+        } else {
+            Filters.empty()
+        }
+
+        // جلب المنتجات
+        val products = collection.find(filter)
+            .skip(skip)
+            .limit(limit)
+            .toList()
+
+        // حساب إجمالي العدد
+        val totalCount = collection.countDocuments(filter)
+
+        return PaginatedResponse(
+            data = products,
+            page = page,
+            limit = limit,
+            total = totalCount,
+            totalPages = ((totalCount + limit - 1) / limit).toInt()
+        )
     }
 
     suspend fun getProductById(id: String): Product? {
@@ -32,13 +65,14 @@ class ProductService(private val collection: MongoCollection<Product>) {
                 Updates.set("price", product.price),
                 Updates.set("description", product.description),
                 Updates.set("categoryId", product.categoryId),
-                Updates.set("imageUrl", product.imageUrl)  // ✅
+                Updates.set("imageUrl", product.imageUrl)
             )
         )
         return updateResult.matchedCount > 0
     }
+
     suspend fun categoryExists(categoryId: String): Boolean {
-        val categoryCollection = DatabaseConfig.categoryCollection  // ✅ صح
+        val categoryCollection = DatabaseConfig.categoryCollection
         val found = categoryCollection.find(Filters.eq("_id", categoryId)).toList()
         return found.isNotEmpty()
     }

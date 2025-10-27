@@ -9,3 +9,12 @@ data class ApiResponse(
     val message: String,
     val data: Product? = null
 )
+
+@Serializable
+data class PaginatedResponse<T>(
+    val data: List<T>,
+    val page: Int,
+    val limit: Int,
+    val total: Long,
+    val totalPages: Int
+)

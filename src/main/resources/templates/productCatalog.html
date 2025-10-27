@@ -18,7 +18,7 @@
         .cart-badge {
             position: absolute;
             top: -8px;
-            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            inset-inline-end: -8px;
             background: #dc2626;
             color: white;
             border-radius: 50%;
@@ -27,14 +27,36 @@
             font-weight: bold;
             min-width: 20px;
             text-align: center;
-            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        /* تحسين توافق الـ badge في قائمة الموبايل */
         .dropdown .cart-badge {
             top: 0;
             inset-inline-end: 0;
             transform: translate(50%, -50%);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .product-image-container,
+        .category-image-container {
+            background-color: #f5f5f5; /* خلفية موحدة */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 200px; /* ارتفاع مناسب للمنتجات */
+        }
+        .category-image-container {
+            height: 96px; /* ارتفاع مناسب للتصنيفات */
+        }
+        .product-image,
+        .category-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* عرض الصورة بالكامل دون قص */
+            object-position: center;
+            transition: none; /* إزالة تأثيرات التحويل */
         }
     </style>
 </head>
@@ -108,18 +130,20 @@
     <!-- العنوان والبحث -->
     <div class="mb-8">
         <h1 id="catalogTitle" class="text-4xl font-bold mb-6 text-center" style="color: #d4af37;">
-            <i class="fas fa-box-open ml-2"></i> <span id="catalogTitleText">كتالوج المنتجات</span>
+            <i class="fas fa-box-open ml-2"></i>
+            <span id="catalogTitleText">كتالوج المنتجات</span>
+            <span class="badge badge-lg ml-2" style="background: rgba(212, 175, 55, 0.2); color: #d4af37;" x-text="`${pagination.total} منتج`"></span>
         </h1>
 
         <!-- شريط البحث والفلاتر -->
         <div class="glass-card p-6 rounded-2xl mb-6">
-            <div class="grid md:grid-cols-2 gap-4">
+            <div class="grid md:grid-cols-3 gap-4">
                 <!-- البحث -->
-                <div class="form-control">
+                <div class="form-control md:col-span-2">
                     <div class="input-group">
                         <input id="searchInput" type="text"
                                x-model="searchQuery"
-                               @input="filterProducts()"
+                               @input.debounce.500ms="searchProducts()"
                                placeholder="ابحث عن منتج..."
                                class="input input-bordered w-full bg-base-200 text-gray-200">
                         <button class="btn btn-square" style="background: #d4af37;">
@@ -136,6 +160,22 @@
                     <option id="sortPriceAsc" value="price-asc">السعر: من الأقل للأعلى</option>
                     <option id="sortPriceDesc" value="price-desc">السعر: من الأعلى للأقل</option>
                     <option id="sortName" value="name">الاسم</option>
+                </select>
+            </div>
+
+            <!-- عدد المنتجات في الصفحة -->
+            <div class="flex justify-between items-center mt-4">
+                <span class="text-gray-400 text-sm">
+                    <span id="showingLabel">عرض</span>
+                    <span x-text="products.length"></span>
+                    <span id="ofLabel">من</span>
+                    <span x-text="pagination.total"></span>
+                </span>
+                <select x-model="pagination.limit" @change="changeLimit()" class="select select-bordered select-sm bg-base-200 text-gray-200">
+                    <option value="12">12 منتج</option>
+                    <option value="24">24 منتج</option>
+                    <option value="48">48 منتج</option>
+                    <option value="100">100 منتج</option>
                 </select>
             </div>
         </div>
@@ -174,7 +214,7 @@
                         <div class="p-3 text-center">
                             <h3 class="font-bold text-gray-100 text-sm" id="allLabel">الكل</h3>
                             <p class="text-xs text-gray-400 mt-1">
-                                <span x-text="products.length"></span> <span id="productLabel">منتج</span>
+                                <span x-text="allProductsCount"></span> <span id="productLabel">منتج</span>
                             </p>
                         </div>
                     </div>
@@ -184,10 +224,10 @@
                         <div @click="selectedCategory = cat._id; filterProducts()"
                              :class="selectedCategory === cat._id ? 'ring-4 ring-[#d4af37]' : ''"
                              class="flex-shrink-0 w-36 glass-card rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 group">
-                            <div class="h-24 overflow-hidden bg-base-300">
+                            <div class="category-image-container">
                                 <img :src="cat.imageUrl || 'https://via.placeholder.com/150x100?text=' + cat.name"
                                      :alt="cat.name"
-                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                     class="category-image">
                             </div>
                             <div class="p-3 text-center">
                                 <h3 class="font-bold text-gray-100 text-sm line-clamp-1" x-text="cat.name"></h3>
@@ -204,7 +244,7 @@
 
     <!-- حالة التحميل -->
     <div x-show="loading" class="flex justify-center items-center py-20">
-        <div class="loading-spinner"></div>
+        <div class="loading loading-spinner loading-lg" style="color: #d4af37;"></div>
     </div>
 
     <!-- رسالة خطأ -->
@@ -214,16 +254,16 @@
     </div>
 
     <!-- عرض المنتجات -->
-    <div x-show="!loading && filteredProducts.length > 0"
+    <div x-show="!loading && products.length > 0"
          class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
          x-transition>
-        <template x-for="product in filteredProducts" :key="product._id">
+        <template x-for="product in products" :key="product._id">
             <div class="glass-card rounded-2xl overflow-hidden shadow-xl">
                 <!-- صورة المنتج -->
-                <div class="relative">
+                <div class="relative product-image-container">
                     <img :src="product.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'"
                          :alt="product.name"
-                         class="w-full product-image">
+                         class="product-image">
                     <div class="absolute top-2 right-2">
                         <span class="badge badge-lg" style="background: #d4af37; color: #1a1a2e; font-weight: bold;">
                             <span x-text="product.price"></span> <span id="currencyLabel">جنيه</span>
@@ -260,7 +300,7 @@
     </div>
 
     <!-- رسالة عدم وجود منتجات -->
-    <div x-show="!loading && filteredProducts.length === 0"
+    <div x-show="!loading && products.length === 0"
          class="text-center py-20"
          x-transition>
         <div class="glass-card rounded-3xl p-12 max-w-md mx-auto">
@@ -268,6 +308,44 @@
             <h3 id="noProductsTitle" class="text-2xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
             <p id="noProductsDesc" class="text-gray-400">جرب البحث بكلمات مختلفة أو تصفح جميع التصنيفات</p>
         </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div x-show="!loading && pagination.totalPages > 1" class="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
+        <div class="flex gap-2">
+            <button @click="goToPage(1)" :disabled="pagination.page === 1"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                «
+            </button>
+            <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                ‹
+            </button>
+
+            <template x-for="pageNum in visiblePages" :key="pageNum">
+                <button
+                        @click="goToPage(pageNum)"
+                        :class="pageNum === pagination.page ? 'ring-2 ring-[#d4af37]' : ''"
+                        :style="pageNum === pagination.page ? 'background: #d4af37; color: #1a1a2e;' : 'background: rgba(212, 175, 55, 0.2); color: #d4af37;'"
+                        class="btn btn-sm"
+                        x-text="pageNum"
+                ></button>
+            </template>
+
+            <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                ›
+            </button>
+            <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                »
+            </button>
+        </div>
+
+        <span class="text-sm text-gray-400">
+            <span id="pageLabel">صفحة</span> <span x-text="pagination.page"></span>
+            <span id="ofPagesLabel">من</span> <span x-text="pagination.totalPages"></span>
+        </span>
     </div>
 
     <!-- Modal تفاصيل المنتج -->
@@ -280,9 +358,11 @@
              class="glass-card rounded-3xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
             <template x-if="selectedProduct">
                 <div>
-                    <img :src="selectedProduct.imageUrl || 'https://via.placeholder.com/600x400'"
-                         :alt="selectedProduct.name"
-                         class="w-full h-64 object-cover rounded-2xl mb-6">
+                    <div class="product-image-container">
+                        <img :src="selectedProduct.imageUrl || 'https://via.placeholder.com/600x400'"
+                             :alt="selectedProduct.name"
+                             class="product-image">
+                    </div>
                     <h2 class="text-3xl font-bold mb-4 text-gray-100" x-text="selectedProduct.name"></h2>
                     <p class="text-gray-300 mb-4" x-text="selectedProduct.description"></p>
                     <div class="flex items-center gap-4 mb-6">
@@ -327,7 +407,7 @@
 <footer class="footer footer-center p-12 glass-card text-gray-300 relative overflow-hidden mt-12" x-data="headerManager()">
     <div class="mb-6 text-center">
         <div class="flex items-center justify-center gap-3 mb-2">
-            <img src="/images/logo.webp" alt="شعار" class="footer-logo">
+            <img src="/images/logo.webp" alt="شعار" style="width: 50px;">
             <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
         <p id="footerDesc" class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة</p>
@@ -350,9 +430,6 @@
 </footer>
 
 <script>
-    /* ==========================
-       Translations (UI only)
-       ========================== */
     const langs = {
         ar: {
             brandName: "جال لتوريدات المصانع",
@@ -372,17 +449,13 @@
             noProductsDesc: "جرب البحث بكلمات مختلفة أو تصفح جميع التصنيفات",
             currency: "جنيه",
             addToCartToast: 'تمت إضافة "{name}" للسلة',
+            showingLabel: "عرض",
+            ofLabel: "من",
+            pageLabel: "صفحة",
+            ofPagesLabel: "من",
             navProducts: "المنتجات",
             navCart: "السلة",
             navContact: "تواصل معنا",
-            navLogin: "تسجيل الدخول",
-            mnavProducts: "المنتجات",
-            mnavCart: "السلة",
-            mnavContact: "تواصل معنا",
-            mnavLogin: "تسجيل الدخول",
-            fnavProducts: "المنتجات",
-            fnavCart: "السلة",
-            fnavContact: "تواصل معنا",
             footerBrand: "جال للتجارة",
             footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
             copyright: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة"
@@ -405,17 +478,13 @@
             noProductsDesc: "Try different keywords or browse categories",
             currency: "EGP",
             addToCartToast: 'Added "{name}" to cart',
+            showingLabel: "Showing",
+            ofLabel: "of",
+            pageLabel: "Page",
+            ofPagesLabel: "of",
             navProducts: "Products",
             navCart: "Cart",
             navContact: "Contact",
-            navLogin: "Login",
-            mnavProducts: "Products",
-            mnavCart: "Cart",
-            mnavContact: "Contact",
-            mnavLogin: "Login",
-            fnavProducts: "Products",
-            fnavCart: "Cart",
-            fnavContact: "Contact",
             footerBrand: "Gal Trading",
             footerDesc: "Your trusted partner in supplying top-quality industrial products.",
             copyright: "© 2025 Gal Trading & Supplies — All rights reserved"
@@ -424,13 +493,10 @@
 
     function applyTranslations(lang) {
         const t = langs[lang] || langs.ar;
-
-        // text mapping by element id
         const map = {
             brandName: t.brandName,
             pageTitle: t.pageTitle,
             catalogTitleText: t.catalogTitle,
-            searchInput: null, // placeholder handled separately
             sortDefault: t.sortDefault,
             sortPriceAsc: t.sortPriceAsc,
             sortPriceDesc: t.sortPriceDesc,
@@ -446,14 +512,16 @@
             noProductsDesc: t.noProductsDesc,
             currencyLabel: t.currency,
             currencyLabelModal: t.currency,
+            showingLabel: t.showingLabel,
+            ofLabel: t.ofLabel,
+            pageLabel: t.pageLabel,
+            ofPagesLabel: t.ofPagesLabel,
             navProducts: t.navProducts,
             navCart: t.navCart,
             navContact: t.navContact,
-            navLogin: t.navLogin,
             mnavProducts: t.navProducts,
             mnavCart: t.navCart,
             mnavContact: t.navContact,
-            mnavLogin: t.navLogin,
             fnavProducts: t.navProducts,
             fnavCart: t.navCart,
             fnavContact: t.navContact,
@@ -468,20 +536,16 @@
             el.innerText = map[id];
         }
 
-        // placeholders
         const searchEl = document.getElementById('searchInput');
         if (searchEl) searchEl.placeholder = t.searchPlaceholder;
 
-        // update current-lang display
         const curr = document.getElementById('current-lang');
         if (curr) curr.innerText = lang.toUpperCase();
 
-        // direction & lang attributes
         document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
         document.documentElement.lang = (lang === 'ar') ? 'ar' : 'en';
         document.title = t.pageTitle;
 
-        // save
         localStorage.setItem('lang', lang);
     }
 
@@ -492,19 +556,15 @@
 
     function changeLang(lang) {
         applyTranslations(lang);
+        location.reload();
     }
 
-    /* apply on initial load */
     document.addEventListener('DOMContentLoaded', loadSavedLang);
 
-    /* ==========================
-       productCatalog Alpine component
-       ========================== */
     function productCatalog() {
         return {
             products: [],
             categories: [],
-            filteredProducts: [],
             loading: true,
             error: '',
             searchQuery: '',
@@ -514,9 +574,38 @@
             selectedProduct: null,
             showToast: false,
             toastMessage: '',
+            allProductsCount: 0,
+            pagination: {
+                page: 1,
+                limit: 24,
+                total: 0,
+                totalPages: 0
+            },
+
+            get visiblePages() {
+                const current = this.pagination.page;
+                const total = this.pagination.totalPages;
+                const pages = [];
+
+                let start = Math.max(1, current - 2);
+                let end = Math.min(total, current + 2);
+
+                if (end - start < 4) {
+                    if (start === 1) {
+                        end = Math.min(total, start + 4);
+                    } else if (end === total) {
+                        start = Math.max(1, end - 4);
+                    }
+                }
+
+                for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                }
+
+                return pages;
+            },
 
             async init() {
-                // load translations immediate (in case called before DOMContentLoaded)
                 const lang = localStorage.getItem('lang') || 'ar';
                 if (typeof applyTranslations === 'function') applyTranslations(lang);
 
@@ -529,12 +618,33 @@
                     this.loading = true;
                     this.error = '';
 
-                    const response = await fetch('/api/products');
+                    const params = new URLSearchParams({
+                        page: this.pagination.page,
+                        limit: this.pagination.limit,
+                        search: this.searchQuery
+                    });
+
+                    const response = await fetch(`/api/products?${params}`);
                     if (!response.ok) throw new Error('فشل تحميل المنتجات');
 
                     const data = await response.json();
-                    this.products = data;
-                    this.filteredProducts = data;
+
+                    if (data.data) {
+                        this.products = data.data;
+                        this.pagination.total = data.total;
+                        this.pagination.totalPages = data.totalPages;
+                        this.pagination.page = data.page;
+                    } else {
+                        this.products = data;
+                        this.pagination.total = data.length;
+                        this.pagination.totalPages = 1;
+                    }
+
+                    if (!this.allProductsCount) {
+                        this.allProductsCount = this.pagination.total;
+                    }
+
+                    this.applyFilters();
                 } catch (err) {
                     this.error = (localStorage.getItem('lang') === 'en') ? 'Failed to load products' : 'حدث خطأ في تحميل المنتجات';
                     console.error(err);
@@ -555,31 +665,31 @@
                 }
             },
 
-            filterProducts() {
+            async searchProducts() {
+                this.pagination.page = 1;
+                await this.loadProducts();
+            },
+
+            async filterProducts() {
+                this.pagination.page = 1;
+                this.applyFilters();
+            },
+
+            applyFilters() {
                 let result = [...this.products];
 
-                // فلترة حسب البحث
-                if (this.searchQuery) {
-                    const query = this.searchQuery.toLowerCase();
-                    result = result.filter(p =>
-                        (p.name && p.name.toLowerCase().includes(query)) ||
-                        (p.description && p.description.toLowerCase().includes(query))
-                    );
-                }
-
-                // فلترة حسب التصنيف
                 if (this.selectedCategory) {
                     result = result.filter(p => p.categoryId === this.selectedCategory);
                 }
 
-                this.filteredProducts = result;
+                this.products = result;
                 this.sortProducts();
             },
 
             sortProducts() {
                 if (!this.sortBy) return;
 
-                const sorted = [...this.filteredProducts];
+                const sorted = [...this.products];
 
                 switch(this.sortBy) {
                     case 'price-asc':
@@ -598,7 +708,19 @@
                         break;
                 }
 
-                this.filteredProducts = sorted;
+                this.products = sorted;
+            },
+
+            async goToPage(page) {
+                if (page < 1 || page > this.pagination.totalPages) return;
+                this.pagination.page = page;
+                await this.loadProducts();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            async changeLimit() {
+                this.pagination.page = 1;
+                await this.loadProducts();
             },
 
             getCategoryName(categoryId) {
@@ -628,7 +750,6 @@
             },
 
             addToCart(product) {
-                // حفظ في localStorage
                 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
                 const existingItem = cart.find(item => item._id === product._id);
                 if (existingItem) {
@@ -638,11 +759,9 @@
                 }
                 localStorage.setItem('cart', JSON.stringify(cart));
 
-                // إطلاق حدث مخصص لتحديث الـ badge
                 const cartEvent = new Event('cartUpdated');
                 window.dispatchEvent(cartEvent);
 
-                // إظهار Toast باستخدام الترجمة
                 const lang = localStorage.getItem('lang') || 'ar';
                 const template = langs[lang]?.addToCartToast || 'تمت إضافة "{name}" للسلة';
                 this.toastMessage = template.replace('{name}', product.name);
@@ -657,9 +776,7 @@
             cartCount: 0,
             init() {
                 this.loadCartCount();
-                // الاستماع إلى حدث storage للتغييرات عبر علامات التبويب
                 window.addEventListener('storage', () => this.loadCartCount());
-                // الاستماع إلى الحدث المخصص لتحديثات السلة في نفس علامة التبويب
                 window.addEventListener('cartUpdated', () => this.loadCartCount());
             },
             loadCartCount() {

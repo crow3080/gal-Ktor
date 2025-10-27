@@ -183,7 +183,7 @@
                     style="background: rgba(212, 175, 55, 0.2); color: #d4af37;">
                 <i class="fas fa-th-large ml-1"></i>
                 <span id="allCat">جميع التصنيفات</span>
-                <span class="badge badge-sm ml-1" x-text="products.length"></span>
+                <span class="badge badge-sm ml-1" x-text="pagination.total"></span>
             </button>
 
             <template x-for="cat in categories" :key="cat._id">
@@ -251,6 +251,44 @@
             <h3 id="noProductsTitle" class="text-2xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
             <p id="noProductsDesc" class="text-gray-400">جرب اختيار تصنيف آخر أو تعديل البحث</p>
         </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div x-show="!loading && pagination.totalPages > 1" class="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
+        <div class="flex gap-2">
+            <button @click="goToPage(1)" :disabled="pagination.page === 1"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                «
+            </button>
+            <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                ‹
+            </button>
+
+            <template x-for="pageNum in visiblePages" :key="pageNum">
+                <button
+                        @click="goToPage(pageNum)"
+                        :class="pageNum === pagination.page ? 'ring-2 ring-[#d4af37]' : ''"
+                        :style="pageNum === pagination.page ? 'background: #d4af37; color: #1a1a2e;' : 'background: rgba(212, 175, 55, 0.2); color: #d4af37;'"
+                        class="btn btn-sm"
+                        x-text="pageNum"
+                ></button>
+            </template>
+
+            <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                ›
+            </button>
+            <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages"
+                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
+                »
+            </button>
+        </div>
+
+        <span class="text-sm text-gray-400">
+            <span id="pageLabel">صفحة</span> <span x-text="pagination.page"></span>
+            <span id="ofPagesLabel">من</span> <span x-text="pagination.totalPages"></span>
+        </span>
     </div>
 
     <!-- Submit Button -->
@@ -351,9 +389,7 @@
                 </h3>
                 <div class="space-y-2 max-h-60 overflow-y-auto">
                     <template x-for="product in selectedProducts" :key="product._id">
-                        <div class="flex items-center gap-3 p-3
-
- bg-base-200 rounded-lg">
+                        <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
                             <img :src="product.imageUrl || 'https://via.placeholder.com/50'"
                                  class="w-12 h-12 object-cover rounded-lg">
                             <div class="flex-1">
@@ -402,313 +438,371 @@
     </nav>
     <p id="copyrightText" class="text-gray-400 mt-4">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
-<script >
+
+<script>
     // Translations
-const langs = {
-    ar: {
-        brandName: "جال لتوريدات المصانع",
-        pageTitle: "طلب عرض سعر - جال للتجارة",
-        mainTitle: "طلب عرض سعر",
-        mainDesc: "اختر المنتجات التي تحتاجها وسنرسل لك عرض سعر مفصل",
-        selectedLabel: "تم اختيار",
-        productLabel: "منتج",
-        clearBtn: "مسح الكل",
-        filterTitle: "تصفية حسب التصنيف",
-        allCat: "جميع التصنيفات",
-        selectedBadge: "محدد",
-        noProductsTitle: "لا توجد منتجات",
-        noProductsDesc: "جرب اختيار تصنيف آخر أو تعديل البحث",
-        submitBtn: "إرسال الطلب",
-        dialogTitle: "إرسال الطلب عبر واتساب",
-        nameLabel: "الاسم",
-        nameInput: "اسمك الكامل",
-        phoneLabel: "رقم الهاتف",
-        phoneInput: "01xxxxxxxxx",
-        notesLabel: "ملاحظات إضافية (اختياري)",
-        notesInput: "أي تفاصيل إضافية...",
-        selectedItemsTitle: "المنتجات المحددة",
-        sendWhatsAppBtn: "إرسال عبر واتساب",
-        cancelBtn: "إلغاء",
-        navProducts: "المنتجات",
-        navCart: "السلة",
-        navContact: "تواصل معنا",
-        mnavProducts: "المنتجات",
-        mnavCart: "السلة",
-        mnavContact: "تواصل معنا",
-        fnavProducts: "المنتجات",
-        fnavCart: "السلة",
-        fnavContact: "تواصل معنا",
-        footerBrand: "جال للتجارة",
-        footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية",
-        copyrightText: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة",
-        searchLabel: "بحث عن المنتجات",
-        searchInput: "ابحث باسم المنتج أو الوصف..."
-    },
-    en: {
-        brandName: "Gal Industrial Supplies",
-        pageTitle: "Price Request - Gal Trading",
-        mainTitle: "Request a Quote",
-        mainDesc: "Select the products you need and we'll send you a detailed quote",
-        selectedLabel: "Selected",
-        productLabel: "product(s)",
-        clearBtn: "Clear All",
-        filterTitle: "Filter by Category",
-        allCat: "All Categories",
-        selectedBadge: "Selected",
-        noProductsTitle: "No Products Found",
-        noProductsDesc: "Try selecting another category or modifying your search",
-        submitBtn: "Submit Request",
-        dialogTitle: "Send Request via WhatsApp",
-        nameLabel: "Name",
-        nameInput: "Your full name",
-        phoneLabel: "Phone Number",
-        phoneInput: "01xxxxxxxxx",
-        notesLabel: "Additional Notes (Optional)",
-        notesInput: "Any additional details...",
-        selectedItemsTitle: "Selected Products",
-        sendWhatsAppBtn: "Send via WhatsApp",
-        cancelBtn: "Cancel",
-        navProducts: "Products",
-        navCart: "Cart",
-        navContact: "Contact",
-        mnavProducts: "Products",
-        mnavCart: "Cart",
-        mnavContact: "Contact",
-        fnavProducts: "Products",
-        fnavCart: "Cart",
-        fnavContact: "Contact",
-        footerBrand: "Gal Trading",
-        footerDesc: "Your trusted partner in industrial supplies",
-        copyrightText: "© 2025 Gal Trading & Supplies — All rights reserved",
-        searchLabel: "Search Products",
-        searchInput: "Search by product name or description..."
-    }
-};
-
-function applyTranslations(lang) {
-    const t = langs[lang] || langs.ar;
-    const map = {
-        brandName: t.brandName,
-        pageTitle: t.pageTitle,
-        mainTitle: t.mainTitle,
-        mainDesc: t.mainDesc,
-        selectedLabel: t.selectedLabel,
-        productLabel: t.productLabel,
-        clearBtn: t.clearBtn,
-        filterTitle: t.filterTitle,
-        allCat: t.allCat,
-        selectedBadge: t.selectedBadge,
-        noProductsTitle: t.noProductsTitle,
-        noProductsDesc: t.noProductsDesc,
-        submitBtn: t.submitBtn,
-        dialogTitle: t.dialogTitle,
-        nameLabel: t.nameLabel,
-        phoneLabel: t.phoneLabel,
-        notesLabel: t.notesLabel,
-        selectedItemsTitle: t.selectedItemsTitle,
-        sendWhatsAppBtn: t.sendWhatsAppBtn,
-        cancelBtn: t.cancelBtn,
-        navProducts: t.navProducts,
-        navCart: t.navCart,
-        navContact: t.navContact,
-        mnavProducts: t.mnavProducts,
-        mnavCart: t.mnavCart,
-        mnavContact: t.mnavContact,
-        fnavProducts: t.fnavProducts,
-        fnavCart: t.fnavCart,
-        fnavContact: t.fnavContact,
-        footerBrand: t.footerBrand,
-        footerDesc: t.footerDesc,
-        copyrightText: t.copyrightText,
-        searchLabel: t.searchLabel,
-        searchInput: t.searchInput
-    };
-
-    for (const id in map) {
-        const el = document.getElementById(id);
-        if (el && map[id]) el.innerText = map[id];
-    }
-
-    // Placeholders
-    const nameInput = document.getElementById('nameInput');
-    const phoneInput = document.getElementById('phoneInput');
-    const notesInput = document.getElementById('notesInput');
-    const searchInput = document.getElementById('searchInput');
-    if (nameInput) nameInput.placeholder = t.nameInput;
-    if (phoneInput) phoneInput.placeholder = t.phoneInput;
-    if (notesInput) notesInput.placeholder = t.notesInput;
-    if (searchInput) searchInput.placeholder = t.searchInput;
-
-    document.title = t.pageTitle;
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    document.getElementById("current-lang").innerText = lang.toUpperCase();
-    localStorage.setItem("lang", lang);
-}
-
-function changeLang(lang) {
-    applyTranslations(lang);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem("lang") || "ar";
-    applyTranslations(saved);
-});
-
-function headerManager() {
-    return {
-        cartCount: 0,
-        init() {
-            this.loadCartCount();
-            window.addEventListener('storage', () => this.loadCartCount());
-            window.addEventListener('cartUpdated', () => this.loadCartCount());
+    const langs = {
+        ar: {
+            brandName: "جال لتوريدات المصانع",
+            pageTitle: "طلب عرض سعر - جال للتجارة",
+            mainTitle: "طلب عرض سعر",
+            mainDesc: "اختر المنتجات التي تحتاجها وسنرسل لك عرض سعر مفصل",
+            selectedLabel: "تم اختيار",
+            productLabel: "منتج",
+            clearBtn: "مسح الكل",
+            filterTitle: "تصفية حسب التصنيف",
+            allCat: "جميع التصنيفات",
+            selectedBadge: "محدد",
+            noProductsTitle: "لا توجد منتجات",
+            noProductsDesc: "جرب اختيار تصنيف آخر أو تعديل البحث",
+            submitBtn: "إرسال الطلب",
+            dialogTitle: "إرسال الطلب عبر واتساب",
+            nameLabel: "الاسم",
+            nameInput: "اسمك الكامل",
+            phoneLabel: "رقم الهاتف",
+            phoneInput: "01xxxxxxxxx",
+            notesLabel: "ملاحظات إضافية (اختياري)",
+            notesInput: "أي تفاصيل إضافية...",
+            selectedItemsTitle: "المنتجات المحددة",
+            sendWhatsAppBtn: "إرسال عبر واتساب",
+            cancelBtn: "إلغاء",
+            navProducts: "المنتجات",
+            navCart: "السلة",
+            navContact: "تواصل معنا",
+            mnavProducts: "المنتجات",
+            mnavCart: "السلة",
+            mnavContact: "تواصل معنا",
+            fnavProducts: "المنتجات",
+            fnavCart: "السلة",
+            fnavContact: "تواصل معنا",
+            footerBrand: "جال للتجارة",
+            footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية",
+            copyrightText: "© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة",
+            searchLabel: "بحث عن المنتجات",
+            searchInput: "ابحث باسم المنتج أو الوصف...",
+            showingLabel: "عرض",
+            ofLabel: "من",
+            pageLabel: "صفحة",
+            ofPagesLabel: "من"
         },
-        loadCartCount() {
-            const cart = localStorage.getItem('cart');
-            const items = cart ? JSON.parse(cart) : [];
-            this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+        en: {
+            brandName: "Gal Industrial Supplies",
+            pageTitle: "Price Request - Gal Trading",
+            mainTitle: "Request a Quote",
+            mainDesc: "Select the products you need and we'll send you a detailed quote",
+            selectedLabel: "Selected",
+            productLabel: "product(s)",
+            clearBtn: "Clear All",
+            filterTitle: "Filter by Category",
+            allCat: "All Categories",
+            selectedBadge: "Selected",
+            noProductsTitle: "No Products Found",
+            noProductsDesc: "Try selecting another category or modifying your search",
+            submitBtn: "Submit Request",
+            dialogTitle: "Send Request via WhatsApp",
+            nameLabel: "Name",
+            nameInput: "Your full name",
+            phoneLabel: "Phone Number",
+            phoneInput: "01xxxxxxxxx",
+            notesLabel: "Additional Notes (Optional)",
+            notesInput: "Any additional details...",
+            selectedItemsTitle: "Selected Products",
+            sendWhatsAppBtn: "Send via WhatsApp",
+            cancelBtn: "Cancel",
+            navProducts: "Products",
+            navCart: "Cart",
+            navContact: "Contact",
+            mnavProducts: "Products",
+            mnavCart: "Cart",
+            mnavContact: "Contact",
+            fnavProducts: "Products",
+            fnavCart: "Cart",
+            fnavContact: "Contact",
+            footerBrand: "Gal Trading",
+            footerDesc: "Your trusted partner in industrial supplies",
+            copyrightText: "© 2025 Gal Trading & Supplies — All rights reserved",
+            searchLabel: "Search Products",
+            searchInput: "Search by product name or description...",
+            showingLabel: "Showing",
+            ofLabel: "of",
+            pageLabel: "Page",
+            ofPagesLabel: "of"
         }
     };
-}
 
-function priceRequestApp() {
-    return {
-        products: [],
-        categories: [],
-        filteredProducts: [],
-        selectedProducts: [],
-        selectedCategory: '',
-        searchQuery: '',
-        loading: true,
-        showDialog: false,
-        customerName: '',
-        customerPhone: '',
-        countryCode: '+20',
-        customerNotes: '',
+    function applyTranslations(lang) {
+        const t = langs[lang] || langs.ar;
+        const map = {
+            brandName: t.brandName,
+            pageTitle: t.pageTitle,
+            mainTitle: t.mainTitle,
+            mainDesc: t.mainDesc,
+            selectedLabel: t.selectedLabel,
+            productLabel: t.productLabel,
+            clearBtn: t.clearBtn,
+            filterTitle: t.filterTitle,
+            allCat: t.allCat,
+            selectedBadge: t.selectedBadge,
+            noProductsTitle: t.noProductsTitle,
+            noProductsDesc: t.noProductsDesc,
+            submitBtn: t.submitBtn,
+            dialogTitle: t.dialogTitle,
+            nameLabel: t.nameLabel,
+            phoneLabel: t.phoneLabel,
+            notesLabel: t.notesLabel,
+            selectedItemsTitle: t.selectedItemsTitle,
+            sendWhatsAppBtn: t.sendWhatsAppBtn,
+            cancelBtn: t.cancelBtn,
+            navProducts: t.navProducts,
+            navCart: t.navCart,
+            navContact: t.navContact,
+            mnavProducts: t.mnavProducts,
+            mnavCart: t.mnavCart,
+            mnavContact: t.mnavContact,
+            fnavProducts: t.fnavProducts,
+            fnavCart: t.fnavCart,
+            fnavContact: t.fnavContact,
+            footerBrand: t.footerBrand,
+            footerDesc: t.footerDesc,
+            copyrightText: t.copyrightText,
+            searchLabel: t.searchLabel,
+            searchInput: t.searchInput,
+            showingLabel: t.showingLabel,
+            ofLabel: t.ofLabel,
+            pageLabel: t.pageLabel,
+            ofPagesLabel: t.ofPagesLabel
+        };
 
-        async init() {
-            await this.loadCategories();
-            await this.loadProducts();
-        },
+        for (const id in map) {
+            const el = document.getElementById(id);
+            if (el && map[id]) el.innerText = map[id];
+        }
 
-        async loadProducts() {
-            try {
-                this.loading = true;
-                const response = await fetch('/api/products');
-                if (!response.ok) throw new Error('Failed to load products');
-                this.products = await response.json();
-                this.filteredProducts = this.products;
-            } catch (err) {
-                console.error('Error loading products:', err);
-            } finally {
-                this.loading = false;
+        // Placeholders
+        const nameInput = document.getElementById('nameInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const notesInput = document.getElementById('notesInput');
+        const searchInput = document.getElementById('searchInput');
+        if (nameInput) nameInput.placeholder = t.nameInput;
+        if (phoneInput) phoneInput.placeholder = t.phoneInput;
+        if (notesInput) notesInput.placeholder = t.notesInput;
+        if (searchInput) searchInput.placeholder = t.searchInput;
+
+        document.title = t.pageTitle;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+        document.getElementById("current-lang").innerText = lang.toUpperCase();
+        localStorage.setItem("lang", lang);
+    }
+
+    function changeLang(lang) {
+        applyTranslations(lang);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem("lang") || "ar";
+        applyTranslations(saved);
+    });
+
+    function headerManager() {
+        return {
+            cartCount: 0,
+            init() {
+                this.loadCartCount();
+                window.addEventListener('storage', () => this.loadCartCount());
+                window.addEventListener('cartUpdated', () => this.loadCartCount());
+            },
+            loadCartCount() {
+                const cart = localStorage.getItem('cart');
+                const items = cart ? JSON.parse(cart) : [];
+                this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
             }
-        },
+        };
+    }
 
-        async loadCategories() {
-            try {
-                const response = await fetch('/api/categories');
-                if (!response.ok) throw new Error('Failed to load categories');
-                this.categories = await response.json();
-            } catch (err) {
-                console.error('Error loading categories:', err);
-            }
-        },
+    function priceRequestApp() {
+        return {
+            products: [],
+            categories: [],
+            filteredProducts: [],
+            selectedProducts: [],
+            selectedCategory: '',
+            searchQuery: '',
+            loading: true,
+            showDialog: false,
+            customerName: '',
+            customerPhone: '',
+            countryCode: '+20',
+            customerNotes: '',
+            pagination: {
+                page: 1,
+                limit: 12,
+                total: 0,
+                totalPages: 0
+            },
 
-        filterProducts() {
-            let filtered = this.products;
+            get visiblePages() {
+                const current = this.pagination.page;
+                const total = this.pagination.totalPages;
+                const pages = [];
 
-            // Filter by category
-            if (this.selectedCategory) {
-                filtered = filtered.filter(p => p.categoryId === this.selectedCategory);
-            }
+                let start = Math.max(1, current - 2);
+                let end = Math.min(total, current + 2);
 
-            // Filter by search query
-            if (this.searchQuery) {
-                const query = this.searchQuery.toLowerCase();
-                filtered = filtered.filter(p =>
-                    p.name.toLowerCase().includes(query) ||
-                    (p.description && p.description.toLowerCase().includes(query))
-                );
-            }
-
-            this.filteredProducts = filtered;
-        },
-
-        toggleProduct(product) {
-            const index = this.selectedProducts.findIndex(p => p._id === product._id);
-            if (index > -1) {
-                this.selectedProducts.splice(index, 1);
-            } else {
-                this.selectedProducts.push(product);
-            }
-        },
-
-        isSelected(productId) {
-            return this.selectedProducts.some(p => p._id === productId);
-        },
-
-        clearSelection() {
-            this.selectedProducts = [];
-        },
-
-        getCategoryName(categoryId) {
-            const cat = this.categories.find(c => c._id === categoryId);
-            return cat ? cat.name : (localStorage.getItem('lang') === 'en' ? 'Unspecified' : 'غير محدد');
-        },
-
-        getCategoryCount(categoryId) {
-            return this.products.filter(p => p.categoryId === categoryId).length;
-        },
-
-        openWhatsAppDialog() {
-            this.showDialog = true;
-        },
-
-        sendToWhatsApp() {
-            if (!this.customerName || !this.customerPhone) {
-                const lang = localStorage.getItem('lang') || 'ar';
-                alert(lang === 'en' ? 'Please fill in name and phone number' : 'يرجى ملء الاسم ورقم الهاتف');
-                return;
-            }
-
-            // Build WhatsApp message
-            const lang = localStorage.getItem('lang') || 'ar';
-            let message = lang === 'en'
-                ? `*Price Request*\n\n*Customer Name:* ${this.customerName}\n*Phone:* ${this.countryCode}${this.customerPhone}\n\n*Selected Products:*\n\n`
-                : `*طلب عرض سعر*\n\n*اسم العميل:* ${this.customerName}\n*الهاتف:* ${this.countryCode}${this.customerPhone}\n\n*المنتجات المطلوبة:*\n\n`;
-
-            this.selectedProducts.forEach((product, index) => {
-                message += `${index + 1}. ${product.name}\n`;
-                message += `   ${lang === 'en' ? 'Category' : 'التصنيف'}: ${this.getCategoryName(product.categoryId)}\n`;
-                if (product.description) {
-                    message += `   ${lang === 'en' ? 'Details' : 'الوصف'}: ${product.description}\n`;
+                if (end - start < 4) {
+                    if (start === 1) {
+                        end = Math.min(total, start + 4);
+                    } else if (end === total) {
+                        start = Math.max(1, end - 4);
+                    }
                 }
-                message += `\n`;
-            });
 
-            if (this.customerNotes) {
-                message += lang === 'en'
-                    ? `\n*Additional Notes:*\n${this.customerNotes}`
-                    : `\n*ملاحظات إضافية:*\n${this.customerNotes}`;
+                for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                }
+
+                return pages;
+            },
+
+            async init() {
+                await this.loadCategories();
+                await this.loadProducts();
+            },
+
+            async loadProducts() {
+                try {
+                    this.loading = true;
+                    const params = new URLSearchParams({
+                        page: this.pagination.page,
+                        limit: this.pagination.limit,
+                        search: this.searchQuery,
+                        category: this.selectedCategory
+                    });
+
+                    const response = await fetch(`/api/products?${params}`);
+                    if (!response.ok) throw new Error('Failed to load products');
+                    const data = await response.json();
+
+                    if (data.data) {
+                        this.products = data.data;
+                        this.pagination.total = data.total;
+                        this.pagination.totalPages = data.totalPages;
+                        this.pagination.page = data.page;
+                    } else {
+                        this.products = data;
+                        this.pagination.total = data.length;
+                        this.pagination.totalPages = Math.ceil(data.length / this.pagination.limit);
+                    }
+
+                    this.filteredProducts = this.products;
+                } catch (err) {
+                    console.error('Error loading products:', err);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async loadCategories() {
+                try {
+                    const response = await fetch('/api/categories');
+                    if (!response.ok) throw new Error('Failed to load categories');
+                    this.categories = await response.json();
+                } catch (err) {
+                    console.error('Error loading categories:', err);
+                }
+            },
+
+            async filterProducts() {
+                this.pagination.page = 1;
+                await this.loadProducts();
+            },
+
+            toggleProduct(product) {
+                const index = this.selectedProducts.findIndex(p => p._id === product._id);
+                if (index > -1) {
+                    this.selectedProducts.splice(index, 1);
+                } else {
+                    this.selectedProducts.push(product);
+                }
+            },
+
+            isSelected(productId) {
+                return this.selectedProducts.some(p => p._id === productId);
+            },
+
+            clearSelection() {
+                this.selectedProducts = [];
+            },
+
+            getCategoryName(categoryId) {
+                const cat = this.categories.find(c => c._id === categoryId);
+                return cat ? cat.name : (localStorage.getItem('lang') === 'en' ? 'Unspecified' : 'غير محدد');
+            },
+
+            getCategoryCount(categoryId) {
+                return this.products.filter(p => p.categoryId === categoryId).length;
+            },
+
+            async goToPage(page) {
+                if (page < 1 || page > this.pagination.totalPages) return;
+                this.pagination.page = page;
+                await this.loadProducts();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            async changeLimit() {
+                this.pagination.page = 1;
+                await this.loadProducts();
+            },
+
+            openWhatsAppDialog() {
+                this.showDialog = true;
+            },
+
+            sendToWhatsApp() {
+                if (!this.customerName || !this.customerPhone) {
+                    const lang = localStorage.getItem('lang') || 'ar';
+                    alert(lang === 'en' ? 'Please fill in name and phone number' : 'يرجى ملء الاسم ورقم الهاتف');
+                    return;
+                }
+
+                // Build WhatsApp message
+                const lang = localStorage.getItem('lang') || 'ar';
+                let message = lang === 'en'
+                    ? `*Price Request*\n\n*Customer Name:* ${this.customerName}\n*Phone:* ${this.countryCode}${this.customerPhone}\n\n*Selected Products:*\n\n`
+                    : `*طلب عرض سعر*\n\n*اسم العميل:* ${this.customerName}\n*الهاتف:* ${this.countryCode}${this.customerPhone}\n\n*المنتجات المطلوبة:*\n\n`;
+
+                this.selectedProducts.forEach((product, index) => {
+                    message += `${index + 1}. ${product.name}\n`;
+                    message += `   ${lang === 'en' ? 'Category' : 'التصنيف'}: ${this.getCategoryName(product.categoryId)}\n`;
+                    if (product.description) {
+                        message += `   ${lang === 'en' ? 'Details' : 'الوصف'}: ${product.description}\n`;
+                    }
+                    message += `\n`;
+                });
+
+                if (this.customerNotes) {
+                    message += lang === 'en'
+                        ? `\n*Additional Notes:*\n${this.customerNotes}`
+                        : `\n*ملاحظات إضافية:*\n${this.customerNotes}`;
+                }
+
+                // Company WhatsApp number
+                const whatsappNumber = '+201104391245';
+                const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+                window.open(url, '_blank');
+
+                // Reset form
+                this.showDialog = false;
+                this.customerName = '';
+                this.customerPhone = '';
+                this.countryCode = '+966';
+                this.customerNotes = '';
+                this.selectedProducts = [];
             }
-
-            // Company WhatsApp number
-            const whatsappNumber = '+201104391245';
-            const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-
-            window.open(url, '_blank');
-
-            // Reset form
-            this.showDialog = false;
-            this.customerName = '';
-            this.customerPhone = '';
-            this.countryCode = '+966';
-            this.customerNotes = '';
-            this.selectedProducts = [];
-        }
-    };
-}
+        };
+    }
 </script>
 </body>
 </html>

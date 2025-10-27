@@ -4,7 +4,13 @@ function categoryApp() {
         newCategory: { name: '' },
         selectedFile: null,
         imagePreview: null,
-        modal: { show: false, category: {} },
+        modal: {
+            show: false,
+            category: {},
+            selectedFile: null,
+            imagePreview: null,
+            removeCurrentImageFlag: false
+        },
         alert: { show: false, message: '', type: 'success' },
         searchQuery: '',
 
@@ -38,9 +44,32 @@ function categoryApp() {
             }
         },
 
+        handleEditFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.modal.selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = e => this.modal.imagePreview = e.target.result;
+                reader.readAsDataURL(file);
+            }
+        },
+
         clearImage() {
             this.selectedFile = null;
             this.imagePreview = null;
+            document.getElementById('addImageInput').value = '';
+        },
+
+        clearEditImage() {
+            this.modal.selectedFile = null;
+            this.modal.imagePreview = null;
+            document.getElementById('editImageInput').value = '';
+        },
+
+        removeCurrentImage() {
+            this.modal.removeCurrentImageFlag = true;
+            this.modal.category.imageUrl = null;
+            this.clearEditImage();
         },
 
         async addCategory() {
@@ -123,7 +152,13 @@ function categoryApp() {
         },
 
         openEditModal(category) {
-            this.modal = { show: true, category: { ...category } };
+            this.modal = {
+                show: true,
+                category: { ...category },
+                selectedFile: null,
+                imagePreview: null,
+                removeCurrentImageFlag: false
+            };
         },
 
         async updateCategory() {
@@ -133,21 +168,49 @@ function categoryApp() {
             }
 
             try {
-                const res = await fetch(`/api/categories/${this.modal.category._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(this.modal.category),
-                    credentials: 'include'
-                });
-                console.log('Update category status:', res.status);
-                if (!res.ok) {
-                    const text = await res.text();
-                    console.log('Update category response:', text);
-                    throw new Error(text || 'فشل في تحديث التصنيف');
+                let data;
+                if (this.modal.selectedFile || this.modal.removeCurrentImageFlag) {
+                    const formData = new FormData();
+                    formData.append('name', this.modal.category.name);
+                    if (this.modal.selectedFile) {
+                        formData.append('image', this.modal.selectedFile);
+                    }
+                    if (this.modal.removeCurrentImageFlag) {
+                        formData.append('removeImage', 'true');
+                    }
+
+                    const res = await fetch(`/api/categories/${this.modal.category._id}/with-image`, {
+                        method: 'PUT',
+                        body: formData,
+                        credentials: 'include'
+                    });
+                    console.log('Update category with image status:', res.status);
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Update category with image response:', text);
+                        throw new Error(text || 'فشل في تحديث التصنيف');
+                    }
+                    data = await res.json();
+                } else {
+                    const res = await fetch(`/api/categories/${this.modal.category._id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.modal.category),
+                        credentials: 'include'
+                    });
+                    console.log('Update category status:', res.status);
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.log('Update category response:', text);
+                        throw new Error(text || 'فشل في تحديث التصنيف');
+                    }
+                    data = await res.json();
                 }
-                const data = await res.json();
+
                 const index = this.categories.findIndex(c => c._id === this.modal.category._id);
-                if (index !== -1) this.categories[index] = { ...this.modal.category };
+                if (index !== -1) {
+                    this.categories[index] = { ...this.modal.category, imageUrl: data.data?.imageUrl || this.categories[index].imageUrl };
+                }
                 this.modal.show = false;
                 this.showAlert('✅ تم التحديث بنجاح', 'success');
             } catch (err) {

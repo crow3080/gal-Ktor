@@ -28,8 +28,12 @@ fun Route.productRoutes(
 
         get {
             try {
-                val products = productService.getAllProducts()
-                call.respond(HttpStatusCode.OK, products)
+                val page = call.parameters["page"]?.toIntOrNull() ?: 1
+                val limit = call.parameters["limit"]?.toIntOrNull() ?: 12
+                val search = call.parameters["search"]?.trim() ?: ""
+
+                val result = productService.getProductsPaginated(page, limit, search)
+                call.respond(HttpStatusCode.OK, result)
             } catch (e: Exception) {
                 call.respond(
                     HttpStatusCode.InternalServerError,
@@ -181,6 +185,15 @@ fun Route.productRoutes(
                     return@put
                 }
 
+                val categoryExists = productService.categoryExists(product.categoryId)
+                if (!categoryExists) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ApiResponse(false, "التصنيف المحدد غير موجود")
+                    )
+                    return@put
+                }
+
                 val updated = productService.updateProduct(id, product)
 
                 if (updated) {
@@ -198,6 +211,119 @@ fun Route.productRoutes(
                 call.respond(
                     HttpStatusCode.BadRequest,
                     ApiResponse(false, "خطأ في التحديث: ${e.message}")
+                )
+            }
+        }
+
+        put("/{id}/with-image") {
+            try {
+                val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
+                val multipart = call.receiveMultipart()
+                var name = ""
+                var price = 0.0
+                var description = ""
+                var categoryId = ""
+                var imageUrl: String? = null
+                var removeImage = false
+
+                // جلب المنتج الحالي للحصول على الصورة القديمة
+                val currentProduct = productService.getProductById(id)
+                if (currentProduct == null) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        ApiResponse(false, "المنتج غير موجود")
+                    )
+                    return@put
+                }
+
+                multipart.forEachPart { part ->
+                    when (part) {
+                        is PartData.FormItem -> {
+                            when (part.name) {
+                                "name" -> name = part.value
+                                "price" -> price = part.value.toDoubleOrNull() ?: 0.0
+                                "description" -> description = part.value
+                                "categoryId" -> categoryId = part.value
+                                "removeImage" -> removeImage = part.value == "true"
+                            }
+                        }
+                        is PartData.FileItem -> {
+                            val fileBytes = part.streamProvider().readBytes()
+                            val originalFileName = part.originalFileName ?: "image.jpg"
+                            val fileExtension = originalFileName.substringAfterLast(".")
+                            val fileName = "${java.util.UUID.randomUUID()}.$fileExtension"
+                            val file = File("uploads/images/$fileName")
+                            file.parentFile.mkdirs()
+                            file.writeBytes(fileBytes)
+                            imageUrl = "/uploads/images/$fileName"
+                        }
+                        else -> {}
+                    }
+                    part.dispose()
+                }
+
+                // إذا تم طلب إزالة الصورة، تعيين imageUrl إلى null
+                if (removeImage) {
+                    imageUrl = null
+                    currentProduct.imageUrl?.let { fileUploadService.deleteImage(it) }
+                } else if (imageUrl != null) {
+                    // إذا تم رفع صورة جديدة، حذف الصورة القديمة إن وجدت
+                    currentProduct.imageUrl?.let { fileUploadService.deleteImage(it) }
+                } else {
+                    // الاحتفاظ بالصورة الحالية إذا لم يتم رفع صورة جديدة ولم يتم طلب الإزالة
+                    imageUrl = currentProduct.imageUrl
+                }
+
+                val product = Product(
+                    _id = id,
+                    name = name,
+                    price = price,
+                    description = description,
+                    categoryId = categoryId,
+                    imageUrl = imageUrl
+                )
+
+                val validationError = productService.validateProduct(product)
+                if (validationError != null) {
+                    // حذف الصورة المرفوعة إذا فشل التحقق
+                    imageUrl?.let { if (!removeImage && it != currentProduct.imageUrl) fileUploadService.deleteImage(it) }
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ApiResponse(false, validationError)
+                    )
+                    return@put
+                }
+
+                val categoryExists = productService.categoryExists(product.categoryId)
+                if (!categoryExists) {
+                    // حذف الصورة المرفوعة إذا فشل التحقق
+                    imageUrl?.let { if (!removeImage && it != currentProduct.imageUrl) fileUploadService.deleteImage(it) }
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ApiResponse(false, "التصنيف المحدد غير موجود")
+                    )
+                    return@put
+                }
+
+                val updated = productService.updateProduct(id, product)
+
+                if (updated) {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        ApiResponse(true, "تم تحديث المنتج بنجاح", product)
+                    )
+                } else {
+                    // حذف الصورة المرفوعة إذا فشل التحديث
+                    imageUrl?.let { if (!removeImage && it != currentProduct.imageUrl) fileUploadService.deleteImage(it) }
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        ApiResponse(false, "المنتج غير موجود")
+                    )
+                }
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ApiResponse(false, "خطأ في تحديث المنتج: ${e.message}")
                 )
             }
         }
@@ -230,7 +356,6 @@ fun Route.productRoutes(
             }
         }
 
-        // ✅ نقل endpoint الاستيراد هنا داخل route /api/products
         post("/import") {
             try {
                 val multipart = call.receiveMultipart()
@@ -259,46 +384,32 @@ fun Route.productRoutes(
                 val errors = mutableListOf<String>()
 
                 val content = csvFile!!.readText(Charsets.UTF_8)
-                println("📄 محتوى الملف:")
-                println(content)
-
                 val lines = content.lines().filter { it.isNotBlank() }
-                println("📊 عدد الأسطر: ${lines.size}")
 
-                // تجاهل الصف الأول (العناوين)
                 for (i in 1 until lines.size) {
                     try {
                         val line = lines[i].trim()
-                        println("\n🔍 معالجة السطر $i: $line")
-
                         val parts = line.split(",").map { it.trim() }
-                        println("   الأجزاء (${parts.size}): ${parts.joinToString(" | ")}")
 
-                        if (parts.size < 4) {
-                            val error = "السطر $i: عدد أعمدة غير كافي (${parts.size}/4)"
-                            errors.add(error)
-                            println("   ❌ $error")
+                        if (parts.isEmpty() || parts[0].isBlank()) {
+                            errors.add("السطر $i: اسم المنتج فارغ")
                             continue
                         }
 
-                        val name = parts[0]
-                        val priceStr = parts[1]
-                        val description = parts[2]
-                        val categoryId = parts[3]
-                        val imageUrl = if (parts.size > 4 && parts[4].isNotBlank()) parts[4] else null
-
-                        println("   📦 اسم: $name")
-                        println("   💰 سعر: $priceStr")
-                        println("   📝 وصف: $description")
-                        println("   🏷️  تصنيف: $categoryId")
-                        println("   🖼️  صورة: $imageUrl")
+                        val name = parts.getOrNull(0) ?: ""
+                        val priceStr = parts.getOrNull(1) ?: ""
+                        var description = parts.getOrNull(2) ?: ""
+                        val categoryId = parts.getOrNull(3) ?: ""
+                        val imageUrl = parts.getOrNull(4)?.takeIf { it.isNotBlank() }
 
                         val price = priceStr.toDoubleOrNull()
                         if (price == null || price <= 0) {
-                            val error = "السطر $i: السعر غير صحيح ($priceStr)"
-                            errors.add(error)
-                            println("   ❌ $error")
+                            errors.add("السطر $i: السعر غير صحيح ($priceStr)")
                             continue
+                        }
+
+                        if (description.isBlank()) {
+                            description = name
                         }
 
                         val product = Product(
@@ -309,42 +420,23 @@ fun Route.productRoutes(
                             imageUrl = imageUrl
                         )
 
-                        val validationError = productService.validateProduct(product)
-                        if (validationError != null) {
-                            val error = "السطر $i: $validationError"
-                            errors.add(error)
-                            println("   ❌ $error")
-                            continue
-                        }
-
-                        val categoryExists = productService.categoryExists(categoryId)
-                        println("   🔎 التصنيف موجود؟ $categoryExists")
-
-                        if (!categoryExists) {
-                            val error = "السطر $i: التصنيف '$categoryId' غير موجود"
-                            errors.add(error)
-                            println("   ❌ $error")
-                            continue
+                        if (categoryId.isNotBlank()) {
+                            val categoryExists = productService.categoryExists(categoryId)
+                            if (!categoryExists) {
+                                errors.add("السطر $i: التصنيف '$categoryId' غير موجود")
+                                continue
+                            }
                         }
 
                         val newProduct = productService.createProduct(product)
                         addedProducts.add(newProduct)
-                        println("   ✅ تم إضافة المنتج بنجاح!")
 
                     } catch (e: Exception) {
-                        val error = "السطر $i: ${e.message}"
-                        errors.add(error)
-                        println("   ❌ خطأ: ${e.message}")
-                        e.printStackTrace()
+                        errors.add("السطر $i: ${e.message}")
                     }
                 }
 
-                // حذف الملف المؤقت
                 csvFile!!.delete()
-
-                println("\n📊 النتيجة النهائية:")
-                println("   ✅ نجح: ${addedProducts.size}")
-                println("   ❌ فشل: ${errors.size}")
 
                 val message = if (errors.isNotEmpty()) {
                     "تم استيراد ${addedProducts.size} منتج. فشل ${errors.size}: ${errors.take(3).joinToString("; ")}"
