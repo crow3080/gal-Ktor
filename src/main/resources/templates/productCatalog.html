@@ -561,215 +561,205 @@
 
     document.addEventListener('DOMContentLoaded', loadSavedLang);
 
-    function productCatalog() {
-        return {
-            products: [],
-            categories: [],
-            loading: true,
-            error: '',
-            searchQuery: '',
-            selectedCategory: '',
-            sortBy: '',
-            showModal: false,
-            selectedProduct: null,
-            showToast: false,
-            toastMessage: '',
-            allProductsCount: 0,
-            pagination: {
-                page: 1,
-                limit: 24,
-                total: 0,
-                totalPages: 0
-            },
+   function productCatalog() {
+    return {
+        products: [],
+        categories: [],
+        loading: true,
+        error: '',
+        searchQuery: '',
+        selectedCategory: '',
+        sortBy: '',
+        showModal: false,
+        selectedProduct: null,
+        showToast: false,
+        toastMessage: '',
+        allProductsCount: 0,
+        pagination: {
+            page: 1,
+            limit: 24,
+            total: 0,
+            totalPages: 0
+        },
 
-            get visiblePages() {
-                const current = this.pagination.page;
-                const total = this.pagination.totalPages;
-                const pages = [];
+        get visiblePages() {
+            const current = this.pagination.page;
+            const total = this.pagination.totalPages;
+            const pages = [];
 
-                let start = Math.max(1, current - 2);
-                let end = Math.min(total, current + 2);
+            let start = Math.max(1, current - 2);
+            let end = Math.min(total, current + 2);
 
-                if (end - start < 4) {
-                    if (start === 1) {
-                        end = Math.min(total, start + 4);
-                    } else if (end === total) {
-                        start = Math.max(1, end - 4);
-                    }
+            if (end - start < 4) {
+                if (start === 1) {
+                    end = Math.min(total, start + 4);
+                } else if (end === total) {
+                    start = Math.max(1, end - 4);
                 }
+            }
 
-                for (let i = start; i <= end; i++) {
-                    pages.push(i);
-                }
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
 
-                return pages;
-            },
+            return pages;
+        },
 
-            async init() {
-                const lang = localStorage.getItem('lang') || 'ar';
-                if (typeof applyTranslations === 'function') applyTranslations(lang);
+        async init() {
+            const lang = localStorage.getItem('lang') || 'ar';
+            if (typeof applyTranslations === 'function') applyTranslations(lang);
 
-                await this.loadCategories();
-                await this.loadProducts();
-            },
+            await this.loadCategories();
+            await this.loadProducts();
+        },
 
-            async loadProducts() {
-                try {
-                    this.loading = true;
-                    this.error = '';
+        async loadProducts() {
+            try {
+                this.loading = true;
+                this.error = '';
 
-                    const params = new URLSearchParams({
-                        page: this.pagination.page,
-                        limit: this.pagination.limit,
-                        search: this.searchQuery
-                    });
+                // تنظيف query البحث لإزالة الرموز الخاصة
+                const cleanSearchQuery = this.cleanSearchText(this.searchQuery);
 
-                    const response = await fetch(`/api/products?${params}`);
-                    if (!response.ok) throw new Error('فشل تحميل المنتجات');
-
-                    const data = await response.json();
-
-                    if (data.data) {
-                        this.products = data.data;
-                        this.pagination.total = data.total;
-                        this.pagination.totalPages = data.totalPages;
-                        this.pagination.page = data.page;
-                    } else {
-                        this.products = data;
-                        this.pagination.total = data.length;
-                        this.pagination.totalPages = 1;
-                    }
-
-                    if (!this.allProductsCount) {
-                        this.allProductsCount = this.pagination.total;
-                    }
-
-                    this.applyFilters();
-                } catch (err) {
-                    this.error = (localStorage.getItem('lang') === 'en') ? 'Failed to load products' : 'حدث خطأ في تحميل المنتجات';
-                    console.error(err);
-                } finally {
-                    this.loading = false;
-                }
-            },
-
-            async loadCategories() {
-                try {
-                    const response = await fetch('/api/categories');
-                    if (!response.ok) throw new Error('فشل تحميل التصنيفات');
-
-                    const data = await response.json();
-                    this.categories = data;
-                } catch (err) {
-                    console.error('خطأ في تحميل التصنيفات:', err);
-                }
-            },
-
-            async searchProducts() {
-                this.pagination.page = 1;
-                await this.loadProducts();
-            },
-
-            async filterProducts() {
-                this.pagination.page = 1;
-                this.applyFilters();
-            },
-
-            applyFilters() {
-                let result = [...this.products];
+                const params = new URLSearchParams({
+                    page: this.pagination.page,
+                    limit: this.pagination.limit,
+                    search: cleanSearchQuery
+                });
 
                 if (this.selectedCategory) {
-                    result = result.filter(p => p.categoryId === this.selectedCategory);
+                    params.append('category', this.selectedCategory);
                 }
 
-                this.products = result;
-                this.sortProducts();
-            },
-
-            sortProducts() {
-                if (!this.sortBy) return;
-
-                const sorted = [...this.products];
-
-                switch(this.sortBy) {
-                    case 'price-asc':
-                        sorted.sort((a, b) => a.price - b.price);
-                        break;
-                    case 'price-desc':
-                        sorted.sort((a, b) => b.price - a.price);
-                        break;
-                    case 'name':
-                        const lang = localStorage.getItem('lang') || 'ar';
-                        sorted.sort((a, b) => {
-                            const an = (a.name || '').toString();
-                            const bn = (b.name || '').toString();
-                            return an.localeCompare(bn, lang);
-                        });
-                        break;
+                if (this.sortBy) {
+                    params.append('sort', this.sortBy);
                 }
 
-                this.products = sorted;
-            },
+                console.log('Search params:', params.toString()); // للتصحيح
 
-            async goToPage(page) {
-                if (page < 1 || page > this.pagination.totalPages) return;
-                this.pagination.page = page;
-                await this.loadProducts();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            },
+                const response = await fetch(`/api/products?${params}`);
+                if (!response.ok) throw new Error('فشل تحميل المنتجات');
 
-            async changeLimit() {
-                this.pagination.page = 1;
-                await this.loadProducts();
-            },
+                const data = await response.json();
 
-            getCategoryName(categoryId) {
-                const category = this.categories.find(c => c._id === categoryId);
-                return category ? category.name : (localStorage.getItem('lang') === 'en' ? 'Unspecified' : 'غير محدد');
-            },
-
-            getCategoryProductCount(categoryId) {
-                return this.products.filter(p => p.categoryId === categoryId).length;
-            },
-
-            scrollCategories(direction) {
-                const container = this.$refs.categoriesScroll;
-                const scrollAmount = 300;
-
-                if (!container) return;
-                if (direction === 'left') {
-                    container.scrollLeft -= scrollAmount;
+                if (data.data) {
+                    this.products = data.data;
+                    this.pagination.total = data.total;
+                    this.pagination.totalPages = data.totalPages;
+                    this.pagination.page = data.page;
                 } else {
-                    container.scrollLeft += scrollAmount;
+                    this.products = data;
+                    this.pagination.total = data.length;
+                    this.pagination.totalPages = 1;
                 }
-            },
 
-            showProductDetails(product) {
-                this.selectedProduct = product;
-                this.showModal = true;
-            },
-
-            addToCart(product) {
-                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-                const existingItem = cart.find(item => item._id === product._id);
-                if (existingItem) {
-                    existingItem.quantity += 1;
-                } else {
-                    cart.push({...product, quantity: 1});
+                if (!this.allProductsCount) {
+                    this.allProductsCount = this.pagination.total;
                 }
-                localStorage.setItem('cart', JSON.stringify(cart));
-
-                const cartEvent = new Event('cartUpdated');
-                window.dispatchEvent(cartEvent);
-
-                const lang = localStorage.getItem('lang') || 'ar';
-                const template = langs[lang]?.addToCartToast || 'تمت إضافة "{name}" للسلة';
-                this.toastMessage = template.replace('{name}', product.name);
-                this.showToast = true;
-                setTimeout(() => { this.showToast = false; }, 3000);
+            } catch (err) {
+                this.error = (localStorage.getItem('lang') === 'en') ? 'Failed to load products' : 'حدث خطأ في تحميل المنتجات';
+                console.error('Error loading products:', err);
+            } finally {
+                this.loading = false;
             }
-        };
-    }
+        },
+
+        // دالة لتنظيف نص البحث
+        cleanSearchText(text) {
+            if (!text) return '';
+
+            // إزالة الرموز الخاصة والحفاظ على الأرقام والحروف فقط
+            return text
+                .replace(/[^\w\u0600-\u06FF\s\d]/g, ' ') // إزالة الرموز الخاصة
+                .replace(/\s+/g, ' ') // استبدال المسافات المتعددة بمسافة واحدة
+                .trim();
+        },
+
+        async loadCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                if (!response.ok) throw new Error('فشل تحميل التصنيفات');
+
+                const data = await response.json();
+                this.categories = data;
+            } catch (err) {
+                console.error('خطأ في تحميل التصنيفات:', err);
+            }
+        },
+
+        async searchProducts() {
+            this.pagination.page = 1;
+            await this.loadProducts();
+        },
+
+        async filterProducts() {
+            this.pagination.page = 1;
+            await this.loadProducts();
+        },
+
+        async sortProducts() {
+            await this.loadProducts();
+        },
+
+        async goToPage(page) {
+            if (page < 1 || page > this.pagination.totalPages) return;
+            this.pagination.page = page;
+            await this.loadProducts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        async changeLimit() {
+            this.pagination.page = 1;
+            await this.loadProducts();
+        },
+
+        getCategoryName(categoryId) {
+            const category = this.categories.find(c => c._id === categoryId);
+            return category ? category.name : (localStorage.getItem('lang') === 'en' ? 'Unspecified' : 'غير محدد');
+        },
+
+        getCategoryProductCount(categoryId) {
+            return this.products.filter(p => p.categoryId === categoryId).length;
+        },
+
+        scrollCategories(direction) {
+            const container = this.$refs.categoriesScroll;
+            const scrollAmount = 300;
+
+            if (!container) return;
+            if (direction === 'left') {
+                container.scrollLeft -= scrollAmount;
+            } else {
+                container.scrollLeft += scrollAmount;
+            }
+        },
+
+        showProductDetails(product) {
+            this.selectedProduct = product;
+            this.showModal = true;
+        },
+
+        addToCart(product) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const existingItem = cart.find(item => item._id === product._id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({...product, quantity: 1});
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            const cartEvent = new Event('cartUpdated');
+            window.dispatchEvent(cartEvent);
+
+            const lang = localStorage.getItem('lang') || 'ar';
+            const template = langs[lang]?.addToCartToast || 'تمت إضافة "{name}" للسلة';
+            this.toastMessage = template.replace('{name}', product.name);
+            this.showToast = true;
+            setTimeout(() => { this.showToast = false; }, 3000);
+        }
+    };
+}
 
     function headerManager() {
         return {

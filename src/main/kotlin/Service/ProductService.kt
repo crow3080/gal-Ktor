@@ -4,6 +4,8 @@ import com.example.db.DatabaseConfig
 import com.example.db.models.Product
 import com.example.utils.Responses.PaginatedResponse
 import com.mongodb.client.model.Filters
+import com.mongodb.client.model.Projections
+import com.mongodb.client.model.Sorts
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.toList
@@ -16,24 +18,58 @@ class ProductService(private val collection: MongoCollection<Product>) {
         return collection.find().toList()
     }
 
-    suspend fun getProductsPaginated(page: Int, limit: Int, search: String): PaginatedResponse<Product> {
+    suspend fun getProductsPaginated(page: Int, limit: Int, search: String, category: String? = null, sort: String? = null): PaginatedResponse<Product> {
         val skip = (page - 1) * limit
 
-        // بناء فلتر البحث
-        val filter: Bson = if (search.isNotEmpty()) {
-            Filters.or(
-                Filters.regex("name", search, "i"),
-                Filters.regex("description", search, "i")
-            )
+        val filters = mutableListOf<Bson>()
+
+        if (search.isNotEmpty()) {
+            val cleanSearch = search.trim()
+
+            if (cleanSearch.isNotEmpty()) {
+                // استخدام البحث النصي مع الفهرس
+                filters.add(Filters.text(cleanSearch))
+            }
+        }
+
+        // فلتر التصنيف
+        if (!category.isNullOrEmpty()) {
+            filters.add(Filters.eq("categoryId", category))
+        }
+
+        val filter = if (filters.isNotEmpty()) {
+            Filters.and(filters)
         } else {
             Filters.empty()
         }
 
+        // بناء options الترتيب
+        val sortOptions = when(sort) {
+            "price-asc" -> Sorts.ascending("price")
+            "price-desc" -> Sorts.descending("price")
+            "name" -> Sorts.ascending("name")
+            else -> {
+                // إذا كان هناك بحث، رتب حسب النقاط النصية أولاً
+                if (search.isNotEmpty()) {
+                    Sorts.metaTextScore("score")
+                } else {
+                    Sorts.descending("createdAt")
+                }
+            }
+        }
+
         // جلب المنتجات
-        val products = collection.find(filter)
+        val findOperation = collection.find(filter)
+            .sort(sortOptions)
             .skip(skip)
             .limit(limit)
-            .toList()
+
+        // إذا كان هناك بحث، أضف إسقاط النقاط النصية
+        val products = if (search.isNotEmpty()) {
+            findOperation.projection(Projections.metaTextScore("score")).toList()
+        } else {
+            findOperation.toList()
+        }
 
         // حساب إجمالي العدد
         val totalCount = collection.countDocuments(filter)
@@ -45,6 +81,23 @@ class ProductService(private val collection: MongoCollection<Product>) {
             total = totalCount,
             totalPages = ((totalCount + limit - 1) / limit).toInt()
         )
+    }
+    // دالة مساعدة لهروب النصوص في regex
+    fun escapeRegex(text: String): String {
+        return text.replace("\\", "\\\\")
+            .replace(".", "\\.")
+            .replace("*", "\\*")
+            .replace("+", "\\+")
+            .replace("?", "\\?")
+            .replace("^", "\\^")
+            .replace("$", "\\$")
+            .replace("[", "\\[")
+            .replace("]", "\\]")
+            .replace("(", "\\(")
+            .replace(")", "\\)")
+            .replace("{", "\\{")
+            .replace("}", "\\}")
+            .replace("|", "\\|")
     }
 
     suspend fun getProductById(id: String): Product? {

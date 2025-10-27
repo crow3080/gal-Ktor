@@ -31,8 +31,16 @@ fun Route.productRoutes(
                 val page = call.parameters["page"]?.toIntOrNull() ?: 1
                 val limit = call.parameters["limit"]?.toIntOrNull() ?: 12
                 val search = call.parameters["search"]?.trim() ?: ""
+                val category = call.parameters["category"]?.trim() ?: ""
+                val sort = call.parameters["sort"]?.trim() ?: ""
 
-                val result = productService.getProductsPaginated(page, limit, search)
+                val result = productService.getProductsPaginated(
+                    page = page,
+                    limit = limit,
+                    search = search,
+                    category = if (category.isNotEmpty()) category else null,
+                    sort = if (sort.isNotEmpty()) sort else null
+                )
                 call.respond(HttpStatusCode.OK, result)
             } catch (e: Exception) {
                 call.respond(
