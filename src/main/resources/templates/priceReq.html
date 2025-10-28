@@ -191,7 +191,7 @@
                         :class="selectedCategory === cat._id ? 'ring-2 ring-[#d4af37]' : ''"
                         class="btn btn-sm whitespace-nowrap"
                         style="background: rgba(212, 175, 55, 0.1); color: #d4af37;">
-                    <span x-text="cat.name"></span>
+                    <span x-text="lang === 'ar' ? cat.nameAr : cat.nameEn || cat.nameAr"></span>
                     <span class="badge badge-sm ml-1" x-text="getCategoryCount(cat._id)"></span>
                 </button>
             </template>
@@ -220,14 +220,14 @@
                 <!-- Product Image -->
                 <div class="relative h-48 overflow-hidden bg-base-300">
                     <img :src="product.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'"
-                         :alt="product.name"
+                         :alt="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"
                          class="w-full h-full object-cover">
                 </div>
 
                 <!-- Product Info -->
                 <div class="p-5">
-                    <h3 class="text-lg font-bold mb-2 text-gray-100 line-clamp-2" x-text="product.name"></h3>
-                    <p class="text-gray-400 text-sm mb-3 line-clamp-2" x-text="product.description"></p>
+                    <h3 class="text-lg font-bold mb-2 text-gray-100 line-clamp-2" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></h3>
+                    <p class="text-gray-400 text-sm mb-3 line-clamp-2" x-text="lang === 'ar' ? product.descriptionAr : product.descriptionEn || product.descriptionAr"></p>
 
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-300">
@@ -393,7 +393,7 @@
                             <img :src="product.imageUrl || 'https://via.placeholder.com/50'"
                                  class="w-12 h-12 object-cover rounded-lg">
                             <div class="flex-1">
-                                <p class="font-semibold text-gray-100 text-sm" x-text="product.name"></p>
+                                <p class="font-semibold text-gray-100 text-sm" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></p>
                                 <p class="text-xs text-gray-400" x-text="getCategoryName(product.categoryId)"></p>
                             </div>
                         </div>
@@ -440,7 +440,6 @@
 </footer>
 
 <script>
-    // Translations
     const langs = {
         ar: {
             brandName: "جال لتوريدات المصانع",
@@ -597,6 +596,7 @@
 
     function changeLang(lang) {
         applyTranslations(lang);
+        location.reload();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -629,11 +629,13 @@
             selectedCategory: '',
             searchQuery: '',
             loading: true,
+            error: '',
             showDialog: false,
             customerName: '',
             customerPhone: '',
             countryCode: '+20',
             customerNotes: '',
+            lang: localStorage.getItem('lang') || 'ar',
             pagination: {
                 page: 1,
                 limit: 12,
@@ -665,6 +667,9 @@
             },
 
             async init() {
+                const lang = localStorage.getItem('lang') || 'ar';
+                this.lang = lang;
+                if (typeof applyTranslations === 'function') applyTranslations(lang);
                 await this.loadCategories();
                 await this.loadProducts();
             },
@@ -672,12 +677,20 @@
             async loadProducts() {
                 try {
                     this.loading = true;
+                    this.error = '';
+                    const cleanSearchQuery = this.cleanSearchText(this.searchQuery);
+
                     const params = new URLSearchParams({
                         page: this.pagination.page,
                         limit: this.pagination.limit,
-                        search: this.searchQuery,
-                        category: this.selectedCategory
+                        search: cleanSearchQuery
                     });
+
+                    if (this.selectedCategory) {
+                        params.append('category', this.selectedCategory);
+                    }
+
+                    console.log('Search params:', params.toString());
 
                     const response = await fetch(`/api/products?${params}`);
                     if (!response.ok) throw new Error('Failed to load products');
@@ -696,10 +709,20 @@
 
                     this.filteredProducts = this.products;
                 } catch (err) {
+                    this.error = (this.lang === 'en' ? 'Failed to load products' : 'حدث خطأ في تحميل المنتجات');
                     console.error('Error loading products:', err);
                 } finally {
                     this.loading = false;
                 }
+            },
+
+            cleanSearchText(text) {
+                if (!text) return '';
+
+                return text
+                    .replace(/[^\w\u0600-\u06FF\s\d]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
             },
 
             async loadCategories() {
@@ -736,7 +759,7 @@
 
             getCategoryName(categoryId) {
                 const cat = this.categories.find(c => c._id === categoryId);
-                return cat ? cat.name : (localStorage.getItem('lang') === 'en' ? 'Unspecified' : 'غير محدد');
+                return cat ? (this.lang === 'ar' ? cat.nameAr : cat.nameEn || cat.nameAr) : (this.lang === 'en' ? 'Unspecified' : 'غير محدد');
             },
 
             getCategoryCount(categoryId) {
@@ -761,28 +784,29 @@
 
             sendToWhatsApp() {
                 if (!this.customerName || !this.customerPhone) {
-                    const lang = localStorage.getItem('lang') || 'ar';
+                    const lang = this.lang;
                     alert(lang === 'en' ? 'Please fill in name and phone number' : 'يرجى ملء الاسم ورقم الهاتف');
                     return;
                 }
 
                 // Build WhatsApp message
-                const lang = localStorage.getItem('lang') || 'ar';
-                let message = lang === 'en'
+                let message = this.lang === 'en'
                     ? `*Price Request*\n\n*Customer Name:* ${this.customerName}\n*Phone:* ${this.countryCode}${this.customerPhone}\n\n*Selected Products:*\n\n`
                     : `*طلب عرض سعر*\n\n*اسم العميل:* ${this.customerName}\n*الهاتف:* ${this.countryCode}${this.customerPhone}\n\n*المنتجات المطلوبة:*\n\n`;
 
                 this.selectedProducts.forEach((product, index) => {
-                    message += `${index + 1}. ${product.name}\n`;
-                    message += `   ${lang === 'en' ? 'Category' : 'التصنيف'}: ${this.getCategoryName(product.categoryId)}\n`;
-                    if (product.description) {
-                        message += `   ${lang === 'en' ? 'Details' : 'الوصف'}: ${product.description}\n`;
+                    const name = this.lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr;
+                    const description = this.lang === 'ar' ? product.descriptionAr : product.descriptionEn || product.descriptionAr;
+                    message += `${index + 1}. ${name}\n`;
+                    message += `   ${this.lang === 'en' ? 'Category' : 'التصنيف'}: ${this.getCategoryName(product.categoryId)}\n`;
+                    if (description) {
+                        message += `   ${this.lang === 'en' ? 'Details' : 'الوصف'}: ${description}\n`;
                     }
                     message += `\n`;
                 });
 
                 if (this.customerNotes) {
-                    message += lang === 'en'
+                    message += this.lang === 'en'
                         ? `\n*Additional Notes:*\n${this.customerNotes}`
                         : `\n*ملاحظات إضافية:*\n${this.customerNotes}`;
                 }

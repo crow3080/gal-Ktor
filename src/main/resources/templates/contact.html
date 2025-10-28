@@ -11,14 +11,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="/css/contact.css">
     <style>
-        body { font-family: "Cairo", sans-serif; }
+        body {
+            font-family: "Cairo", sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
         .gold-text { color: #d4af37; }
         .cart-badge {
             position: absolute;
             top: -8px;
-            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            inset-inline-end: -8px;
             background: #dc2626;
             color: white;
             border-radius: 50%;
@@ -27,64 +29,199 @@
             font-weight: bold;
             min-width: 20px;
             text-align: center;
-            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        /* تحسين توافق الـ badge في قائمة الموبايل */
         .dropdown .cart-badge {
             top: 0;
             inset-inline-end: 0;
             transform: translate(50%, -50%);
+        }
+
+        /* تحسينات التصميم */
+        .glass-card {
+            background: rgba(17, 25, 40, 0.75);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .gold-border {
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+        }
+
+        .gold-border:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-modern {
+            background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+            color: #1a1a2e;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-modern:hover::before {
+            left: 100%;
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(212,175,55,0.3);
+        }
+
+        .header-glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        /* أنيميشن الدخول */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-delay {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease 0.3s forwards;
+        }
+
+        .pulse-gold {
+            animation: pulseGold 2s infinite;
+        }
+
+        @keyframes pulseGold {
+            0% { box-shadow: 0 0 0 0 rgba(212,175,55, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(212,175,55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212,175,55, 0); }
+        }
+
+        /* تحسينات الخريطة */
+        .map-container {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .map-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .map-iframe {
+            border: none;
+            filter: grayscale(20%) contrast(110%);
+        }
+
+        /* تأثيرات العناصر */
+        .contact-item {
+            transition: all 0.3s ease;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .contact-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateX(-5px);
+        }
+
+        /* تحسينات الاستجابة */
+        @media (max-width: 768px) {
+            .hero-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .map-container {
+                height: 300px;
+            }
         }
     </style>
 </head>
 
 <body class="text-base-content">
 
-<!-- الهيدر -->
+<!-- الهيدر المحسن -->
 <header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
     <div class="flex-1">
-        <a href="/" class="flex items-center gap-3">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
-            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+        <a href="/" class="flex items-center gap-3 hover:scale-105 transition-transform duration-300">
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo rounded-lg" style="width:50px;">
+            <span id="brandName" class="text-xl md:text-2xl font-bold gold-text">جال لتوريدات المصانع</span>
         </a>
     </div>
 
     <!-- قائمة Desktop -->
-    <nav class="hidden md:flex gap-3">
-        <a href="/productCatalog" class="btn btn-ghost btn-sm">
+    <nav class="hidden md:flex gap-2">
+        <a href="/productCatalog" class="btn btn-ghost btn-sm rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
         </a>
-        <a href="/cart" class="btn btn-ghost btn-sm relative">
+        <a href="/cart" class="btn btn-ghost btn-sm rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300 relative">
             <i class="fas fa-shopping-cart ml-1"></i>
             <span id="navCart">السلة</span>
             <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
         </a>
-        <a href="/contact" class="btn btn-ghost btn-sm">
+        <a href="/contact" class="btn btn-ghost btn-sm rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
         </a>
     </nav>
 
     <!-- Dropdown للموبايل -->
     <div class="dropdown dropdown-end md:hidden relative">
-        <button tabindex="0" class="btn btn-ghost btn-lg">
+        <button tabindex="0" class="btn btn-ghost btn-lg rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             <i class="fas fa-bars text-2xl"></i>
         </button>
-        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
+        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl glass-card rounded-2xl w-64 z-[100] p-3 text-lg font-semibold border border-[#d4af37]/30">
             <li>
-                <a href="/productCatalog" class="py-4">
+                <a href="/productCatalog" class="py-4 rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
                     <i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span>
                 </a>
             </li>
             <li>
-                <a href="/cart" class="py-4 relative">
+                <a href="/cart" class="py-4 rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300 relative">
                     <i class="fas fa-shopping-cart ml-2 text-xl"></i>
                     <span id="mnavCart">السلة</span>
                     <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
                 </a>
             </li>
             <li>
-                <a href="/contact" class="py-4">
+                <a href="/contact" class="py-4 rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
                     <i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span>
                 </a>
             </li>
@@ -93,77 +230,171 @@
 
     <!-- زر اللغة -->
     <div class="dropdown dropdown-end ml-2">
-        <label tabindex="0" class="btn btn-ghost">
+        <label tabindex="0" class="btn btn-ghost rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             🌐 <span id="current-lang">AR</span>
         </label>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
-            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
-            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
+        <ul tabindex="0" class="dropdown-content menu glass-card rounded-2xl w-28 shadow border border-[#d4af37]/30 p-2">
+            <li><button onclick="changeLang('ar')" class="rounded-lg hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">🇸🇦 عربي</button></li>
+            <li><button onclick="changeLang('en')" class="rounded-lg hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">🇬🇧 English</button></li>
         </ul>
     </div>
 </header>
 
-<main class="max-w-6xl mx-auto p-6 md:p-10 py-12 space-y-12">
+<main class="max-w-6xl mx-auto p-4 md:p-6 py-8 md:py-12 space-y-12 md:space-y-16">
 
-    <!-- Hero -->
+    <!-- Hero Section -->
     <section class="text-center fade-in">
-        <div class="inline-block glass-card rounded-full p-8 shadow-2xl industrial-accent">
-            <i class="fas fa-comments text-6xl gold-text"></i>
+        <div class="inline-flex items-center justify-center p-4 mb-6 rounded-2xl glass-card pulse-gold">
+            <div class="hero-icon w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-br from-[#d4af37] to-[#ffd700]">
+                <i class="fas fa-comments text-4xl text-slate-900"></i>
+            </div>
         </div>
-        <h1 id="contactTitle" class="text-5xl md:text-6xl font-bold mt-6 gradient-text"></h1>
-        <p id="contactDesc" class="text-xl mt-4 text-gray-300 max-w-2xl mx-auto leading-relaxed"></p>
+        <h1 id="contactTitle" class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 gradient-text"></h1>
+        <p id="contactDesc" class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"></p>
     </section>
 
-    <!-- نموذج الاتصال -->
-    <section class="grid md:grid-cols-2 gap-10">
-
+    <!-- نموذج الاتصال والمعلومات -->
+    <section class="grid lg:grid-cols-3 gap-8 md:gap-10">
         <!-- Form -->
-        <div class="glass-card rounded-3xl p-8 shadow-2xl industrial-accent fade-in">
-            <h2 id="sendMsg" class="text-3xl font-bold mb-6 flex items-center gap-3 text-gray-100"></h2>
+        <div class="lg:col-span-2 glass-card rounded-3xl p-6 md:p-8 shadow-2xl fade-in">
+            <h2 id="sendMsg" class="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3 text-gray-100">
+                <i class="fas fa-paper-plane gold-text"></i>
+            </h2>
 
             <form onsubmit="handleSubmit(event)" class="space-y-5">
-                <input id="inputName" type="text" class="input gold-border w-full" required>
-                <input id="inputEmail" type="email" class="input gold-border w-full" required>
-                <input id="inputPhone" type="tel" class="input gold-border w-full">
-                <textarea id="inputMsg" class="textarea gold-border w-full h-36" required></textarea>
-                <button id="sendBtn" type="submit" class="btn btn-modern w-full text-lg">
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <input id="inputName" type="text" class="input gold-border w-full py-3 px-4 rounded-xl" required>
+                    </div>
+                    <div>
+                        <input id="inputEmail" type="email" class="input gold-border w-full py-3 px-4 rounded-xl" required>
+                    </div>
+                </div>
+                <input id="inputPhone" type="tel" class="input gold-border w-full py-3 px-4 rounded-xl">
+                <textarea id="inputMsg" class="textarea gold-border w-full h-36 py-3 px-4 rounded-xl" required></textarea>
+                <button id="sendBtn" type="submit" class="btn btn-modern w-full text-lg py-3 rounded-xl">
                     <i class="fas fa-paper-plane ml-2"></i> <span id="sendBtnText"></span>
                 </button>
             </form>
         </div>
 
-        <!-- Info -->
-        <div class="space-y-8 fade-in">
-            <div class="glass-card rounded-3xl p-8 shadow-2xl text-gray-100 industrial-accent">
-                <h2 id="infoTitle" class="text-3xl font-bold mb-6 flex items-center gap-3">
+        <!-- Info & Map -->
+        <div class="space-y-8 fade-in-delay">
+            <!-- معلومات الاتصال -->
+            <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl text-gray-100">
+                <h2 id="infoTitle" class="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3">
                     <i class="fas fa-info-circle gold-text"></i>
                 </h2>
-                <ul class="space-y-5">
-                    <li><i class="fas fa-location-dot text-2xl gold-text"></i> <span id="address"></span></li>
-                    <li><i class="fas fa-phone text-2xl gold-text"></i> 01050006099</li>
-                    <li><i class="fas fa-clock text-2xl gold-text"></i> <span id="workHours"></span></li>
+                <ul class="space-y-4">
+                    <li class="contact-item flex items-start gap-4">
+                        <i class="fas fa-location-dot text-xl gold-text mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-gray-200" id="address"></span>
+                            <p class="text-sm text-gray-400 mt-1" id="addressDesc">موقعنا في وسط البلد، القاهرة</p>
+                        </div>
+                    </li>
+                    <li class="contact-item flex items-start gap-4">
+                        <i class="fas fa-phone text-xl gold-text mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-gray-200">01050006099</span>
+                            <p class="text-sm text-gray-400 mt-1" id="phoneDesc">اتصل بنا على مدار الساعة</p>
+                        </div>
+                    </li>
+                    <li class="contact-item flex items-start gap-4">
+                        <i class="fas fa-clock text-xl gold-text mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-gray-200" id="workHours"></span>
+                            <p class="text-sm text-gray-400 mt-1" id="hoursDesc">الأحد إجازة</p>
+                        </div>
+                    </li>
+                    <li class="contact-item flex items-start gap-4">
+                        <i class="fas fa-envelope text-xl gold-text mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-gray-200">info@gal-trading.com</span>
+                            <p class="text-sm text-gray-400 mt-1" id="emailDesc">راسلنا عبر البريد الإلكتروني</p>
+                        </div>
+                    </li>
                 </ul>
+            </div>
+
+            <!-- وسائل التواصل الاجتماعي -->
+            <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl text-gray-100">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <i class="fas fa-share-alt gold-text"></i>
+                    <span id="socialTitle">تابعنا على</span>
+                </h2>
+                <div class="flex justify-center gap-4 text-2xl">
+                    <a href="#" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center hover:scale-110 transition-transform">
+                        <i class="fab fa-facebook-f text-white"></i>
+                    </a>
+                    <a href="#" class="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center hover:scale-110 transition-transform">
+                        <i class="fab fa-instagram text-white"></i>
+                    </a>
+                    <a href="#" class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center hover:scale-110 transition-transform">
+                        <i class="fab fa-whatsapp text-white"></i>
+                    </a>
+                    <a href="#" class="w-12 h-12 rounded-full bg-blue-700 flex items-center justify-center hover:scale-110 transition-transform">
+                        <i class="fab fa-linkedin-in text-white"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- الخريطة -->
+    <section class="fade-in-delay">
+        <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3 text-gray-100">
+                <i class="fas fa-map-marker-alt gold-text"></i>
+                <span id="mapTitle">موقعنا على الخريطة</span>
+            </h2>
+            <p class="text-gray-300 mb-6 max-w-2xl" id="mapDesc">زورنا في مقرنا الرئيسي بوسط البلد، القاهرة. نحن على استعداد لاستقبالكم خلال ساعات العمل.</p>
+
+            <div class="map-container h-80 md:h-96 rounded-2xl overflow-hidden">
+                <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.015283029201!2d31.244490315115!3d30.0548819818705!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14583f8a00000000%3A0x1d5e5c5a5a5a5a5a!2s27%20El-Gabrani%20St%2C%20Downtown%2C%20Cairo%20Governorate!5e0!3m2!1sen!2seg!4v1620000000000!5m2!1sen!2seg"
+                        width="100%"
+                        height="100%"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        class="map-iframe">
+                </iframe>
+            </div>
+
+            <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <div class="flex items-center gap-3 text-gray-300">
+                    <i class="fas fa-car text-[#d4af37]"></i>
+                    <span id="parkingInfo">مواقف سيارات متاحة قريبة</span>
+                </div>
+                <a href="https://maps.app.goo.gl/BWgWwS2AResx95rR7" target="_blank" class="btn btn-outline border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-slate-900 transition-all">
+                    <i class="fas fa-external-link-alt ml-2"></i>
+                    <span id="openMap">فتح في خرائط جوجل</span>
+                </a>
             </div>
         </div>
     </section>
 </main>
 
 <!-- Footer -->
-<footer class="footer footer-center p-12 header-glass text-gray-300 relative overflow-hidden" x-data="headerManager()">
-    <div class="flex items-center justify-center gap-3 mb-4">
-        <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
-        <span id="footerBrand" class="text-3xl font-bold gradient-text"></span>
+<footer class="footer footer-center p-8 md:p-12 header-glass text-gray-300 relative overflow-hidden mt-12" x-data="headerManager()">
+    <div class="relative mb-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo rounded-lg" style="width: 60px;">
+            <span id="footerBrand" class="text-2xl md:text-3xl font-bold gold-text">جال للتجارة</span>
+        </div>
+        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto"></p>
     </div>
-    <p id="footerDesc" class="text-gray-400 max-w-md mx-auto"></p>
-    <nav class="grid grid-flow-col gap-6 text-base">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
-        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative">
+    <nav class="grid grid-flow-col gap-4 md:gap-6 text-base relative">
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37] transition-colors duration-300 rounded-lg px-3 py-1 hover:bg-[#d4af37]/10"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37] transition-colors duration-300 rounded-lg px-3 py-1 hover:bg-[#d4af37]/10 relative">
             <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
             <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
         </a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37] transition-colors duration-300 rounded-lg px-3 py-1 hover:bg-[#d4af37]/10"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
-    <p class="text-gray-400 mt-6 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p id="copyrightText" class="text-gray-400 mt-6 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
 
 <script>
@@ -173,25 +404,32 @@
             pageTitle: "تواصل معنا - جال للتجارة والتوريدات",
             contactTitle: "نسعد بتواصلك معنا",
             contactDesc: "فريقنا من المهندسين والمتخصصين جاهز لخدمتك والإجابة على جميع استفساراتك 💬",
-            sendMsg: "📨 أرسل لنا رسالة",
+            sendMsg: "أرسل لنا رسالة",
             sendBtnText: "إرسال الرسالة",
             infoTitle: "معلومات التواصل",
             address: "27 شارع الجبرونى - وسط البلد - القاهرة - مصر",
+            addressDesc: "موقعنا في وسط البلد، القاهرة",
             workHours: "الإثنين - السبت: 8ص - 5م",
+            hoursDesc: "الأحد إجازة",
+            phoneDesc: "اتصل بنا على مدار الساعة",
+            emailDesc: "راسلنا عبر البريد الإلكتروني",
             footerBrand: "جال للتجارة",
             footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
             navProducts: "المنتجات",
             navCart: "السلة",
             navContact: "تواصل معنا",
-            navLogin: "تسجيل الدخول",
             mnavProducts: "المنتجات",
             mnavCart: "السلة",
             mnavContact: "تواصل معنا",
-            mnavLogin: "تسجيل الدخول",
             fnavProducts: "المنتجات",
             fnavCart: "السلة",
             fnavContact: "تواصل معنا",
             submitSuccess: "شكراً لتواصلك معنا! سنرد عليك في أقرب وقت ممكن.",
+            socialTitle: "تابعنا على",
+            mapTitle: "موقعنا على الخريطة",
+            mapDesc: "زورنا في مقرنا الرئيسي بوسط البلد، القاهرة. نحن على استعداد لاستقبالكم خلال ساعات العمل.",
+            parkingInfo: "مواقف سيارات متاحة قريبة",
+            openMap: "فتح في خرائط جوجل",
             placeholders: {
                 inputName: "اسمك الكامل",
                 inputEmail: "بريدك الإلكتروني",
@@ -202,27 +440,34 @@
         en: {
             brandName: "Gal Industrial Supplies",
             pageTitle: "Contact Us - Gal Trading & Supplies",
-            contactTitle: "We’d Love to Hear From You",
+            contactTitle: "We'd Love to Hear From You",
             contactDesc: "Our team of engineers and experts is ready to assist you and answer all your questions 💬",
-            sendMsg: "📨 Send Us a Message",
+            sendMsg: "Send Us a Message",
             sendBtnText: "Send Message",
             infoTitle: "Contact Information",
             address: "27 El-Gabrani St, Downtown, Cairo, Egypt",
+            addressDesc: "Our location in Downtown, Cairo",
             workHours: "Mon - Sat: 8 AM - 5 PM",
+            hoursDesc: "Sunday: Closed",
+            phoneDesc: "Call us anytime",
+            emailDesc: "Email us anytime",
             footerBrand: "Gal Trading",
             footerDesc: "Your trusted partner in supplying top-quality industrial products.",
             navProducts: "Products",
             navCart: "Cart",
             navContact: "Contact Us",
-            navLogin: "Login",
             mnavProducts: "Products",
             mnavCart: "Cart",
             mnavContact: "Contact Us",
-            mnavLogin: "Login",
             fnavProducts: "Products",
             fnavCart: "Cart",
             fnavContact: "Contact Us",
-            submitSuccess: "Thank you for contacting us! We’ll get back to you soon.",
+            submitSuccess: "Thank you for contacting us! We'll get back to you soon.",
+            socialTitle: "Follow Us",
+            mapTitle: "Our Location on Map",
+            mapDesc: "Visit us at our main office in Downtown, Cairo. We're ready to welcome you during business hours.",
+            parkingInfo: "Parking available nearby",
+            openMap: "Open in Google Maps",
             placeholders: {
                 inputName: "Full Name",
                 inputEmail: "Email Address",
@@ -264,6 +509,7 @@
             init() {
                 this.loadCartCount();
                 window.addEventListener('storage', () => this.loadCartCount());
+                window.addEventListener('cartUpdated', () => this.loadCartCount());
             },
             loadCartCount() {
                 const cart = localStorage.getItem('cart');

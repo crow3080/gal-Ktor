@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Category(
     val _id: String? = null,
-    val name: String,
+    val nameAr: String,
+    val nameEn: String,
     val imageUrl: String? = null  // ✅ أضف هنا
 )

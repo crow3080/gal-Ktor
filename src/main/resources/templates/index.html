@@ -40,18 +40,20 @@
         <form @submit.prevent="addProduct()" enctype="multipart/form-data">
             <div class="form-control space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" x-model="newProduct.name" placeholder="اسم المنتج" class="input input-bordered w-full" required>
+                    <input type="text" x-model="newProduct.nameAr" placeholder="اسم المنتج بالعربية" class="input input-bordered w-full" required>
+                    <input type="text" x-model="newProduct.nameEn" placeholder="اسم المنتج بالإنجليزية" class="input input-bordered w-full" dir="ltr">
                     <input type="number" x-model.number="newProduct.price" placeholder="السعر" step="0.01" min="0" class="input input-bordered w-full" required>
                 </div>
 
                 <select x-model="newProduct.categoryId" class="select select-bordered w-full" required>
                     <option value="">اختر التصنيف</option>
                     <template x-for="cat in categories" :key="cat._id">
-                        <option :value="cat._id" x-text="cat.name"></option>
+                        <option :value="cat._id" x-text="cat.nameAr"></option>
                     </template>
                 </select>
 
-                <textarea x-model="newProduct.description" placeholder="وصف المنتج" rows="3" class="textarea textarea-bordered w-full resize-none" required></textarea>
+                <textarea x-model="newProduct.descriptionAr" placeholder="وصف المنتج بالعربية" rows="3" class="textarea textarea-bordered w-full resize-none" required></textarea>
+                <textarea x-model="newProduct.descriptionEn" placeholder="وصف المنتج بالإنجليزية" rows="3" class="textarea textarea-bordered w-full resize-none" dir="ltr"></textarea>
 
                 <div class="form-control">
                     <label class="label">
@@ -109,22 +111,22 @@
         <template x-for="product in products" :key="product._id">
             <div class="card bg-base-100 shadow-md overflow-hidden">
                 <figure x-show="product.imageUrl" class="h-48 bg-base-300">
-                    <img :src="product.imageUrl" :alt="product.name" class="w-full h-full object-cover">
+                    <img :src="product.imageUrl" :alt="product.nameAr" class="w-full h-full object-cover">
                 </figure>
                 <div x-show="!product.imageUrl" class="h-48 bg-base-300 flex items-center justify-center text-6xl">
                     📦
                 </div>
                 <div class="card-body">
                     <div class="flex justify-between items-start mb-3">
-                        <h3 class="card-title" x-text="product.name"></h3>
-                        <span class="badge badge-ghost" x-text="categories.find(c => c._id === product.categoryId)?.name || 'غير محدد'"></span>
+                        <h3 class="card-title" x-text="product.nameAr"></h3>
+                        <span class="badge badge-ghost" x-text="categories.find(c => c._id === product.categoryId)?.nameAr || 'غير محدد'"></span>
                     </div>
 
                     <p class="text-2xl font-bold text-primary mb-2">
                         <span x-text="product.price.toFixed(2)"></span> جنيه
                     </p>
 
-                    <p class="text-sm text-base-content/70 mb-4 line-clamp-2" x-text="product.description"></p>
+                    <p class="text-sm text-base-content/70 mb-4 line-clamp-2" x-text="product.descriptionAr"></p>
 
                     <div class="card-actions flex gap-2">
                         <button @click="openEditModal(product)" class="btn btn-warning btn-sm flex-1">✏️ تعديل</button>
@@ -176,17 +178,19 @@
         <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 class="text-xl font-semibold text-base-content mb-4">تعديل المنتج</h3>
             <div class="form-control space-y-4">
-                <input type="text" x-model="modal.product.name" placeholder="اسم المنتج" class="input input-bordered w-full" required>
+                <input type="text" x-model="modal.product.nameAr" placeholder="اسم المنتج بالعربية" class="input input-bordered w-full" required>
+                <input type="text" x-model="modal.product.nameEn" placeholder="اسم المنتج بالإنجليزية" class="input input-bordered w-full" dir="ltr">
                 <input type="number" x-model.number="modal.product.price" placeholder="السعر" step="0.01" class="input input-bordered w-full" required>
 
                 <select x-model="modal.product.categoryId" class="select select-bordered w-full" required>
                     <option value="">اختر التصنيف</option>
                     <template x-for="cat in categories" :key="cat._id">
-                        <option :value="cat._id" x-text="cat.name"></option>
+                        <option :value="cat._id" x-text="cat.nameAr"></option>
                     </template>
                 </select>
 
-                <textarea x-model="modal.product.description" placeholder="وصف المنتج" rows="3" class="textarea textarea-bordered w-full resize-none" required></textarea>
+                <textarea x-model="modal.product.descriptionAr" placeholder="وصف المنتج بالعربية" rows="3" class="textarea textarea-bordered w-full resize-none" required></textarea>
+                <textarea x-model="modal.product.descriptionEn" placeholder="وصف المنتج بالإنجليزية" rows="3" class="textarea textarea-bordered w-full resize-none" dir="ltr"></textarea>
 
                 <!-- Current Image Display -->
                 <div x-show="modal.product.imageUrl && !modal.removeCurrentImageFlag" class="border rounded-lg p-3 bg-base-200">
@@ -229,7 +233,7 @@
         return {
             products: [],
             categories: [],
-            newProduct: { name: '', price: 0, description: '', categoryId: '' },
+            newProduct: { nameAr: '', nameEn: '', price: 0, descriptionAr: '', descriptionEn: '', categoryId: '' },
             selectedFile: null,
             imagePreview: null,
             modal: {
@@ -385,9 +389,11 @@
                     let data;
                     if (this.selectedFile) {
                         const formData = new FormData();
-                        formData.append('name', this.newProduct.name);
+                        formData.append('nameAr', this.newProduct.nameAr);
+                        formData.append('nameEn', this.newProduct.nameEn);
                         formData.append('price', this.newProduct.price);
-                        formData.append('description', this.newProduct.description);
+                        formData.append('descriptionAr', this.newProduct.descriptionAr);
+                        formData.append('descriptionEn', this.newProduct.descriptionEn);
                         formData.append('categoryId', this.newProduct.categoryId);
                         formData.append('image', this.selectedFile);
 
@@ -417,7 +423,7 @@
                         data = await res.json();
                     }
 
-                    this.newProduct = { name: '', price: 0, description: '', categoryId: '' };
+                    this.newProduct = { nameAr: '', nameEn: '', price: 0, descriptionAr: '', descriptionEn: '', categoryId: '' };
                     this.clearImage();
                     await this.loadProducts();
                     this.showAlert('✅ تمت الإضافة بنجاح', 'success');
@@ -471,9 +477,11 @@
                     let data;
                     if (this.modal.selectedFile || this.modal.removeCurrentImageFlag) {
                         const formData = new FormData();
-                        formData.append('name', this.modal.product.name);
+                        formData.append('nameAr', this.modal.product.nameAr);
+                        formData.append('nameEn', this.modal.product.nameEn);
                         formData.append('price', this.modal.product.price);
-                        formData.append('description', this.modal.product.description);
+                        formData.append('descriptionAr', this.modal.product.descriptionAr);
+                        formData.append('descriptionEn', this.modal.product.descriptionEn);
                         formData.append('categoryId', this.modal.product.categoryId);
                         if (this.modal.selectedFile) {
                             formData.append('image', this.modal.selectedFile);
@@ -546,16 +554,16 @@
             },
 
             validateProduct(product) {
-                if (!product.name.trim()) {
-                    this.showAlert('⚠️ اسم المنتج مطلوب', 'error');
+                if (!product.nameAr.trim()) {
+                    this.showAlert('⚠️ اسم المنتج بالعربية مطلوب', 'error');
                     return false;
                 }
                 if (!product.price || product.price <= 0) {
                     this.showAlert('⚠️ السعر يجب أن يكون أكبر من صفر', 'error');
                     return false;
                 }
-                if (!product.description.trim()) {
-                    this.showAlert('⚠️ وصف المنتج مطلوب', 'error');
+                if (!product.descriptionAr.trim()) {
+                    this.showAlert('⚠️ وصف المنتج بالعربية مطلوب', 'error');
                     return false;
                 }
                 if (!product.categoryId) {

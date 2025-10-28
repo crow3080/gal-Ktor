@@ -27,7 +27,8 @@ class CategoryService(private val collection: MongoCollection<Category>) {
         val updateResult = collection.updateOne(
             Filters.eq("_id", id),
             Updates.combine(
-                Updates.set("name", category.name),
+                Updates.set("nameAr", category.nameAr),
+                Updates.set("nameEn", category.nameEn),
                 Updates.set("imageUrl", category.imageUrl)  // ✅
             )
         )

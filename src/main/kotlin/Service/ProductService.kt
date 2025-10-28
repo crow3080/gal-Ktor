@@ -27,7 +27,7 @@ class ProductService(private val collection: MongoCollection<Product>) {
             val cleanSearch = search.trim()
 
             if (cleanSearch.isNotEmpty()) {
-                // استخدام البحث النصي مع الفهرس
+                // استخدام البحث النصي مع الفهرس (يشمل nameAr, nameEn, etc.)
                 filters.add(Filters.text(cleanSearch))
             }
         }
@@ -82,23 +82,6 @@ class ProductService(private val collection: MongoCollection<Product>) {
             totalPages = ((totalCount + limit - 1) / limit).toInt()
         )
     }
-    // دالة مساعدة لهروب النصوص في regex
-    fun escapeRegex(text: String): String {
-        return text.replace("\\", "\\\\")
-            .replace(".", "\\.")
-            .replace("*", "\\*")
-            .replace("+", "\\+")
-            .replace("?", "\\?")
-            .replace("^", "\\^")
-            .replace("$", "\\$")
-            .replace("[", "\\[")
-            .replace("]", "\\]")
-            .replace("(", "\\(")
-            .replace(")", "\\)")
-            .replace("{", "\\{")
-            .replace("}", "\\}")
-            .replace("|", "\\|")
-    }
 
     suspend fun getProductById(id: String): Product? {
         return collection.find(Filters.eq("_id", id)).toList().firstOrNull()
@@ -114,9 +97,11 @@ class ProductService(private val collection: MongoCollection<Product>) {
         val updateResult = collection.updateOne(
             Filters.eq("_id", id),
             Updates.combine(
-                Updates.set("name", product.name),
+                Updates.set("nameAr", product.nameAr),
+                Updates.set("nameEn", product.nameEn),
                 Updates.set("price", product.price),
-                Updates.set("description", product.description),
+                Updates.set("descriptionAr", product.descriptionAr),
+                Updates.set("descriptionEn", product.descriptionEn),
                 Updates.set("categoryId", product.categoryId),
                 Updates.set("imageUrl", product.imageUrl)
             )
@@ -137,9 +122,9 @@ class ProductService(private val collection: MongoCollection<Product>) {
 
     fun validateProduct(product: Product): String? {
         return when {
-            product.name.isBlank() -> "اسم المنتج مطلوب"
+            product.nameAr.isBlank() -> "اسم المنتج بالعربية مطلوب"
             product.price <= 0 -> "السعر يجب أن يكون أكبر من صفر"
-            product.description.isBlank() -> "وصف المنتج مطلوب"
+            product.descriptionAr.isBlank() -> "وصف المنتج بالعربية مطلوب"
             product.categoryId.isBlank() -> "يجب اختيار تصنيف للمنتج"
             else -> null
         }

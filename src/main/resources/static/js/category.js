@@ -1,7 +1,7 @@
 function categoryApp() {
     return {
         categories: [],
-        newCategory: { name: '' },
+        newCategory: { nameAr: '', nameEn: '' },
         selectedFile: null,
         imagePreview: null,
         modal: {
@@ -73,8 +73,8 @@ function categoryApp() {
         },
 
         async addCategory() {
-            if (!this.newCategory.name.trim()) {
-                this.showAlert('⚠️ اسم التصنيف مطلوب', 'error');
+            if (!this.newCategory.nameAr.trim()) {
+                this.showAlert('⚠️ اسم التصنيف بالعربية مطلوب', 'error');
                 return;
             }
 
@@ -82,7 +82,8 @@ function categoryApp() {
                 let data;
                 if (this.selectedFile) {
                     const formData = new FormData();
-                    formData.append('name', this.newCategory.name);
+                    formData.append('nameAr', this.newCategory.nameAr);
+                    formData.append('nameEn', this.newCategory.nameEn);
                     formData.append('image', this.selectedFile);
 
                     const res = await fetch('/api/categories/with-image', {
@@ -114,7 +115,7 @@ function categoryApp() {
                 }
 
                 if (data.data) this.categories.push(data.data);
-                this.newCategory = { name: '' };
+                this.newCategory = { nameAr: '', nameEn: '' };
                 this.clearImage();
                 this.showAlert('✅ تمت الإضافة بنجاح', 'success');
             } catch (err) {
@@ -162,8 +163,8 @@ function categoryApp() {
         },
 
         async updateCategory() {
-            if (!this.modal.category.name.trim()) {
-                this.showAlert('⚠️ اسم التصنيف مطلوب', 'error');
+            if (!this.modal.category.nameAr.trim()) {
+                this.showAlert('⚠️ اسم التصنيف بالعربية مطلوب', 'error');
                 return;
             }
 
@@ -171,7 +172,8 @@ function categoryApp() {
                 let data;
                 if (this.modal.selectedFile || this.modal.removeCurrentImageFlag) {
                     const formData = new FormData();
-                    formData.append('name', this.modal.category.name);
+                    formData.append('nameAr', this.modal.category.nameAr);
+                    formData.append('nameEn', this.modal.category.nameEn);
                     if (this.modal.selectedFile) {
                         formData.append('image', this.modal.selectedFile);
                     }
@@ -254,7 +256,10 @@ function categoryApp() {
         get filteredCategories() {
             const query = this.searchQuery.toLowerCase().trim();
             if (!query) return this.categories;
-            return this.categories.filter(c => c.name.toLowerCase().includes(query));
+            return this.categories.filter(c =>
+                c.nameAr.toLowerCase().includes(query) ||
+                c.nameEn.toLowerCase().includes(query)
+            );
         }
     };
 }

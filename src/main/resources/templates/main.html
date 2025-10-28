@@ -11,21 +11,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style rel="./app.css">
-        body { font-family: "Cairo", sans-serif; }
-        .gold-text { color: #d4af37; }
-        .hero-logo { width: 150px; height: auto; }
-        .footer-logo { width: 100px; height: auto; }
-        .glass-effect { background: rgba(255,255,255,0.05); backdrop-filter: blur(6px); }
-        .pulse-button { animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(212,175,55, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(212,175,55, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(212,175,55, 0); }
+    <style>
+        body {
+            font-family: "Cairo", sans-serif;
+            overflow-x: hidden;
         }
+        .gold-text { color: #d4af37; }
+        .hero-logo {
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
+        }
+        .footer-logo { width: 100px; height: auto; }
+        .glass-effect {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .pulse-button {
+            animation: pulse 2s infinite;
+            transition: all 0.3s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212,175,55, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(212,175,55, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212,175,55, 0); }
+        }
+
         /* تأثير الفلتر والتدرج على صورة الـ hero */
         .hero-overlay {
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
             position: absolute;
             top: 0;
             left: 0;
@@ -37,6 +52,7 @@
             position: relative;
             background-size: cover;
             background-position: center;
+            overflow: hidden;
         }
         .hero::before {
             content: '';
@@ -45,9 +61,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            filter: blur(3px);
             background: inherit;
             z-index: 0;
+            animation: zoomInOut 20s ease-in-out infinite;
+        }
+        @keyframes zoomInOut {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         .hero-content {
             position: relative;
@@ -56,7 +77,7 @@
         .cart-badge {
             position: absolute;
             top: -8px;
-            inset-inline-end: -8px; /* يدعم RTL/LTR */
+            inset-inline-end: -8px;
             background: #dc2626;
             color: white;
             border-radius: 50%;
@@ -65,64 +86,315 @@
             font-weight: bold;
             min-width: 20px;
             text-align: center;
-            transition: all 0.3s ease; /* تأثير انتقال سلس */
+            transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        /* تحسين توافق الـ badge في قائمة الموبايل */
         .dropdown .cart-badge {
             top: 0;
             inset-inline-end: 0;
             transform: translate(50%, -50%);
         }
+
+        /* أنيميشن دخول العناصر */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s ease forwards;
+        }
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease 0.5s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            animation: slideInLeft 1s ease 0.3s forwards;
+        }
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            animation: slideInRight 1s ease 0.3s forwards;
+        }
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .bounce-in {
+            opacity: 0;
+            transform: scale(0.8);
+            animation: bounceIn 1s ease 0.7s forwards;
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* تأثيرات البطاقات */
+        .feature-card {
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(255,215,0,0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        /* تأثيرات النافبار */
+        .navbar {
+            transition: all 0.3s ease;
+        }
+        .navbar.scrolled {
+            background: rgba(17, 25, 40, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        /* تأثيرات الأزرار */
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+            color: #1a1a2e;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-gold::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .btn-gold:hover::before {
+            left: 100%;
+        }
+        .btn-gold:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(212,175,55,0.3);
+        }
+
+        .btn-outline-gold {
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-gold:hover {
+            background: #d4af37;
+            color: #1a1a2e;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(212,175,55,0.2);
+        }
+
+        /* أنيميشن النجوم */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 5s infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        /* أنيميشن الخط المتعرج */
+        .zigzag-line {
+            position: relative;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            margin: 20px 0;
+        }
+        .zigzag-line::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                #d4af37 10px,
+                #d4af37 20px
+            );
+            animation: moveLine 3s linear infinite;
+        }
+        @keyframes moveLine {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-20px); }
+        }
+
+        /* أنيميشن النص المتلألئ */
+        .shimmer-text {
+            background: linear-gradient(90deg, #d4af37, #ffd700, #d4af37);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shimmer 3s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* أنيميشن الدوامات */
+        .vortex {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%);
+            animation: vortexSpin 20s linear infinite;
+            z-index: 0;
+        }
+        @keyframes vortexSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* تأثيرات التمرير */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* تحسينات التوافقية بين اللغات */
+        [dir="rtl"] .text-left {
+            text-align: right;
+        }
+        [dir="ltr"] .text-left {
+            text-align: left;
+        }
+
+        /* تحسينات إضافية لاسم الشركة */
+        .company-name {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .company-name {
+                font-size: 2.5rem;
+            }
+        }
+
+        .welcome-text {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
     </style>
 </head>
 
-<body class="bg-base-100">
+<body class="bg-base-100" x-data="app()">
 
 <!-- Navbar -->
-<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
+<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4 transition-all duration-300"
+        :class="scrolled ? 'scrolled' : ''"
+        x-data="headerManager()">
     <div class="flex-1">
-        <a href="/" class="flex items-center gap-3">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
-            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+        <a href="/" class="flex items-center gap-3 hover:scale-105 transition-transform duration-300">
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo rounded-lg" style="width:50px;">
+            <span id="brandName" class="text-xl md:text-2xl font-bold gold-text">جال لتوريدات المصانع</span>
         </a>
     </div>
 
     <!-- قائمة Desktop -->
-    <nav class="hidden md:flex gap-3">
-        <a href="/productCatalog" class="btn btn-ghost btn-sm">
+    <nav class="hidden md:flex gap-2">
+        <a href="/productCatalog" class="btn btn-ghost btn-sm rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
         </a>
-        <a href="/cart" class="btn btn-ghost btn-sm relative">
+        <a href="/cart" class="btn btn-ghost btn-sm rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300 relative">
             <i class="fas fa-shopping-cart ml-1"></i>
             <span id="navCart">السلة</span>
             <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
         </a>
-        <a href="/contact" class="btn btn-ghost btn-sm">
+        <a href="/contact" class="btn btn-ghost btn-sm rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
         </a>
     </nav>
 
     <!-- Dropdown للموبايل -->
     <div class="dropdown dropdown-end md:hidden relative">
-        <button tabindex="0" class="btn btn-ghost btn-lg">
+        <button tabindex="0" class="btn btn-ghost btn-lg rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             <i class="fas fa-bars text-2xl"></i>
         </button>
-        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
+        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl glass-effect rounded-2xl w-64 z-[100] p-3 text-lg font-semibold border border-[#d4af37]/30">
             <li>
-                <a href="/productCatalog" class="py-4">
+                <a href="/productCatalog" class="py-4 rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
                     <i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span>
                 </a>
             </li>
             <li>
-                <a href="/cart" class="py-4 relative">
+                <a href="/cart" class="py-4 rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300 relative">
                     <i class="fas fa-shopping-cart ml-2 text-xl"></i>
                     <span id="mnavCart">السلة</span>
                     <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
                 </a>
             </li>
             <li>
-                <a href="/contact" class="py-4">
+                <a href="/contact" class="py-4 rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
                     <i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span>
                 </a>
             </li>
@@ -131,73 +403,124 @@
 
     <!-- زر اللغة -->
     <div class="dropdown dropdown-end ml-2">
-        <label tabindex="0" class="btn btn-ghost">
+        <label tabindex="0" class="btn btn-ghost rounded-xl hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">
             🌐 <span id="current-lang">AR</span>
         </label>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
-            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
-            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
+        <ul tabindex="0" class="dropdown-content menu glass-effect rounded-2xl w-28 shadow border border-[#d4af37]/30 p-2">
+            <li><button onclick="changeLang('ar')" class="rounded-lg hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">🇸🇦 عربي</button></li>
+            <li><button onclick="changeLang('en')" class="rounded-lg hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-all duration-300">🇬🇧 English</button></li>
         </ul>
     </div>
 </header>
 
 <!-- Hero Section -->
 <main class="min-h-screen">
-    <section class="hero min-h-screen" style="background-image: url('/images/background.jpg');">
+    <section class="hero min-h-screen relative" style="background-image: url('/images/background.jpg');">
+        <!-- تأثيرات الخلفية -->
+        <div class="stars" id="stars-container"></div>
+        <div class="vortex" style="top: 10%; left: 10%;"></div>
+        <div class="vortex" style="bottom: 10%; right: 10%;"></div>
+
         <div class="hero-overlay"></div>
         <div class="hero-content text-center text-neutral-content">
-            <div class="max-w-3xl fade-up">
-                <div class="mb-8 flex justify-center">
+            <div class="max-w-4xl">
+                <div class="mb-8 flex justify-center bounce-in">
                     <img src="/images/logo.webp" alt="شعار جال للتجارة" class="hero-logo">
                 </div>
-                <h1 id="welcome" class="text-2xl md:text-4xl font-bold leading-tight text-gray-100 mb-8"></h1>
-                <h2 id="subtitle" class="text-4xl md:text-6xl font-extrabold mb-6 leading-relaxed gold-text"></h2>
-                <div class="flex justify-center items-center gap-3 mb-8">
-                    <div class="h-0.5 w-20 md:w-32 bg-gradient-to-r from-transparent via-[#d4af37] to-[#d4af37]"></div>
-                    <i class="fas fa-star text-[#d4af37] text-xl"></i>
-                    <div class="h-0.5 w-20 md:w-32 bg-gradient-to-l from-transparent via-[#d4af37] to-[#d4af37]"></div>
+
+                <!-- تحسين هيكل النص لضمان ظهور اسم الشركة -->
+                <div class="fade-up">
+                    <h1 id="welcome" class="welcome-text text-gray-100 mb-2"></h1>
+                    <h2 id="subtitle" class="company-name shimmer-text font-extrabold leading-tight"></h2>
                 </div>
-                <p id="description" class="mb-10 text-base md:text-xl text-gray-200 leading-relaxed max-w-2xl mx-auto"></p>
-                <div class="flex gap-4 justify-center flex-wrap">
-                    <a href="/productCatalog" class="btn btn-lg pulse-button text-slate-900 font-bold" style="background: linear-gradient(135deg,#d4af37 0%,#ffd700 100%); border:none;">
+
+                <!-- خط متعرج بدل النجوم -->
+                <div class="zigzag-line my-8 fade-up" style="animation-delay: 0.4s"></div>
+
+                <p id="description" class="mb-10 text-base md:text-xl text-gray-200 leading-relaxed max-w-2xl mx-auto fade-up" style="animation-delay: 0.6s"></p>
+                <div class="flex gap-4 justify-center flex-wrap fade-up" style="animation-delay: 0.8s">
+                    <a href="/productCatalog" class="btn btn-lg btn-gold pulse-button">
                         <i class="fas fa-box-open ml-2"></i> <span id="browseProducts"></span>
                     </a>
-                    <a href="/priceReq" class="btn btn-lg glass-effect text-gray-200 hover:text-[#d4af37] border-[#d4af37] hover:border-[#ffd700] transition-all">
+                    <a href="/priceReq" class="btn btn-lg btn-outline-gold">
                         <i class="fas fa-phone-volume ml-2"></i> <span id="contactUs"></span>
                     </a>
+                </div>
+
+                <!-- مؤشر التمرير -->
+                <div class="mt-16 fade-up" style="animation-delay: 1s">
+                    <div class="flex flex-col items-center">
+                        <span class="text-gray-300 mb-2" id="scrollHint">مرر للأسفل</span>
+                        <div class="w-6 h-10 border-2 border-[#d4af37] rounded-full flex justify-center">
+                            <div class="w-1 h-3 bg-[#d4af37] rounded-full mt-2 animate-bounce"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features -->
-    <section class="py-20 relative" style="background: linear-gradient(135deg,#0f3460 0%,#16213e 100%);">
+    <section class="py-20 relative overflow-hidden" style="background: linear-gradient(135deg,#0f3460 0%,#16213e 100%);">
+        <!-- تأثيرات الخلفية -->
+        <div class="vortex" style="top: -150px; right: -150px;"></div>
+        <div class="vortex" style="bottom: -150px; left: -150px;"></div>
+
         <div class="max-w-6xl mx-auto px-6 relative z-10">
-            <div class="text-center mb-12 fade-up">
+            <div class="text-center mb-12 scroll-reveal">
                 <h2 id="bestWhy" class="text-4xl md:text-5xl font-bold gold-text mb-4"></h2>
                 <p id="whyDesc" class="text-gray-300 text-lg"></p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="feature-card p-8 rounded-xl shadow-2xl text-center industrial-accent">
+                <div class="feature-card glass-effect p-8 rounded-2xl shadow-xl text-center scroll-reveal">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,215,0,0.1));">
-                        <i class="fas fa-certificate text-5xl" style="color: #d4af37;"></i>
+                        <i class="fas fa-certificate text-4xl" style="color: #d4af37;"></i>
                     </div>
                     <h3 id="quality" class="text-2xl font-bold mb-3 text-gray-100"></h3>
                     <p id="qualityDesc" class="text-gray-300 leading-relaxed"></p>
                 </div>
-                <div class="feature-card p-8 rounded-xl shadow-2xl text-center industrial-accent">
+                <div class="feature-card glass-effect p-8 rounded-2xl shadow-xl text-center scroll-reveal" style="transition-delay: 0.2s">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,215,0,0.1));">
-                        <i class="fas fa-shipping-fast text-5xl" style="color: #d4af37;"></i>
+                        <i class="fas fa-shipping-fast text-4xl" style="color: #d4af37;"></i>
                     </div>
                     <h3 id="delivery" class="text-2xl font-bold mb-3 text-gray-100"></h3>
                     <p id="deliveryDesc" class="text-gray-300 leading-relaxed"></p>
                 </div>
-                <div class="feature-card p-8 rounded-xl shadow-2xl text-center industrial-accent">
+                <div class="feature-card glass-effect p-8 rounded-2xl shadow-xl text-center scroll-reveal" style="transition-delay: 0.4s">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,215,0,0.1));">
-                        <i class="fas fa-headset text-5xl" style="color: #d4af37;"></i>
+                        <i class="fas fa-headset text-4xl" style="color: #d4af37;"></i>
                     </div>
                     <h3 id="support" class="text-2xl font-bold mb-3 text-gray-100"></h3>
                     <p id="supportDesc" class="text-gray-300 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم إضافي للإحصائيات -->
+    <section class="py-16 bg-base-200 relative overflow-hidden">
+        <div class="vortex" style="top: -100px; left: -100px; width: 200px; height: 200px;"></div>
+        <div class="max-w-6xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-12 scroll-reveal">
+                <h2 class="text-3xl md:text-4xl font-bold gold-text mb-4" id="statsTitle">أرقامنا تتحدث عنا</h2>
+                <p class="text-gray-300 text-lg" id="statsDesc">نفتخر بخدمة آلاف العملاء على مدار سنوات من الخبرة</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center scroll-reveal">
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2" x-data="{ count: 0 }" x-init="setTimeout(() => { let interval = setInterval(() => { if (count < 77) count++; else clearInterval(interval); }, 30) }, 500)" x-text="count">0</div>
+                    <p class="text-gray-300" id="yearsExp">سنوات من الخبرة</p>
+                </div>
+                <div class="text-center scroll-reveal" style="transition-delay: 0.1s">
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2" x-data="{ count: 0 }" x-init="setTimeout(() => { let interval = setInterval(() => { if (count < 1300) count+=5; else clearInterval(interval); }, 10) }, 700)" x-text="count">0</div>
+                    <p class="text-gray-300" id="clientsServed">عميل راضٍ</p>
+                </div>
+                <div class="text-center scroll-reveal" style="transition-delay: 0.2s">
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2" x-data="{ count: 0 }" x-init="setTimeout(() => { let interval = setInterval(() => { if (count < 6000) count+=10; else clearInterval(interval); }, 10) }, 900)" x-text="count">0</div>
+                    <p class="text-gray-300" id="productsCount">منتج متوفر</p>
+                </div>
+                <div class="text-center scroll-reveal" style="transition-delay: 0.3s">
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2" x-data="{ count: 0 }" x-init="setTimeout(() => { let interval = setInterval(() => { if (count < 24) count++; else clearInterval(interval); }, 60) }, 1100)" x-text="count">0</div>
+                    <p class="text-gray-300" id="supportHours">ساعة دعم فني</p>
                 </div>
             </div>
         </div>
@@ -206,28 +529,29 @@
 
 <!-- Footer -->
 <footer class="footer footer-center p-12 glass-effect text-gray-300 relative overflow-hidden">
-    <div class="mb-6 text-center">
+    <div class="vortex" style="top: -100px; right: -100px; width: 200px; height: 200px;"></div>
+    <div class="relative mb-6 text-center">
         <div class="flex items-center justify-center gap-3 mb-2">
             <img src="/images/logo.webp" alt="شعار جال للتجارة" class="footer-logo">
             <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
         </div>
         <p id="footerDesc" class="text-gray-400 max-w-md mx-auto"></p>
     </div>
-    <nav class="grid grid-flow-col gap-6 text-base">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
-        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative">
+    <nav class="grid grid-flow-col gap-6 text-base relative">
+        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37] transition-colors duration-300 rounded-lg px-3 py-1 hover:bg-[#d4af37]/10"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-[#d4af37] transition-colors duration-300 rounded-lg px-3 py-1 hover:bg-[#d4af37]/10 relative">
             <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
             <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
         </a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37] transition-colors duration-300 rounded-lg px-3 py-1 hover:bg-[#d4af37]/10"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
-    <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
-        <a href="#" class="hover:text-blue-600 transition-colors"><i class="fab fa-facebook"></i></a>
-        <a href="#" class="hover:text-pink-500 transition-colors"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="hover:text-green-500 transition-colors"><i class="fab fa-whatsapp"></i></a>
-        <a href="#" class="hover:text-blue-700 transition-colors"><i class="fab fa-linkedin"></i></a>
+    <div class="flex justify-center gap-6 text-2xl mt-6 mb-4 relative">
+        <a href="#" class="hover:text-blue-600 transition-colors duration-300 hover:scale-110"><i class="fab fa-facebook"></i></a>
+        <a href="#" class="hover:text-pink-500 transition-colors duration-300 hover:scale-110"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="hover:text-green-500 transition-colors duration-300 hover:scale-110"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="hover:text-blue-700 transition-colors duration-300 hover:scale-110"><i class="fab fa-linkedin"></i></a>
     </div>
-    <p id="copyrightText" class="text-gray-400 mt-4 text-center">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p id="copyrightText" class="text-gray-400 mt-4 text-center relative">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
 
 <!-- 🧠 اللغة -->
@@ -255,14 +579,19 @@
             navProducts: "المنتجات",
             navCart: "السلة",
             navContact: "تواصل معنا",
-            navLogin: "تسجيل الدخول",
             mnavProducts: "المنتجات",
             mnavCart: "السلة",
             mnavContact: "تواصل معنا",
-            mnavLogin: "تسجيل الدخول",
             fnavProducts: "المنتجات",
             fnavCart: "السلة",
-            fnavContact: "تواصل معنا"
+            fnavContact: "تواصل معنا",
+            scrollHint: "مرر للأسفل",
+            statsTitle: "أرقامنا تتحدث عنا",
+            statsDesc: "نفتخر بخدمة آلاف العملاء على مدار سنوات من الخبرة",
+            yearsExp: "سنوات من الخبرة",
+            clientsServed: "عميل راضٍ",
+            productsCount: "منتج متوفر",
+            supportHours: "ساعة دعم فني"
         },
         en: {
             brandName: "Gal Industrial Supplies",
@@ -286,14 +615,19 @@
             navProducts: "Products",
             navCart: "Cart",
             navContact: "Contact Us",
-            navLogin: "Login",
             mnavProducts: "Products",
             mnavCart: "Cart",
             mnavContact: "Contact Us",
-            mnavLogin: "Login",
             fnavProducts: "Products",
             fnavCart: "Cart",
-            fnavContact: "Contact Us"
+            fnavContact: "Contact Us",
+            scrollHint: "Scroll Down",
+            statsTitle: "Our Numbers Speak",
+            statsDesc: "Proudly serving thousands of customers over years of experience",
+            yearsExp: "Years of Experience",
+            clientsServed: "Satisfied Clients",
+            productsCount: "Available Products",
+            supportHours: "Support Hours"
         }
     };
 
@@ -321,14 +655,19 @@
             navProducts: t.navProducts,
             navCart: t.navCart,
             navContact: t.navContact,
-            navLogin: t.navLogin,
             mnavProducts: t.mnavProducts,
             mnavCart: t.mnavCart,
             mnavContact: t.mnavContact,
-            mnavLogin: t.mnavLogin,
             fnavProducts: t.fnavProducts,
             fnavCart: t.fnavCart,
-            fnavContact: t.fnavContact
+            fnavContact: t.fnavContact,
+            scrollHint: t.scrollHint,
+            statsTitle: t.statsTitle,
+            statsDesc: t.statsDesc,
+            yearsExp: t.yearsExp,
+            clientsServed: t.clientsServed,
+            productsCount: t.productsCount,
+            supportHours: t.supportHours
         };
 
         for (const id in map) {
@@ -353,11 +692,66 @@
             init() {
                 this.loadCartCount();
                 window.addEventListener('storage', () => this.loadCartCount());
+                window.addEventListener('cartUpdated', () => this.loadCartCount());
             },
             loadCartCount() {
                 const cart = localStorage.getItem('cart');
                 const items = cart ? JSON.parse(cart) : [];
                 this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+            }
+        };
+    }
+
+    function app() {
+        return {
+            scrolled: false,
+            init() {
+                // تأثير النجوم
+                this.createStars();
+
+                // تأثير التمرير للنافبار
+                window.addEventListener('scroll', () => {
+                    this.scrolled = window.scrollY > 50;
+                });
+
+                // تأثير الظهور عند التمرير
+                this.initScrollReveal();
+            },
+            createStars() {
+                const container = document.getElementById('stars-container');
+                if (!container) return;
+
+                for (let i = 0; i < 100; i++) {
+                    const star = document.createElement('div');
+                    star.classList.add('star');
+
+                    // حجم عشوائي
+                    const size = Math.random() * 3;
+                    star.style.width = `${size}px`;
+                    star.style.height = `${size}px`;
+
+                    // موقع عشوائي
+                    star.style.left = `${Math.random() * 100}%`;
+                    star.style.top = `${Math.random() * 100}%`;
+
+                    // تأخير عشوائي للأنيميشن
+                    star.style.animationDelay = `${Math.random() * 5}s`;
+
+                    container.appendChild(star);
+                }
+            },
+            initScrollReveal() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('revealed');
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.scroll-reveal').forEach(el => {
+                    observer.observe(el);
+                });
             }
         };
     }

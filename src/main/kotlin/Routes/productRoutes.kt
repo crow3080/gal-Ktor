@@ -74,9 +74,11 @@ fun Route.productRoutes(
         post("/with-image") {
             try {
                 val multipart = call.receiveMultipart()
-                var name = ""
+                var nameAr = ""
+                var nameEn = ""
                 var price = 0.0
-                var description = ""
+                var descriptionAr = ""
+                var descriptionEn = ""
                 var categoryId = ""
                 var imageUrl: String? = null
 
@@ -84,9 +86,11 @@ fun Route.productRoutes(
                     when (part) {
                         is PartData.FormItem -> {
                             when (part.name) {
-                                "name" -> name = part.value
+                                "nameAr" -> nameAr = part.value
+                                "nameEn" -> nameEn = part.value
                                 "price" -> price = part.value.toDoubleOrNull() ?: 0.0
-                                "description" -> description = part.value
+                                "descriptionAr" -> descriptionAr = part.value
+                                "descriptionEn" -> descriptionEn = part.value
                                 "categoryId" -> categoryId = part.value
                             }
                         }
@@ -106,9 +110,11 @@ fun Route.productRoutes(
                 }
 
                 val product = Product(
-                    name = name,
+                    nameAr = nameAr,
+                    nameEn = nameEn,
                     price = price,
-                    description = description,
+                    descriptionAr = descriptionAr,
+                    descriptionEn = descriptionEn,
                     categoryId = categoryId,
                     imageUrl = imageUrl
                 )
@@ -227,9 +233,11 @@ fun Route.productRoutes(
             try {
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
                 val multipart = call.receiveMultipart()
-                var name = ""
+                var nameAr = ""
+                var nameEn = ""
                 var price = 0.0
-                var description = ""
+                var descriptionAr = ""
+                var descriptionEn = ""
                 var categoryId = ""
                 var imageUrl: String? = null
                 var removeImage = false
@@ -248,9 +256,11 @@ fun Route.productRoutes(
                     when (part) {
                         is PartData.FormItem -> {
                             when (part.name) {
-                                "name" -> name = part.value
+                                "nameAr" -> nameAr = part.value
+                                "nameEn" -> nameEn = part.value
                                 "price" -> price = part.value.toDoubleOrNull() ?: 0.0
-                                "description" -> description = part.value
+                                "descriptionAr" -> descriptionAr = part.value
+                                "descriptionEn" -> descriptionEn = part.value
                                 "categoryId" -> categoryId = part.value
                                 "removeImage" -> removeImage = part.value == "true"
                             }
@@ -284,9 +294,11 @@ fun Route.productRoutes(
 
                 val product = Product(
                     _id = id,
-                    name = name,
+                    nameAr = nameAr,
+                    nameEn = nameEn,
                     price = price,
-                    description = description,
+                    descriptionAr = descriptionAr,
+                    descriptionEn = descriptionEn,
                     categoryId = categoryId,
                     imageUrl = imageUrl
                 )
@@ -400,15 +412,17 @@ fun Route.productRoutes(
                         val parts = line.split(",").map { it.trim() }
 
                         if (parts.isEmpty() || parts[0].isBlank()) {
-                            errors.add("السطر $i: اسم المنتج فارغ")
+                            errors.add("السطر $i: اسم المنتج بالعربية فارغ")
                             continue
                         }
 
-                        val name = parts.getOrNull(0) ?: ""
-                        val priceStr = parts.getOrNull(1) ?: ""
-                        var description = parts.getOrNull(2) ?: ""
-                        val categoryId = parts.getOrNull(3) ?: ""
-                        val imageUrl = parts.getOrNull(4)?.takeIf { it.isNotBlank() }
+                        val nameAr = parts.getOrNull(0) ?: ""
+                        val nameEn = parts.getOrNull(1) ?: ""
+                        val priceStr = parts.getOrNull(2) ?: ""
+                        var descriptionAr = parts.getOrNull(3) ?: ""
+                        var descriptionEn = parts.getOrNull(4) ?: ""
+                        val categoryId = parts.getOrNull(5) ?: ""
+                        val imageUrl = parts.getOrNull(6)?.takeIf { it.isNotBlank() }
 
                         val price = priceStr.toDoubleOrNull()
                         if (price == null || price <= 0) {
@@ -416,14 +430,19 @@ fun Route.productRoutes(
                             continue
                         }
 
-                        if (description.isBlank()) {
-                            description = name
+                        if (descriptionAr.isBlank()) {
+                            descriptionAr = nameAr
+                        }
+                        if (descriptionEn.isBlank()) {
+                            descriptionEn = nameEn
                         }
 
                         val product = Product(
-                            name = name,
+                            nameAr = nameAr,
+                            nameEn = nameEn,
                             price = price,
-                            description = description,
+                            descriptionAr = descriptionAr,
+                            descriptionEn = descriptionEn,
                             categoryId = categoryId,
                             imageUrl = imageUrl
                         )

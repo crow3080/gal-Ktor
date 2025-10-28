@@ -41,14 +41,16 @@ fun Route.categoryRoutes(
         post("/with-image") {
             try {
                 val multipart = call.receiveMultipart()
-                var name = ""
+                var nameAr = ""
+                var nameEn = ""
                 var imageUrl: String? = null
 
                 multipart.forEachPart { part ->
                     when (part) {
                         is PartData.FormItem -> {
-                            if (part.name == "name") {
-                                name = part.value
+                            when (part.name) {
+                                "nameAr" -> nameAr = part.value
+                                "nameEn" -> nameEn = part.value
                             }
                         }
                         is PartData.FileItem -> {
@@ -66,15 +68,15 @@ fun Route.categoryRoutes(
                     part.dispose()
                 }
 
-                if (name.isBlank()) {
+                if (nameAr.isBlank()) {
                     call.respond(
                         HttpStatusCode.BadRequest,
-                        CategoryApiResponse(false, "اسم التصنيف مطلوب")
+                        CategoryApiResponse(false, "اسم التصنيف بالعربية مطلوب")
                     )
                     return@post
                 }
 
-                val category = Category(name = name, imageUrl = imageUrl)
+                val category = Category(nameAr = nameAr, nameEn = nameEn, imageUrl = imageUrl)
                 val newCategory = categoryService.createCategory(category)
 
                 call.respond(
@@ -93,10 +95,10 @@ fun Route.categoryRoutes(
             try {
                 val category = call.receive<Category>()
 
-                if (category.name.isBlank()) {
+                if (category.nameAr.isBlank()) {
                     call.respond(
                         HttpStatusCode.BadRequest,
-                        CategoryApiResponse(false, "اسم التصنيف مطلوب")
+                        CategoryApiResponse(false, "اسم التصنيف بالعربية مطلوب")
                     )
                     return@post
                 }
@@ -119,10 +121,10 @@ fun Route.categoryRoutes(
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
                 val category = call.receive<Category>()
 
-                if (category.name.isBlank()) {
+                if (category.nameAr.isBlank()) {
                     call.respond(
                         HttpStatusCode.BadRequest,
-                        CategoryApiResponse(false, "اسم التصنيف مطلوب")
+                        CategoryApiResponse(false, "اسم التصنيف بالعربية مطلوب")
                     )
                     return@put
                 }
@@ -201,8 +203,8 @@ fun Route.categoryRoutes(
                 .drop(1)
                 .mapNotNull { line ->
                     val parts = line.split(",")
-                    if (parts.size >= 2)
-                        Category(name = parts[0], imageUrl = parts[1])
+                    if (parts.size >= 3)
+                        Category(nameAr = parts[0], nameEn = parts[1], imageUrl = parts[2].takeIf { it.isNotBlank() })
                     else null
                 }
 

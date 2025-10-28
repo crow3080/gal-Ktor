@@ -45,8 +45,10 @@
     <div class="card bg-base-100 shadow-md p-6 mb-8">
         <h2 class="text-xl font-semibold text-base-content mb-4">➕ إضافة تصنيف جديد</h2>
         <form @submit.prevent="addCategory()" enctype="multipart/form-data" class="space-y-4">
-            <input type="text" x-model="newCategory.name" placeholder="اسم التصنيف"
+            <input type="text" x-model="newCategory.nameAr" placeholder="اسم التصنيف بالعربية"
                    class="input input-bordered w-full" required>
+            <input type="text" x-model="newCategory.nameEn" placeholder="اسم التصنيف بالإنجليزية"
+                   class="input input-bordered w-full" dir="ltr">
 
             <div class="form-control">
                 <label class="label">
@@ -91,12 +93,12 @@
                         <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg hover:bg-base-300 transition">
                             <div class="flex items-center gap-3">
                                 <template x-if="category.imageUrl">
-                                    <img :src="category.imageUrl" :alt="category.name" class="w-12 h-12 object-cover rounded-lg">
+                                    <img :src="category.imageUrl" :alt="category.nameAr" class="w-12 h-12 object-cover rounded-lg">
                                 </template>
                                 <template x-if="!category.imageUrl">
                                     <span class="text-2xl">🏷️</span>
                                 </template>
-                                <span class="font-medium text-lg" x-text="category.name"></span>
+                                <span class="font-medium text-lg" x-text="category.nameAr"></span>
                             </div>
                             <div class="flex gap-2">
                                 <button @click="openEditModal(category)" class="btn btn-warning btn-sm">✏️ تعديل</button>
@@ -120,8 +122,10 @@
         <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6">
             <h3 class="text-xl font-semibold text-base-content mb-4">✏️ تعديل التصنيف</h3>
             <div class="form-control space-y-4">
-                <input type="text" x-model="modal.category.name" placeholder="اسم التصنيف"
+                <input type="text" x-model="modal.category.nameAr" placeholder="اسم التصنيف بالعربية"
                        class="input input-bordered w-full" required>
+                <input type="text" x-model="modal.category.nameEn" placeholder="اسم التصنيف بالإنجليزية"
+                       class="input input-bordered w-full" dir="ltr">
 
                 <div x-show="modal.category.imageUrl" class="flex items-center gap-3">
                     <img :src="modal.category.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg">
