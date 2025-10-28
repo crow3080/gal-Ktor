@@ -398,138 +398,240 @@
 </footer>
 
 <script>
-    const langs = {
-        ar: {
-            brandName: "جال لتوريدات المصانع",
-            pageTitle: "تواصل معنا - جال للتجارة والتوريدات",
-            contactTitle: "نسعد بتواصلك معنا",
-            contactDesc: "فريقنا من المهندسين والمتخصصين جاهز لخدمتك والإجابة على جميع استفساراتك 💬",
-            sendMsg: "أرسل لنا رسالة",
-            sendBtnText: "إرسال الرسالة",
-            infoTitle: "معلومات التواصل",
-            address: "27 شارع الجبرونى - وسط البلد - القاهرة - مصر",
-            addressDesc: "موقعنا في وسط البلد، القاهرة",
-            workHours: "الإثنين - السبت: 8ص - 5م",
-            hoursDesc: "الأحد إجازة",
-            phoneDesc: "اتصل بنا على مدار الساعة",
-            emailDesc: "راسلنا عبر البريد الإلكتروني",
-            footerBrand: "جال للتجارة",
-            footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
-            navProducts: "المنتجات",
-            navCart: "السلة",
-            navContact: "تواصل معنا",
-            mnavProducts: "المنتجات",
-            mnavCart: "السلة",
-            mnavContact: "تواصل معنا",
-            fnavProducts: "المنتجات",
-            fnavCart: "السلة",
-            fnavContact: "تواصل معنا",
-            submitSuccess: "شكراً لتواصلك معنا! سنرد عليك في أقرب وقت ممكن.",
-            socialTitle: "تابعنا على",
-            mapTitle: "موقعنا على الخريطة",
-            mapDesc: "زورنا في مقرنا الرئيسي بوسط البلد، القاهرة. نحن على استعداد لاستقبالكم خلال ساعات العمل.",
-            parkingInfo: "مواقف سيارات متاحة قريبة",
-            openMap: "فتح في خرائط جوجل",
-            placeholders: {
-                inputName: "اسمك الكامل",
-                inputEmail: "بريدك الإلكتروني",
-                inputPhone: "رقم الهاتف (اختياري)",
-                inputMsg: "اكتب رسالتك هنا..."
-            }
-        },
-        en: {
-            brandName: "Gal Industrial Supplies",
-            pageTitle: "Contact Us - Gal Trading & Supplies",
-            contactTitle: "We'd Love to Hear From You",
-            contactDesc: "Our team of engineers and experts is ready to assist you and answer all your questions 💬",
-            sendMsg: "Send Us a Message",
-            sendBtnText: "Send Message",
-            infoTitle: "Contact Information",
-            address: "27 El-Gabrani St, Downtown, Cairo, Egypt",
-            addressDesc: "Our location in Downtown, Cairo",
-            workHours: "Mon - Sat: 8 AM - 5 PM",
-            hoursDesc: "Sunday: Closed",
-            phoneDesc: "Call us anytime",
-            emailDesc: "Email us anytime",
-            footerBrand: "Gal Trading",
-            footerDesc: "Your trusted partner in supplying top-quality industrial products.",
-            navProducts: "Products",
-            navCart: "Cart",
-            navContact: "Contact Us",
-            mnavProducts: "Products",
-            mnavCart: "Cart",
-            mnavContact: "Contact Us",
-            fnavProducts: "Products",
-            fnavCart: "Cart",
-            fnavContact: "Contact Us",
-            submitSuccess: "Thank you for contacting us! We'll get back to you soon.",
-            socialTitle: "Follow Us",
-            mapTitle: "Our Location on Map",
-            mapDesc: "Visit us at our main office in Downtown, Cairo. We're ready to welcome you during business hours.",
-            parkingInfo: "Parking available nearby",
-            openMap: "Open in Google Maps",
-            placeholders: {
-                inputName: "Full Name",
-                inputEmail: "Email Address",
-                inputPhone: "Phone Number (Optional)",
-                inputMsg: "Write your message here..."
-            }
-        }
-    };
+    // استبدل السكريبت الموجود في نهاية contact.html بهذا:
 
-    function loadLang(lang) {
-        const t = langs[lang] || langs.ar;
-        for (const key in t) {
-            if (key === 'placeholders') continue;
-            const el = document.getElementById(key);
-            if (el && typeof t[key] === "string") el.innerText = t[key];
-        }
+ const langs = {
+     ar: {
+         brandName: "جال لتوريدات المصانع",
+         pageTitle: "تواصل معنا - جال للتجارة والتوريدات",
+         contactTitle: "نسعد بتواصلك معنا",
+         contactDesc: "فريقنا من المهندسين والمتخصصين جاهز لخدمتك والإجابة على جميع استفساراتك 💬",
+         sendMsg: "أرسل لنا رسالة",
+         sendBtnText: "إرسال الرسالة",
+         infoTitle: "معلومات التواصل",
+         address: "27 شارع الجبرونى - وسط البلد - القاهرة - مصر",
+         addressDesc: "موقعنا في وسط البلد، القاهرة",
+         workHours: "الإثنين - السبت: 8ص - 5م",
+         hoursDesc: "الأحد إجازة",
+         phoneDesc: "اتصل بنا على مدار الساعة",
+         emailDesc: "راسلنا عبر البريد الإلكتروني",
+         footerBrand: "جال للتجارة",
+         footerDesc: "شريكك الموثوق في توريد المعدات والمنتجات الصناعية بأعلى معايير الجودة",
+         navProducts: "المنتجات",
+         navCart: "السلة",
+         navContact: "تواصل معنا",
+         mnavProducts: "المنتجات",
+         mnavCart: "السلة",
+         mnavContact: "تواصل معنا",
+         fnavProducts: "المنتجات",
+         fnavCart: "السلة",
+         fnavContact: "تواصل معنا",
+         submitSuccess: "شكراً لتواصلك معنا! سنرد عليك في أقرب وقت ممكن.",
+         submitError: "حدث خطأ أثناء إرسال الرسالة. الرجاء المحاولة مرة أخرى.",
+         socialTitle: "تابعنا على",
+         mapTitle: "موقعنا على الخريطة",
+         mapDesc: "زورنا في مقرنا الرئيسي بوسط البلد، القاهرة. نحن على استعداد لاستقبالكم خلال ساعات العمل.",
+         parkingInfo: "مواقف سيارات متاحة قريبة",
+         openMap: "فتح في خرائط جوجل",
+         sending: "جاري الإرسال...",
+         placeholders: {
+             inputName: "اسمك الكامل",
+             inputEmail: "بريدك الإلكتروني",
+             inputPhone: "رقم الهاتف (اختياري)",
+             inputMsg: "اكتب رسالتك هنا..."
+         }
+     },
+     en: {
+         brandName: "Gal Industrial Supplies",
+         pageTitle: "Contact Us - Gal Trading & Supplies",
+         contactTitle: "We'd Love to Hear From You",
+         contactDesc: "Our team of engineers and experts is ready to assist you and answer all your questions 💬",
+         sendMsg: "Send Us a Message",
+         sendBtnText: "Send Message",
+         infoTitle: "Contact Information",
+         address: "27 El-Gabrani St, Downtown, Cairo, Egypt",
+         addressDesc: "Our location in Downtown, Cairo",
+         workHours: "Mon - Sat: 8 AM - 5 PM",
+         hoursDesc: "Sunday: Closed",
+         phoneDesc: "Call us anytime",
+         emailDesc: "Email us anytime",
+         footerBrand: "Gal Trading",
+         footerDesc: "Your trusted partner in supplying top-quality industrial products.",
+         navProducts: "Products",
+         navCart: "Cart",
+         navContact: "Contact Us",
+         mnavProducts: "Products",
+         mnavCart: "Cart",
+         mnavContact: "Contact Us",
+         fnavProducts: "Products",
+         fnavCart: "Cart",
+         fnavContact: "Contact Us",
+         submitSuccess: "Thank you for contacting us! We'll get back to you soon.",
+         submitError: "Failed to send message. Please try again.",
+         socialTitle: "Follow Us",
+         mapTitle: "Our Location on Map",
+         mapDesc: "Visit us at our main office in Downtown, Cairo. We're ready to welcome you during business hours.",
+         parkingInfo: "Parking available nearby",
+         openMap: "Open in Google Maps",
+         sending: "Sending...",
+         placeholders: {
+             inputName: "Full Name",
+             inputEmail: "Email Address",
+             inputPhone: "Phone Number (Optional)",
+             inputMsg: "Write your message here..."
+         }
+     }
+ };
 
-        // تحديث placeholders
-        const ph = t.placeholders;
-        for (const id in ph) {
-            const input = document.getElementById(id);
-            if (input) input.placeholder = ph[id];
-        }
+ function loadLang(lang) {
+     const t = langs[lang] || langs.ar;
+     for (const key in t) {
+         if (key === 'placeholders') continue;
+         const el = document.getElementById(key);
+         if (el && typeof t[key] === "string") el.innerText = t[key];
+     }
 
-        document.title = t.pageTitle;
-        document.documentElement.lang = lang;
-        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-        document.getElementById("current-lang").innerText = lang.toUpperCase();
-        localStorage.setItem("lang", lang);
-    }
+     // تحديث placeholders
+     const ph = t.placeholders;
+     for (const id in ph) {
+         const input = document.getElementById(id);
+         if (input) input.placeholder = ph[id];
+     }
 
-    function changeLang(lang) {
-        loadLang(lang);
-    }
+     document.title = t.pageTitle;
+     document.documentElement.lang = lang;
+     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+     document.getElementById("current-lang").innerText = lang.toUpperCase();
+     localStorage.setItem("lang", lang);
+ }
 
-    function headerManager() {
-        return {
-            cartCount: 0,
-            init() {
-                this.loadCartCount();
-                window.addEventListener('storage', () => this.loadCartCount());
-                window.addEventListener('cartUpdated', () => this.loadCartCount());
-            },
-            loadCartCount() {
-                const cart = localStorage.getItem('cart');
-                const items = cart ? JSON.parse(cart) : [];
-                this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
-            }
+ function changeLang(lang) {
+     loadLang(lang);
+ }
+
+ function headerManager() {
+     return {
+         cartCount: 0,
+         init() {
+             this.loadCartCount();
+             window.addEventListener('storage', () => this.loadCartCount());
+             window.addEventListener('cartUpdated', () => this.loadCartCount());
+         },
+         loadCartCount() {
+             const cart = localStorage.getItem('cart');
+             const items = cart ? JSON.parse(cart) : [];
+             this.cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+         }
+     };
+ }
+
+ async function handleSubmit(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const sendBtn = document.getElementById('sendBtn');
+    const sendBtnText = document.getElementById('sendBtnText');
+    const lang = localStorage.getItem("lang") || "ar";
+    const t = langs[lang];
+
+    const originalText = sendBtnText.innerText;
+
+    sendBtn.disabled = true;
+    sendBtnText.innerText = t.sending;
+
+    const spinner = document.createElement('span');
+    spinner.className = 'loading loading-spinner loading-sm mr-2';
+    sendBtn.insertBefore(spinner, sendBtnText);
+
+    try {
+        const formData = {
+            name: document.getElementById('inputName').value.trim(),
+            email: document.getElementById('inputEmail').value.trim(),
+            phone: document.getElementById('inputPhone').value.trim() || null,
+            message: document.getElementById('inputMsg').value.trim()
         };
-    }
 
-    function handleSubmit(event) {
-        event.preventDefault();
-        const lang = localStorage.getItem("lang") || "ar";
-        alert(langs[lang].submitSuccess);
-        event.target.reset();
-    }
+        console.log('📤 Sending data:', formData);
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem("lang") || "ar";
-        loadLang(saved);
-    });
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        console.log('📡 Response status:', response.status);
+
+        const result = await response.json();
+        console.log('📋 Response data:', result);
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || result.message || t.submitError);
+        }
+
+        // نجح الإرسال
+        showSuccessMessage(result.message || t.submitSuccess);
+        form.reset();
+
+    } catch (error) {
+        console.error('❌ Error:', error);
+        showErrorMessage(error.message || t.submitError);
+    } finally {
+        spinner.remove();
+        sendBtn.disabled = false;
+        sendBtnText.innerText = originalText;
+    }
+}
+ function showSuccessMessage(message) {
+     const alertDiv = document.createElement('div');
+     alertDiv.className = 'alert alert-success shadow-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] max-w-md';
+     alertDiv.innerHTML = `
+         <div class="flex items-center gap-3">
+             <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+             </svg>
+             <span class="font-semibold">${message}</span>
+         </div>
+     `;
+
+     document.body.appendChild(alertDiv);
+
+     setTimeout(() => {
+         alertDiv.style.transition = 'opacity 0.5s, transform 0.5s';
+         alertDiv.style.opacity = '0';
+         alertDiv.style.transform = 'translate(-50%, -20px)';
+         setTimeout(() => alertDiv.remove(), 500);
+     }, 3000);
+ }
+
+ function showErrorMessage(message) {
+     const alertDiv = document.createElement('div');
+     alertDiv.className = 'alert alert-error shadow-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] max-w-md';
+     alertDiv.innerHTML = `
+         <div class="flex items-center gap-3">
+             <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+             </svg>
+             <span class="font-semibold">${message}</span>
+         </div>
+     `;
+
+     document.body.appendChild(alertDiv);
+
+     setTimeout(() => {
+         alertDiv.style.transition = 'opacity 0.5s, transform 0.5s';
+         alertDiv.style.opacity = '0';
+         alertDiv.style.transform = 'translate(-50%, -20px)';
+         setTimeout(() => alertDiv.remove(), 500);
+     }, 5000);
+ }
+
+ document.addEventListener('DOMContentLoaded', () => {
+     const saved = localStorage.getItem("lang") || "ar";
+     loadLang(saved);
+ });
 </script>
 
 </body>

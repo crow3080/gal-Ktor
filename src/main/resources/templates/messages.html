@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="fantasy">
+<head>
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الرسائل - Gal Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .unread { background: rgba(59, 130, 246, 0.05); border-right: 4px solid #3b82f6; }
+        .read { opacity: 0.7; }
+    </style>
+</head>
+<body x-data="messagesApp()" x-init="init()" class="bg-base-100 min-h-screen">
+
+<header class="bg-base-200 shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-base-content">
+                📧 إدارة الرسائل
+                <span x-show="unreadCount > 0" class="badge badge-error badge-lg mr-2" x-text="unreadCount + ' غير مقروءة'"></span>
+            </h1>
+            <div class="flex gap-2">
+                <a href="/products" class="btn btn-ghost btn-sm">📦 المنتجات</a>
+                <a href="/categories" class="btn btn-ghost btn-sm">🏷️ التصنيفات</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6">
+
+    <div x-show="alert.show" x-transition :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'" class="mb-6" role="alert">
+        <p x-text="alert.message" class="font-medium"></p>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="card bg-base-100 shadow-md p-4 mb-6">
+        <div class="flex flex-col md:flex-row gap-4 items-center">
+            <input
+                    type="text"
+                    placeholder="🔍 ابحث باسم المرسل أو البريد أو محتوى الرسالة"
+                    x-model="searchQuery"
+                    @input.debounce.500ms="searchMessages()"
+                    class="input input-bordered flex-1 w-full"
+            >
+
+            <div class="flex gap-2 w-full md:w-auto">
+                <select x-model="readFilter" @change="filterMessages()" class="select select-bordered">
+                    <option value="">جميع الرسائل</option>
+                    <option value="false">غير مقروءة فقط</option>
+                    <option value="true">مقروءة فقط</option>
+                </select>
+
+                <select x-model="pagination.limit" @change="changeLimit()" class="select select-bordered">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div x-show="loading" class="flex justify-center items-center py-20">
+        <div class="loading loading-spinner loading-lg text-primary"></div>
+    </div>
+
+    <!-- Messages List -->
+    <div x-show="!loading && messages.length > 0" class="space-y-4">
+        <template x-for="msg in messages" :key="msg.id">
+            <div :class="msg.isRead ? 'read' : 'unread'" class="card bg-base-100 shadow-md p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="avatar placeholder">
+                                <div class="bg-primary text-primary-content rounded-full w-12">
+                                    <span class="text-xl" x-text="msg.name.charAt(0).toUpperCase()"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg" x-text="msg.name"></h3>
+                                <p class="text-sm text-base-content/60">
+                                    <i class="fas fa-envelope ml-1"></i>
+                                    <span x-text="msg.email"></span>
+                                </p>
+                                <p x-show="msg.phone" class="text-sm text-base-content/60">
+                                    <i class="fas fa-phone ml-1"></i>
+                                    <span x-text="msg.phone"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-2">
+                        <span class="text-xs text-base-content/50" x-text="formatDate(msg.createdAt)"></span>
+                        <div class="flex gap-2">
+
+                            <button @click="deleteMessage(msg.id)" class="btn btn-error btn-xs" title="حذف">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-base-200 rounded-lg p-4">
+                    <p class="text-base-content whitespace-pre-wrap" x-text="msg.message"></p>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Empty State -->
+    <div x-show="!loading && messages.length === 0" class="text-center py-20">
+        <div class="text-8xl mb-4">📭</div>
+        <h3 class="text-2xl font-semibold text-base-content mb-2">لا توجد رسائل</h3>
+        <p class="text-base-content/70">لم يتم استلام أي رسائل بعد</p>
+    </div>
+
+    <!-- Pagination -->
+    <div x-show="!loading && pagination.totalPages > 1" class="flex justify-center items-center gap-2 mt-8">
+        <button @click="goToPage(1)" :disabled="pagination.page === 1" class="btn btn-sm">«</button>
+        <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1" class="btn btn-sm">‹</button>
+
+        <template x-for="pageNum in visiblePages" :key="pageNum">
+            <button
+                    @click="goToPage(pageNum)"
+                    :class="pageNum === pagination.page ? 'btn-primary' : 'btn-ghost'"
+                    class="btn btn-sm"
+                    x-text="pageNum"
+            ></button>
+        </template>
+
+        <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">›</button>
+        <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">»</button>
+
+        <span class="text-sm text-base-content/70 mr-4">
+            صفحة <span x-text="pagination.page"></span> من <span x-text="pagination.totalPages"></span>
+        </span>
+    </div>
+
+</main>
+
+<script>
+    function messagesApp() {
+        return {
+            messages: [],
+            searchQuery: '',
+            readFilter: '',
+            loading: false,
+            unreadCount: 0,
+            alert: { show: false, message: '', type: 'success' },
+            pagination: {
+                page: 1,
+                limit: 20,
+                total: 0,
+                totalPages: 0
+            },
+
+            get visiblePages() {
+                const current = this.pagination.page;
+                const total = this.pagination.totalPages;
+                const pages = [];
+                let start = Math.max(1, current - 2);
+                let end = Math.min(total, current + 2);
+                if (end - start < 4) {
+                    if (start === 1) end = Math.min(total, start + 4);
+                    else if (end === total) start = Math.max(1, end - 4);
+                }
+                for (let i = start; i <= end; i++) pages.push(i);
+                return pages;
+            },
+
+            async init() {
+                await this.loadMessages();
+            },
+
+            async loadMessages() {
+                this.loading = true;
+                try {
+                    const params = new URLSearchParams({
+                        page: this.pagination.page,
+                        limit: this.pagination.limit,
+                        ...(this.searchQuery && { search: this.searchQuery }),
+                        ...(this.readFilter && { read: this.readFilter })
+                    });
+
+                    const res = await fetch(`/api/admin/messages?${params}`, { credentials: 'include' });
+                    if (!res.ok) throw new Error('فشل في جلب الرسائل');
+
+                    const data = await res.json();
+                    this.messages = data.data;
+                    this.pagination.total = data.total;
+                    this.pagination.totalPages = data.totalPages;
+                    this.pagination.page = data.page;
+                    this.unreadCount = data.unreadCount;
+                } catch (err) {
+                    this.showAlert(err.message, 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async searchMessages() {
+                this.pagination.page = 1;
+                await this.loadMessages();
+            },
+
+            async filterMessages() {
+                this.pagination.page = 1;
+                await this.loadMessages();
+            },
+
+            async changeLimit() {
+                this.pagination.page = 1;
+                await this.loadMessages();
+            },
+
+            async goToPage(page) {
+                if (page < 1 || page > this.pagination.totalPages) return;
+                this.pagination.page = page;
+                await this.loadMessages();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            async toggleRead(message) {
+                try {
+                    const newState = !message.isRead;
+                    const res = await fetch(`/api/admin/messages/${message._id}/read?isRead=${newState}`, {
+                        method: 'PATCH',
+                        credentials: 'include'
+                    });
+                    if (!res.ok) throw new Error('فشل في تحديث الرسالة');
+
+                    message.isRead = newState;
+                    this.unreadCount += newState ? -1 : 1;
+                    this.showAlert(newState ? '✅ تم تحديد الرسالة كمقروءة' : '✅ تم تحديد الرسالة كغير مقروءة', 'success');
+                } catch (err) {
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            async deleteMessage(id) {
+                if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+
+                try {
+                    const res = await fetch(`/api/admin/messages/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    if (!res.ok) throw new Error('فشل في حذف الرسالة');
+
+                    await this.loadMessages();
+                    this.showAlert('✅ تم حذف الرسالة بنجاح', 'success');
+                } catch (err) {
+                    this.showAlert(err.message, 'error');
+                }
+            },
+
+            formatDate(dateStr) {
+                const timestamp = typeof dateStr === 'number' ? dateStr : parseInt(dateStr);
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = now - date;
+                const minutes = Math.floor(diff / 60000);
+                const hours = Math.floor(diff / 3600000);
+                const days = Math.floor(diff / 86400000);
+
+                if (minutes < 1) return 'الآن';
+                if (minutes < 60) return `منذ ${minutes} دقيقة`;
+                if (hours < 24) return `منذ ${hours} ساعة`;
+                if (days < 7) return `منذ ${days} يوم`;
+
+                return date.toLocaleDateString('ar-EG', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            },
+
+            showAlert(message, type = 'success') {
+                this.alert = { show: true, message, type };
+                setTimeout(() => this.alert.show = false, 4000);
+            }
+        };
+    }
+</script>
+
+</body>
+</html>

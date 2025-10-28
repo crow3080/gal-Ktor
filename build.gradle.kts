@@ -44,5 +44,6 @@ dependencies {
     implementation("io.ktor:ktor-server-thymeleaf")
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:5.6.1")
     implementation("org.mongodb:bson-kotlinx:5.6.1")
+    implementation("io.ktor:ktor-server-cors:3.3.1")
 
 }
