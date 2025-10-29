@@ -12,6 +12,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
 import java.io.File
+import java.util.UUID
 
 fun Route.categoryRoutes(
     categoryService: CategoryService,
@@ -57,8 +58,8 @@ fun Route.categoryRoutes(
                             val fileBytes = part.streamProvider().readBytes()
                             val originalFileName = part.originalFileName ?: "image.jpg"
                             val fileExtension = originalFileName.substringAfterLast(".")
-                            val fileName = "${java.util.UUID.randomUUID()}.$fileExtension"
-                            val file = java.io.File("uploads/images/$fileName")
+                            val fileName = "${UUID.randomUUID()}.$fileExtension"
+                            val file = File("uploads/images/$fileName")
                             file.parentFile.mkdirs()
                             file.writeBytes(fileBytes)
                             imageUrl = "/uploads/images/$fileName"
@@ -135,6 +136,96 @@ fun Route.categoryRoutes(
                     call.respond(
                         HttpStatusCode.OK,
                         CategoryApiResponse(true, "تم التحديث بنجاح")
+                    )
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        CategoryApiResponse(false, "التصنيف غير موجود")
+                    )
+                }
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    CategoryApiResponse(false, "خطأ في التحديث: ${e.message}")
+                )
+            }
+        }
+
+        put("/{id}/with-image") {
+            try {
+                val id = call.parameters["id"] ?: throw IllegalArgumentException("المعرف مفقود")
+                val multipart = call.receiveMultipart()
+                var nameAr = ""
+                var nameEn = ""
+                var imageUrl: String? = null
+                var removeImage = false
+
+                multipart.forEachPart { part ->
+                    when (part) {
+                        is PartData.FormItem -> {
+                            when (part.name) {
+                                "nameAr" -> nameAr = part.value
+                                "nameEn" -> nameEn = part.value
+                                "removeImage" -> removeImage = part.value == "true"
+                            }
+                        }
+                        is PartData.FileItem -> {
+                            if (part.name == "image") {
+                                val fileBytes = part.streamProvider().readBytes()
+                                val originalFileName = part.originalFileName ?: "image.jpg"
+                                val fileExtension = originalFileName.substringAfterLast(".")
+                                val fileName = "${UUID.randomUUID()}.$fileExtension"
+                                val file = File("uploads/images/$fileName")
+                                file.parentFile.mkdirs()
+                                file.writeBytes(fileBytes)
+                                imageUrl = "/uploads/images/$fileName"
+                            }
+                        }
+                        else -> {}
+                    }
+                    part.dispose()
+                }
+
+                if (nameAr.isBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        CategoryApiResponse(false, "اسم التصنيف بالعربية مطلوب")
+                    )
+                    return@put
+                }
+
+                // جلب التصنيف الحالي للحصول على imageUrl القديم إذا لزم الأمر
+                val existingCategory = categoryService.getCategoryById(id)
+                    ?: return@put call.respond(
+                        HttpStatusCode.NotFound,
+                        CategoryApiResponse(false, "التصنيف غير موجود")
+                    )
+
+                // التعامل مع إزالة الصورة
+                if (removeImage) {
+                    existingCategory.imageUrl?.let { fileUploadService.deleteImage(it) }
+                    imageUrl = null
+                } else if (imageUrl != null) {
+                    // إذا تم تحميل صورة جديدة، حذف القديمة
+                    existingCategory.imageUrl?.let { fileUploadService.deleteImage(it) }
+                } else {
+                    // إذا لم يتم تغيير الصورة، الاحتفاظ بالقديمة
+                    imageUrl = existingCategory.imageUrl
+                }
+
+                val updatedCategory = Category(
+                    _id = id,
+                    nameAr = nameAr,
+                    nameEn = nameEn,
+                    imageUrl = imageUrl
+                )
+
+                val updated = categoryService.updateCategory(id, updatedCategory)
+
+                if (updated) {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        CategoryApiResponse(true, "تم التحديث بنجاح", updatedCategory)
                     )
                 } else {
                     call.respond(
