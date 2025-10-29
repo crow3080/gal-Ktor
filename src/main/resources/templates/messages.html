@@ -1,116 +1,156 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="fantasy">
 <head>
-    <link rel="icon" type="image/webp" href="/images/logo.webp">
-    <link rel="apple-touch-icon" href="/images/logo.webp">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة الرسائل - Gal Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { transition: all 0.3s ease; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .unread { background: rgba(59, 130, 246, 0.05); border-right: 4px solid #3b82f6; }
-        .read { opacity: 0.7; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+        }
+        .header-gradient {
+            background: linear-gradient(to right, #7c3aed, #4f46e5);
+        }
+        .card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .unread {
+            background: rgba(59, 130, 246, 0.1);
+            border-right: 5px solid #3b82f6;
+        }
+        .read {
+            opacity: 0.85;
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .avatar {
+            transition: transform 0.2s ease;
+        }
+        .avatar:hover {
+            transform: scale(1.1);
+        }
+        .btn-primary, .btn-error, .btn-ghost {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover, .btn-error:hover, .btn-ghost:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body x-data="messagesApp()" x-init="init()" class="bg-base-100 min-h-screen">
 
-<header class="bg-base-200 shadow-sm sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-4">
+<!-- ✅ Header -->
+<header class="header-gradient shadow-lg sticky top-0 z-50 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-base-content">
-                📧 إدارة الرسائل
-                <span x-show="unreadCount > 0" class="badge badge-error badge-lg mr-2" x-text="unreadCount + ' غير مقروءة'"></span>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-envelope"></i> إدارة الرسائل
+                <span x-show="unreadCount > 0" class="badge badge-error badge-lg mr-2 animate-pulse" x-text="unreadCount + ' غير مقروءة'"></span>
             </h1>
             <div class="flex gap-2">
-                <a href="/products" class="btn btn-ghost btn-sm">📦 المنتجات</a>
-                <a href="/categories" class="btn btn-ghost btn-sm">🏷️ التصنيفات</a>
+                <a href="/products" class="btn btn-ghost btn-sm text-white border-white/30 hover:bg-white/20">
+                    <i class="fa-solid fa-box"></i> المنتجات
+                </a>
+                <a href="/categories" class="btn btn-ghost btn-sm text-white border-white/30 hover:bg-white/20">
+                    <i class="fa-solid fa-tags"></i> التصنيفات
+                </a>
             </div>
         </div>
     </div>
 </header>
 
-<main class="max-w-6xl mx-auto px-4 py-6">
-
-    <div x-show="alert.show" x-transition :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'" class="mb-6" role="alert">
+<!-- ✅ Main -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- ✅ Alerts -->
+    <div x-show="alert.show" x-transition
+         :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'"
+         class="mb-6 rounded-xl flex items-center gap-2" role="alert">
+        <i :class="alert.type === 'success' ? 'fa-solid fa-check-circle' : 'fa-solid fa-exclamation-circle'"></i>
         <p x-text="alert.message" class="font-medium"></p>
     </div>
 
-    <!-- Filters & Search -->
-    <div class="card bg-base-100 shadow-md p-4 mb-6">
-        <div class="flex flex-col md:flex-row gap-4 items-center">
+    <!-- ✅ Filters & Search -->
+    <div class="card bg-base-100 shadow-xl p-6 mb-8 rounded-xl">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
             <input
                     type="text"
                     placeholder="🔍 ابحث باسم المرسل أو البريد أو محتوى الرسالة"
                     x-model="searchQuery"
                     @input.debounce.500ms="searchMessages()"
-                    class="input input-bordered flex-1 w-full"
+                    class="input input-bordered w-full rounded-lg"
             >
-
-            <div class="flex gap-2 w-full md:w-auto">
-                <select x-model="readFilter" @change="filterMessages()" class="select select-bordered">
-                    <option value="">جميع الرسائل</option>
-                    <option value="false">غير مقروءة فقط</option>
-                    <option value="true">مقروءة فقط</option>
-                </select>
-
-                <select x-model="pagination.limit" @change="changeLimit()" class="select select-bordered">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                </select>
-            </div>
+            <select x-model="readFilter" @change="filterMessages()" class="select select-bordered w-full rounded-lg">
+                <option value="">جميع الرسائل</option>
+                <option value="false">غير مقروءة فقط</option>
+                <option value="true">مقروءة فقط</option>
+            </select>
+            <select x-model="pagination.limit" @change="changeLimit()" class="select select-bordered w-full rounded-lg">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
         </div>
     </div>
 
-    <!-- Loading -->
+    <!-- ✅ Loading -->
     <div x-show="loading" class="flex justify-center items-center py-20">
-        <div class="loading loading-spinner loading-lg text-primary"></div>
+        <div class="loading-spinner text-primary w-12 h-12">
+            <i class="fa-solid fa-spinner"></i>
+        </div>
     </div>
 
-    <!-- Messages List -->
+    <!-- ✅ Messages List -->
     <div x-show="!loading && messages.length > 0" class="space-y-4">
         <template x-for="msg in messages" :key="msg.id">
-            <div :class="msg.isRead ? 'read' : 'unread'" class="card bg-base-100 shadow-md p-6">
+            <div :class="msg.isRead ? 'read' : 'unread'" class="card bg-base-100 shadow-md p-6 rounded-xl">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="avatar placeholder">
-                                <div class="bg-primary text-primary-content rounded-full w-12">
-                                    <span class="text-xl" x-text="msg.name.charAt(0).toUpperCase()"></span>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-lg" x-text="msg.name"></h3>
-                                <p class="text-sm text-base-content/60">
-                                    <i class="fas fa-envelope ml-1"></i>
-                                    <span x-text="msg.email"></span>
-                                </p>
-                                <p x-show="msg.phone" class="text-sm text-base-content/60">
-                                    <i class="fas fa-phone ml-1"></i>
-                                    <span x-text="msg.phone"></span>
-                                </p>
+                    <div class="flex-1 flex items-start gap-3">
+                        <div class="avatar placeholder">
+                            <div class="bg-gradient-to-br from-primary to-secondary text-primary-content rounded-full w-12 h-12 flex items-center justify-center">
+                                <span class="text-xl" x-text="msg.name.charAt(0).toUpperCase()"></span>
                             </div>
                         </div>
+                        <div>
+                            <h3 class="font-bold text-lg" x-text="msg.name"></h3>
+                            <p class="text-sm text-base-content/60 flex items-center gap-1">
+                                <i class="fas fa-envelope"></i>
+                                <span x-text="msg.email"></span>
+                            </p>
+                            <p x-show="msg.phone" class="text-sm text-base-content/60 flex items-center gap-1">
+                                <i class="fas fa-phone"></i>
+                                <span x-text="msg.phone"></span>
+                            </p>
+                        </div>
                     </div>
-
                     <div class="flex flex-col items-end gap-2">
                         <span class="text-xs text-base-content/50" x-text="formatDate(msg.createdAt)"></span>
                         <div class="flex gap-2">
-
+                            <button @click="toggleRead(msg)" class="btn btn-ghost btn-xs" :title="msg.isRead ? 'غير مقروء' : 'مقروء'">
+                                <i :class="msg.isRead ? 'fas fa-envelope' : 'fas fa-envelope-open'"></i>
+                            </button>
                             <button @click="deleteMessage(msg.id)" class="btn btn-error btn-xs" title="حذف">
-                                <i class="fas fa-trash text-sm"></i>
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-base-200 rounded-lg p-4">
                     <p class="text-base-content whitespace-pre-wrap" x-text="msg.message"></p>
                 </div>
@@ -118,18 +158,17 @@
         </template>
     </div>
 
-    <!-- Empty State -->
+    <!-- ✅ Empty State -->
     <div x-show="!loading && messages.length === 0" class="text-center py-20">
-        <div class="text-8xl mb-4">📭</div>
+        <div class="text-8xl mb-4"><i class="fa-solid fa-inbox"></i></div>
         <h3 class="text-2xl font-semibold text-base-content mb-2">لا توجد رسائل</h3>
         <p class="text-base-content/70">لم يتم استلام أي رسائل بعد</p>
     </div>
 
-    <!-- Pagination -->
+    <!-- ✅ Pagination -->
     <div x-show="!loading && pagination.totalPages > 1" class="flex justify-center items-center gap-2 mt-8">
-        <button @click="goToPage(1)" :disabled="pagination.page === 1" class="btn btn-sm">«</button>
-        <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1" class="btn btn-sm">‹</button>
-
+        <button @click="goToPage(1)" :disabled="pagination.page === 1" class="btn btn-sm btn-ghost">«</button>
+        <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1" class="btn btn-sm btn-ghost">‹</button>
         <template x-for="pageNum in visiblePages" :key="pageNum">
             <button
                     @click="goToPage(pageNum)"
@@ -138,15 +177,12 @@
                     x-text="pageNum"
             ></button>
         </template>
-
-        <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">›</button>
-        <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">»</button>
-
+        <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm btn-ghost">›</button>
+        <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm btn-ghost">»</button>
         <span class="text-sm text-base-content/70 mr-4">
             صفحة <span x-text="pagination.page"></span> من <span x-text="pagination.totalPages"></span>
         </span>
     </div>
-
 </main>
 
 <script>
@@ -234,7 +270,7 @@
             async toggleRead(message) {
                 try {
                     const newState = !message.isRead;
-                    const res = await fetch(`/api/admin/messages/${message._id}/read?isRead=${newState}`, {
+                    const res = await fetch(`/api/admin/messages/${message.id}/read?isRead=${newState}`, {
                         method: 'PATCH',
                         credentials: 'include'
                     });

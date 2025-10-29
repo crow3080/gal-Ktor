@@ -12,12 +12,42 @@
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <link rel="icon" type="image/webp" href="/images/logo.webp">
     <link rel="apple-touch-icon" href="/images/logo.webp">
 
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+        }
+        .header-gradient {
+            background: linear-gradient(to right, #7c3aed, #4f46e5);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .category-image {
+            transition: transform 0.3s ease;
+        }
+        .category-image:hover {
+            transform: scale(1.1);
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .loading .loading-spinner {
+            display: inline-block;
         }
     </style>
 </head>
@@ -25,58 +55,71 @@
 <body x-data="categoryApp()" x-init="init()" class="bg-base-100 min-h-screen">
 
 <!-- ✅ Header -->
-<header class="bg-base-200 shadow-sm sticky top-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-base-content">🏷️ إدارة التصنيفات</h1>
-        <a href="/products" class="btn btn-ghost btn-sm">← العودة للمنتجات</a>
+<header class="header-gradient shadow-lg sticky top-0 z-50 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold flex items-center gap-2">
+            <i class="fa-solid fa-tags"></i> إدارة التصنيفات
+        </h1>
+        <a href="/products" class="btn btn-ghost btn-sm text-white border-white/30 hover:bg-white/20">
+            <i class="fa-solid fa-arrow-right"></i> العودة للمنتجات
+        </a>
     </div>
 </header>
 
 <!-- ✅ Main -->
-<main class="max-w-4xl mx-auto px-4 py-6">
-
+<main class="max-w-5xl mx-auto px-4 py-8">
     <!-- ✅ Alerts -->
     <div x-show="alert.show" x-transition
-         :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'" class="mb-6">
-        <p x-text="alert.message" class="font-medium"></p>
+         :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'" class="mb-6 rounded-xl">
+        <p x-text="alert.message" class="font-medium flex items-center gap-2">
+            <i :class="alert.type === 'success' ? 'fa-solid fa-check-circle' : 'fa-solid fa-exclamation-circle'"></i>
+            <span x-text="alert.message"></span>
+        </p>
     </div>
 
     <!-- ✅ إضافة تصنيف جديد -->
-    <div class="card bg-base-100 shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold text-base-content mb-4">➕ إضافة تصنيف جديد</h2>
+    <div class="card bg-base-100 shadow-xl p-6 mb-8 rounded-xl card-hover">
+        <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle"></i> إضافة تصنيف جديد
+        </h2>
         <form @submit.prevent="addCategory()" enctype="multipart/form-data" class="space-y-4">
             <input type="text" x-model="newCategory.nameAr" placeholder="اسم التصنيف بالعربية"
-                   class="input input-bordered w-full" required>
+                   class="input input-bordered w-full rounded-lg" required>
             <input type="text" x-model="newCategory.nameEn" placeholder="اسم التصنيف بالإنجليزية"
-                   class="input input-bordered w-full" dir="ltr">
+                   class="input input-bordered w-full rounded-lg" dir="ltr">
 
             <div class="form-control">
                 <label class="label">
                     <span class="label-text">صورة التصنيف (اختياري)</span>
                 </label>
                 <input type="file" @change="handleFileSelect($event)" accept="image/*"
-                       class="file-input file-input-bordered w-full">
+                       class="file-input file-input-bordered w-full rounded-lg">
             </div>
 
             <div x-show="imagePreview" class="flex items-center gap-3">
-                <img :src="imagePreview" alt="Preview" class="w-20 h-20 object-cover rounded-lg">
-                <button type="button" @click="clearImage()" class="btn btn-error btn-sm">🗑️ إزالة</button>
+                <img :src="imagePreview" alt="Preview" class="w-20 h-20 object-cover rounded-lg category-image">
+                <button type="button" @click="clearImage()" class="btn btn-error btn-sm rounded-lg">
+                    <i class="fa-solid fa-trash"></i> إزالة
+                </button>
             </div>
 
-            <button type="submit" class="btn btn-primary w-full">إضافة</button>
+            <button type="submit" class="btn btn-primary w-full rounded-lg flex items-center gap-2">
+                <i class="fa-solid fa-plus loading-spinner"></i> إضافة
+            </button>
         </form>
     </div>
 
     <!-- ✅ قائمة التصنيفات -->
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-base-100 shadow-xl rounded-xl">
         <div class="card-body">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="card-title">📋 التصنيفات الموجودة</h2>
-
+                <h2 class="card-title flex items-center gap-2">
+                    <i class="fa-solid fa-list"></i> التصنيفات الموجودة
+                </h2>
                 <div class="flex gap-2 items-center">
                     <input type="file" id="csvInput" @change="importCSV($event)" accept=".csv" class="hidden">
-                    <button @click="document.getElementById('csvInput').click()" class="btn btn-secondary btn-sm">
-                        📂 استيراد CSV
+                    <button @click="document.getElementById('csvInput').click()" class="btn btn-secondary btn-sm rounded-lg flex items-center gap-2">
+                        <i class="fa-solid fa-file-import"></i> استيراد CSV
                     </button>
                 </div>
             </div>
@@ -84,25 +127,29 @@
             <div class="mb-4">
                 <input type="text" x-model="searchQuery"
                        placeholder="🔍 ابحث عن تصنيف..."
-                       class="input input-bordered w-full">
+                       class="input input-bordered w-full rounded-lg">
             </div>
 
             <template x-if="filteredCategories.length > 0">
-                <div class="space-y-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <template x-for="category in filteredCategories" :key="category._id">
-                        <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg hover:bg-base-300 transition">
+                        <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg card-hover transition">
                             <div class="flex items-center gap-3">
                                 <template x-if="category.imageUrl">
-                                    <img :src="category.imageUrl" :alt="category.nameAr" class="w-12 h-12 object-cover rounded-lg">
+                                    <img :src="category.imageUrl" :alt="category.nameAr" class="w-12 h-12 object-cover rounded-lg category-image">
                                 </template>
                                 <template x-if="!category.imageUrl">
-                                    <span class="text-2xl">🏷️</span>
+                                    <span class="text-2xl"><i class="fa-solid fa-tag"></i></span>
                                 </template>
                                 <span class="font-medium text-lg" x-text="category.nameAr"></span>
                             </div>
                             <div class="flex gap-2">
-                                <button @click="openEditModal(category)" class="btn btn-warning btn-sm">✏️ تعديل</button>
-                                <button @click="deleteCategory(category._id)" class="btn btn-error btn-sm">🗑️ حذف</button>
+                                <button @click="openEditModal(category)" class="btn btn-warning btn-sm rounded-lg">
+                                    <i class="fa-solid fa-edit"></i> تعديل
+                                </button>
+                                <button @click="deleteCategory(category._id)" class="btn btn-error btn-sm rounded-lg">
+                                    <i class="fa-solid fa-trash"></i> حذف
+                                </button>
                             </div>
                         </div>
                     </template>
@@ -110,7 +157,7 @@
             </template>
 
             <div x-show="categories.length === 0" class="text-center py-12">
-                <div class="text-6xl mb-3">🏷️</div>
+                <div class="text-6xl mb-3"><i class="fa-solid fa-tags"></i></div>
                 <p class="text-base-content/70">لا توجد تصنيفات بعد</p>
             </div>
         </div>
@@ -119,30 +166,34 @@
     <!-- ✅ نافذة التعديل -->
     <div x-show="modal.show" x-transition @click="modal.show = false"
          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6">
-            <h3 class="text-xl font-semibold text-base-content mb-4">✏️ تعديل التصنيف</h3>
+        <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6 rounded-xl">
+            <h3 class="text-xl font-semibold text-base-content mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-edit"></i> تعديل التصنيف
+            </h3>
             <div class="form-control space-y-4">
                 <input type="text" x-model="modal.category.nameAr" placeholder="اسم التصنيف بالعربية"
-                       class="input input-bordered w-full" required>
+                       class="input input-bordered w-full rounded-lg" required>
                 <input type="text" x-model="modal.category.nameEn" placeholder="اسم التصنيف بالإنجليزية"
-                       class="input input-bordered w-full" dir="ltr">
+                       class="input input-bordered w-full rounded-lg" dir="ltr">
 
                 <div x-show="modal.category.imageUrl" class="flex items-center gap-3">
-                    <img :src="modal.category.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg">
+                    <img :src="modal.category.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg category-image">
                     <span class="text-sm text-base-content/70">الصورة الحالية</span>
                 </div>
 
                 <div class="flex gap-3">
-                    <button @click="modal.show = false" class="btn btn-ghost flex-1">إلغاء</button>
-                    <button @click="updateCategory()" class="btn btn-primary flex-1">💾 حفظ</button>
+                    <button @click="modal.show = false" class="btn btn-ghost flex-1 rounded-lg">
+                        إلغاء
+                    </button>
+                    <button @click="updateCategory()" class="btn btn-primary flex-1 rounded-lg flex items-center gap-2">
+                        <i class="fa-solid fa-save"></i> حفظ
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
 </main>
 
 <script src="/js/category.js"></script>
-
 </body>
 </html>

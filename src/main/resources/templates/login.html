@@ -1,55 +1,107 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="fantasy">
+<html lang="ar" dir="rtl" data-theme="fantasy" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <link rel="icon" type="image/webp" href="/images/logo.webp">
-    <link rel="apple-touch-icon" href="/images/logo.webp">
     <meta charset="UTF-8">
-    <title>تسجيل الدخول | Gal Admin Panel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | Gal Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom right, #e5e7eb, #d1d5db);
+        }
+        .card {
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .input-bordered:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+            outline: none;
+        }
+        .btn-primary {
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: linear-gradient(to right, #7c3aed, #4f46e5);
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="bg-base-200 min-h-screen flex items-center justify-center">
+<body class="bg-base-200 min-h-screen flex items-center justify-center p-4">
 
-<div class="card w-full max-w-md bg-base-100 shadow-xl p-6">
-    <div class="text-center mb-6">
-        <h1 class="text-3xl font-bold text-primary mb-2">🛒 Gal Admin Panel</h1>
+<div class="card w-full max-w-md bg-base-100 shadow-xl p-8 rounded-xl">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-primary mb-2 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-store"></i> Gal Admin Panel
+        </h1>
         <p class="text-base-content/70">تسجيل الدخول إلى لوحة التحكم</p>
     </div>
 
     <!-- رسالة خطأ -->
-    <div th:if="${error}" class="alert alert-error mb-4">
+    <div th:if="${error}" class="alert alert-error mb-6 rounded-lg flex items-center gap-2">
+        <i class="fa-solid fa-exclamation-circle"></i>
         <span th:text="${error}">بيانات الدخول غير صحيحة</span>
     </div>
 
     <!-- نموذج تسجيل الدخول -->
-    <form action="/login" method="post" class="space-y-4">
+    <form action="/login" method="post" class="space-y-6">
         <div class="form-control">
             <label class="label">
-                <span class="label-text">اسم المستخدم</span>
+                <span class="label-text flex items-center gap-2">
+                    <i class="fa-solid fa-user"></i> اسم المستخدم
+                </span>
             </label>
-            <input type="text" name="username" class="input input-bordered w-full" placeholder="ادخل اسم المستخدم" required>
+            <input type="text" name="username" class="input input-bordered w-full rounded-lg" placeholder="ادخل اسم المستخدم" required>
         </div>
 
         <div class="form-control">
             <label class="label">
-                <span class="label-text">كلمة المرور</span>
+                <span class="label-text flex items-center gap-2">
+                    <i class="fa-solid fa-lock"></i> كلمة المرور
+                </span>
             </label>
-            <input type="password" name="password" class="input input-bordered w-full" placeholder="••••••••" required>
+            <input type="password" name="password" class="input input-bordered w-full rounded-lg" placeholder="••••••••" required>
         </div>
 
-        <button type="submit" class="btn btn-primary w-full">تسجيل الدخول</button>
+        <button type="submit" class="btn btn-primary w-full rounded-lg flex items-center gap-2">
+            <i class="fa-solid fa-sign-in-alt"></i> تسجيل الدخول
+            <i class="fa-solid fa-spinner hidden animate-spin"></i>
+        </button>
     </form>
 
-    <p class="text-center mt-6 text-sm text-base-content/60">
+    <p class="text-center mt-8 text-sm text-base-content/60">
         جميع الحقوق محفوظة © <span class="font-semibold">Crow Studio</span> - 2025
     </p>
 </div>
+
+<script>
+    // إضافة تأثير تحميل على زر تسجيل الدخول
+    document.querySelector('form').addEventListener('submit', function () {
+        const submitButton = this.querySelector('button[type="submit"]');
+        const spinner = submitButton.querySelector('.fa-spinner');
+        submitButton.disabled = true;
+        spinner.classList.remove('hidden');
+        setTimeout(() => {
+            submitButton.disabled = false;
+            spinner.classList.add('hidden');
+        }, 2000); // محاكاة التحميل لمدة ثانيتين (يمكن تعديلها حسب API)
+    });
+</script>
 
 </body>
 </html>

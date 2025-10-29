@@ -1,103 +1,158 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="fantasy">
 <head>
-    <link rel="icon" type="image/webp" href="/images/logo.webp">
-    <link rel="apple-touch-icon" href="/images/logo.webp">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gal Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="icon" type="image/webp" href="/images/logo.webp">
+    <link rel="apple-touch-icon" href="/images/logo.webp">
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { transition: all 0.3s ease; }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+        }
+        .header-gradient {
+            background: linear-gradient(to right, #7c3aed, #4f46e5);
+        }
+        .card {
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .product-image {
+            transition: transform 0.3s ease;
+        }
+        .product-image:hover {
+            transform: scale(1.1);
+        }
+        .btn-primary, .btn-error, .btn-warning, .btn-secondary {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover, .btn-error:hover, .btn-warning:hover, .btn-secondary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .input-bordered:focus, .select-bordered:focus, .textarea-bordered:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+            outline: none;
+        }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body x-data="productApp()" x-init="init()" class="bg-base-100 min-h-screen">
 
-<header class="bg-base-200 shadow-sm sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-4">
+<!-- ✅ Header -->
+<header class="header-gradient shadow-lg sticky top-0 z-50 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-base-content">📦 إدارة المنتجات</h1>
-            <a href="/categories" class="btn btn-ghost btn-sm">
-                🏷️ إدارة التصنيفات
-            </a>
-            <a href="/messages" class="btn btn-ghost btn-sm">
-                📧 الرسائل
-            </a>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-box"></i> إدارة المنتجات
+            </h1>
+            <div class="flex gap-2">
+                <a href="/categories" class="btn btn-ghost btn-sm text-white border-white/30 hover:bg-white/20">
+                    <i class="fa-solid fa-tags"></i> إدارة التصنيفات
+                </a>
+                <a href="/messages" class="btn btn-ghost btn-sm text-white border-white/30 hover:bg-white/20">
+                    <i class="fa-solid fa-envelope"></i> الرسائل
+                </a>
+            </div>
         </div>
     </div>
 </header>
 
-<main class="max-w-6xl mx-auto px-4 py-6">
-
-    <div x-show="alert.show" x-transition :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'" class="mb-6" role="alert">
+<!-- ✅ Main -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- ✅ Alerts -->
+    <div x-show="alert.show" x-transition
+         :class="alert.type === 'success' ? 'alert alert-success' : 'alert alert-error'"
+         class="mb-6 rounded-xl flex items-center gap-2" role="alert">
+        <i :class="alert.type === 'success' ? 'fa-solid fa-check-circle' : 'fa-solid fa-exclamation-circle'"></i>
         <p x-text="alert.message" class="font-medium"></p>
     </div>
 
-    <div class="card bg-base-100 shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold text-base-content mb-4">إضافة منتج جديد</h2>
-        <form @submit.prevent="addProduct()" enctype="multipart/form-data">
-            <div class="form-control space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" x-model="newProduct.nameAr" placeholder="اسم المنتج بالعربية" class="input input-bordered w-full" required>
-                    <input type="text" x-model="newProduct.nameEn" placeholder="اسم المنتج بالإنجليزية" class="input input-bordered w-full" dir="ltr">
-                    <input type="number" x-model.number="newProduct.price" placeholder="السعر" step="0.01" min="0" class="input input-bordered w-full" required>
-                </div>
-
-                <select x-model="newProduct.categoryId" class="select select-bordered w-full" required>
+    <!-- ✅ إضافة منتج جديد -->
+    <div class="card bg-base-100 shadow-xl p-6 mb-8 rounded-xl">
+        <h2 class="text-xl font-semibold text-base-content mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle"></i> إضافة منتج جديد
+        </h2>
+        <form @submit.prevent="addProduct()" enctype="multipart/form-data" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" x-model="newProduct.nameAr" placeholder="اسم المنتج بالعربية"
+                       class="input input-bordered w-full rounded-lg" required>
+                <input type="text" x-model="newProduct.nameEn" placeholder="اسم المنتج بالإنجليزية"
+                       class="input input-bordered w-full rounded-lg" dir="ltr">
+                <input type="number" x-model.number="newProduct.price" placeholder="السعر" step="0.01" min="0"
+                       class="input input-bordered w-full rounded-lg" required>
+                <select x-model="newProduct.categoryId" class="select select-bordered w-full rounded-lg" required>
                     <option value="">اختر التصنيف</option>
                     <template x-for="cat in categories" :key="cat._id">
                         <option :value="cat._id" x-text="cat.nameAr"></option>
                     </template>
                 </select>
-
-                <textarea x-model="newProduct.descriptionAr" placeholder="وصف المنتج بالعربية" rows="3" class="textarea textarea-bordered w-full resize-none" required></textarea>
-                <textarea x-model="newProduct.descriptionEn" placeholder="وصف المنتج بالإنجليزية" rows="3" class="textarea textarea-bordered w-full resize-none" dir="ltr"></textarea>
-
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">صورة المنتج (اختياري)</span>
-                    </label>
-                    <input type="file" @change="handleFileSelect($event)" accept="image/*" class="file-input file-input-bordered w-full">
-                </div>
-
-                <div x-show="imagePreview" class="flex items-center gap-3">
-                    <img :src="imagePreview" alt="Preview" class="w-24 h-24 object-cover rounded-lg">
-                    <button type="button" @click="clearImage()" class="btn btn-error btn-sm">إزالة</button>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-full md:w-auto">➕ إضافة المنتج</button>
             </div>
+            <textarea x-model="newProduct.descriptionAr" placeholder="وصف المنتج بالعربية" rows="3"
+                      class="textarea textarea-bordered w-full rounded-lg resize-none" required></textarea>
+            <textarea x-model="newProduct.descriptionEn" placeholder="وصف المنتج بالإنجليزية" rows="3"
+                      class="textarea textarea-bordered w-full rounded-lg resize-none" dir="ltr"></textarea>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">صورة المنتج (اختياري)</span>
+                </label>
+                <input type="file" @change="handleFileSelect($event)" accept="image/*"
+                       class="file-input file-input-bordered w-full rounded-lg">
+            </div>
+            <div x-show="imagePreview" class="flex items-center gap-3">
+                <img :src="imagePreview" alt="Preview" class="w-24 h-24 object-cover rounded-lg product-image">
+                <button type="button" @click="clearImage()" class="btn btn-error btn-sm rounded-lg">
+                    <i class="fa-solid fa-trash"></i> إزالة
+                </button>
+            </div>
+            <button type="submit" class="btn btn-primary w-full rounded-lg flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> إضافة المنتج
+                <i class="fa-solid fa-spinner hidden animate-spin"></i>
+            </button>
         </form>
     </div>
 
-    <div class="card bg-base-100 shadow-md p-4 mb-8">
+    <!-- ✅ قائمة المنتجات -->
+    <div class="card bg-base-100 shadow-xl p-6 mb-8 rounded-xl">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-base-content">
-                📋 المنتجات الموجودة
-                <span class="badge badge-primary" x-text="`${pagination.total} منتج`"></span>
+            <h2 class="text-xl font-semibold text-base-content flex items-center gap-2">
+                <i class="fa-solid fa-list"></i> المنتجات الموجودة
+                <span class="badge badge-primary animate-pulse" x-text="`${pagination.total} منتج`"></span>
             </h2>
             <div class="flex gap-2 items-center">
                 <input type="file" id="csvInput" @change="importCSV($event)" accept=".csv" class="hidden">
-                <button @click="document.getElementById('csvInput').click()" class="btn btn-secondary btn-sm">
-                    📂 استيراد CSV
+                <button @click="document.getElementById('csvInput').click()" class="btn btn-secondary btn-sm rounded-lg flex items-center gap-2">
+                    <i class="fa-solid fa-file-import"></i> استيراد CSV
                 </button>
             </div>
         </div>
-
-        <div class="flex gap-2 items-center">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
             <input
                     type="text"
                     placeholder="🔍 ابحث باسم المنتج أو الوصف"
                     x-model="searchQuery"
                     @input.debounce.500ms="searchProducts()"
-                    class="input input-bordered flex-1"
+                    class="input input-bordered w-full rounded-lg"
             >
-            <select x-model="pagination.limit" @change="changeLimit()" class="select select-bordered">
+            <select x-model="pagination.limit" @change="changeLimit()" class="select select-bordered w-full rounded-lg">
                 <option value="12">12 منتج</option>
                 <option value="24">24 منتج</option>
                 <option value="48">48 منتج</option>
@@ -106,55 +161,56 @@
         </div>
     </div>
 
+    <!-- ✅ Loading -->
     <div x-show="loading" class="flex justify-center items-center py-20">
-        <div class="loading loading-spinner loading-lg text-primary"></div>
+        <div class="loading-spinner text-primary w-12 h-12">
+            <i class="fa-solid fa-spinner"></i>
+        </div>
     </div>
 
-    <div x-show="!loading && products.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- ✅ قائمة المنتجات -->
+    <div x-show="!loading && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <template x-for="product in products" :key="product._id">
-            <div class="card bg-base-100 shadow-md overflow-hidden">
+            <div class="card bg-base-100 shadow-md overflow-hidden rounded-xl">
                 <figure x-show="product.imageUrl" class="h-48 bg-base-300">
-                    <img :src="product.imageUrl" :alt="product.nameAr" class="w-full h-full object-cover">
+                    <img :src="product.imageUrl" :alt="product.nameAr" class="w-full h-full object-cover product-image">
                 </figure>
                 <div x-show="!product.imageUrl" class="h-48 bg-base-300 flex items-center justify-center text-6xl">
-                    📦
+                    <i class="fa-solid fa-box"></i>
                 </div>
                 <div class="card-body">
                     <div class="flex justify-between items-start mb-3">
                         <h3 class="card-title" x-text="product.nameAr"></h3>
                         <span class="badge badge-ghost" x-text="categories.find(c => c._id === product.categoryId)?.nameAr || 'غير محدد'"></span>
                     </div>
-
                     <p class="text-2xl font-bold text-primary mb-2">
                         <span x-text="product.price.toFixed(2)"></span> جنيه
                     </p>
-
                     <p class="text-sm text-base-content/70 mb-4 line-clamp-2" x-text="product.descriptionAr"></p>
-
                     <div class="card-actions flex gap-2">
-                        <button @click="openEditModal(product)" class="btn btn-warning btn-sm flex-1">✏️ تعديل</button>
-                        <button @click="deleteProduct(product._id)" class="btn btn-error btn-sm flex-1">🗑️ حذف</button>
+                        <button @click="openEditModal(product)" class="btn btn-warning btn-sm flex-1 rounded-lg flex items-center gap-2">
+                            <i class="fa-solid fa-edit"></i> تعديل
+                        </button>
+                        <button @click="deleteProduct(product._id)" class="btn btn-error btn-sm flex-1 rounded-lg flex items-center gap-2">
+                            <i class="fa-solid fa-trash"></i> حذف
+                        </button>
                     </div>
                 </div>
             </div>
         </template>
     </div>
 
+    <!-- ✅ حالة عدم وجود منتجات -->
     <div x-show="!loading && products.length === 0" class="text-center py-20">
-        <div class="text-8xl mb-4">📦</div>
+        <div class="text-8xl mb-4"><i class="fa-solid fa-box-open"></i></div>
         <h3 class="text-2xl font-semibold text-base-content mb-2">لا توجد منتجات</h3>
         <p class="text-base-content/70">ابدأ بإضافة منتج جديد أو جرب البحث</p>
     </div>
 
-    <!-- Pagination Controls -->
+    <!-- ✅ التنقل بين الصفحات -->
     <div x-show="!loading && pagination.totalPages > 1" class="flex justify-center items-center gap-2 mt-8">
-        <button @click="goToPage(1)" :disabled="pagination.page === 1" class="btn btn-sm">
-            «
-        </button>
-        <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1" class="btn btn-sm">
-            ‹
-        </button>
-
+        <button @click="goToPage(1)" :disabled="pagination.page === 1" class="btn btn-sm btn-ghost">«</button>
+        <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1" class="btn btn-sm btn-ghost">‹</button>
         <template x-for="pageNum in visiblePages" :key="pageNum">
             <button
                     @click="goToPage(pageNum)"
@@ -163,72 +219,70 @@
                     x-text="pageNum"
             ></button>
         </template>
-
-        <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">
-            ›
-        </button>
-        <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm">
-            »
-        </button>
-
+        <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm btn-ghost">›</button>
+        <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages" class="btn btn-sm btn-ghost">»</button>
         <span class="text-sm text-base-content/70 mr-4">
             صفحة <span x-text="pagination.page"></span> من <span x-text="pagination.totalPages"></span>
         </span>
     </div>
 
-    <!-- Edit Product Modal -->
+    <!-- ✅ نافذة تعديل المنتج -->
     <div x-show="modal.show" x-transition @click="modal.show = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-xl font-semibold text-base-content mb-4">تعديل المنتج</h3>
+        <div @click.stop x-transition class="card bg-base-100 shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto rounded-xl">
+            <h3 class="text-xl font-semibold text-base-content mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-edit"></i> تعديل المنتج
+            </h3>
             <div class="form-control space-y-4">
-                <input type="text" x-model="modal.product.nameAr" placeholder="اسم المنتج بالعربية" class="input input-bordered w-full" required>
-                <input type="text" x-model="modal.product.nameEn" placeholder="اسم المنتج بالإنجليزية" class="input input-bordered w-full" dir="ltr">
-                <input type="number" x-model.number="modal.product.price" placeholder="السعر" step="0.01" class="input input-bordered w-full" required>
-
-                <select x-model="modal.product.categoryId" class="select select-bordered w-full" required>
+                <input type="text" x-model="modal.product.nameAr" placeholder="اسم المنتج بالعربية"
+                       class="input input-bordered w-full rounded-lg" required>
+                <input type="text" x-model="modal.product.nameEn" placeholder="اسم المنتج بالإنجليزية"
+                       class="input input-bordered w-full rounded-lg" dir="ltr">
+                <input type="number" x-model.number="modal.product.price" placeholder="السعر" step="0.01"
+                       class="input input-bordered w-full rounded-lg" required>
+                <select x-model="modal.product.categoryId" class="select select-bordered w-full rounded-lg" required>
                     <option value="">اختر التصنيف</option>
                     <template x-for="cat in categories" :key="cat._id">
                         <option :value="cat._id" x-text="cat.nameAr"></option>
                     </template>
                 </select>
-
-                <textarea x-model="modal.product.descriptionAr" placeholder="وصف المنتج بالعربية" rows="3" class="textarea textarea-bordered w-full resize-none" required></textarea>
-                <textarea x-model="modal.product.descriptionEn" placeholder="وصف المنتج بالإنجليزية" rows="3" class="textarea textarea-bordered w-full resize-none" dir="ltr"></textarea>
-
-                <!-- Current Image Display -->
+                <textarea x-model="modal.product.descriptionAr" placeholder="وصف المنتج بالعربية" rows="3"
+                          class="textarea textarea-bordered w-full rounded-lg resize-none" required></textarea>
+                <textarea x-model="modal.product.descriptionEn" placeholder="وصف المنتج بالإنجليزية" rows="3"
+                          class="textarea textarea-bordered w-full rounded-lg resize-none" dir="ltr"></textarea>
                 <div x-show="modal.product.imageUrl && !modal.removeCurrentImageFlag" class="border rounded-lg p-3 bg-base-200">
                     <p class="text-sm font-medium mb-2">الصورة الحالية:</p>
                     <div class="flex items-center gap-3">
-                        <img :src="modal.product.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg">
-                        <button type="button" @click="removeCurrentImage()" class="btn btn-error btn-sm">🗑️ إزالة الصورة</button>
+                        <img :src="modal.product.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg product-image">
+                        <button type="button" @click="removeCurrentImage()" class="btn btn-error btn-sm rounded-lg">
+                            <i class="fa-solid fa-trash"></i> إزالة الصورة
+                        </button>
                     </div>
                 </div>
-
-                <!-- New Image Upload -->
                 <div class="form-control">
                     <label class="label">
                         <span class="label-text">تغيير الصورة (اختياري)</span>
                     </label>
-                    <input type="file" @change="handleEditFileSelect($event)" accept="image/*" class="file-input file-input-bordered w-full" id="editImageInput">
+                    <input type="file" @change="handleEditFileSelect($event)" accept="image/*"
+                           class="file-input file-input-bordered w-full rounded-lg" id="editImageInput">
                 </div>
-
-                <!-- New Image Preview -->
                 <div x-show="modal.imagePreview" class="border rounded-lg p-3 bg-base-200">
                     <p class="text-sm font-medium mb-2">معاينة الصورة الجديدة:</p>
                     <div class="flex items-center gap-3">
-                        <img :src="modal.imagePreview" alt="Preview" class="w-20 h-20 object-cover rounded-lg">
-                        <button type="button" @click="clearEditImage()" class="btn btn-error btn-sm">إزالة</button>
+                        <img :src="modal.imagePreview" alt="Preview" class="w-20 h-20 object-cover rounded-lg product-image">
+                        <button type="button" @click="clearEditImage()" class="btn btn-error btn-sm rounded-lg">
+                            <i class="fa-solid fa-trash"></i> إزالة
+                        </button>
                     </div>
                 </div>
-
                 <div class="flex gap-3 pt-2">
-                    <button type="button" @click="modal.show = false" class="btn btn-ghost flex-1">إلغاء</button>
-                    <button type="button" @click="updateProduct()" class="btn btn-primary flex-1">💾 حفظ التغييرات</button>
+                    <button type="button" @click="modal.show = false" class="btn btn-ghost flex-1 rounded-lg">إلغاء</button>
+                    <button type="button" @click="updateProduct()" class="btn btn-primary flex-1 rounded-lg flex items-center gap-2">
+                        <i class="fa-solid fa-save"></i> حفظ التغييرات
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
 </main>
 
 <script>
@@ -260,22 +314,13 @@
                 const current = this.pagination.page;
                 const total = this.pagination.totalPages;
                 const pages = [];
-
                 let start = Math.max(1, current - 2);
                 let end = Math.min(total, current + 2);
-
                 if (end - start < 4) {
-                    if (start === 1) {
-                        end = Math.min(total, start + 4);
-                    } else if (end === total) {
-                        start = Math.max(1, end - 4);
-                    }
+                    if (start === 1) end = Math.min(total, start + 4);
+                    else if (end === total) start = Math.max(1, end - 4);
                 }
-
-                for (let i = start; i <= end; i++) {
-                    pages.push(i);
-                }
-
+                for (let i = start; i <= end; i++) pages.push(i);
                 return pages;
             },
 
@@ -287,11 +332,7 @@
             async loadCategories() {
                 try {
                     const res = await fetch('/api/categories', { credentials: 'include' });
-                    if (!res.ok) {
-                        const text = await res.text();
-                        console.log('Load categories response:', text);
-                        throw new Error('فشل في جلب التصنيفات');
-                    }
+                    if (!res.ok) throw new Error('فشل في جلب التصنيفات');
                     this.categories = await res.json();
                 } catch (err) {
                     console.error('Load categories error:', err);
@@ -307,13 +348,8 @@
                         limit: this.pagination.limit,
                         search: this.searchQuery
                     });
-
                     const res = await fetch(`/api/products?${params}`, { credentials: 'include' });
-                    if (!res.ok) {
-                        const text = await res.text();
-                        console.log('Load products response:', text);
-                        throw new Error('فشل في جلب المنتجات');
-                    }
+                    if (!res.ok) throw new Error('فشل في جلب المنتجات');
                     const data = await res.json();
                     this.products = data.data;
                     this.pagination.total = data.total;
@@ -371,6 +407,7 @@
             clearImage() {
                 this.selectedFile = null;
                 this.imagePreview = null;
+                document.querySelector('input[type="file"]').value = '';
             },
 
             clearEditImage() {
@@ -387,8 +424,12 @@
 
             async addProduct() {
                 if (!this.validateProduct(this.newProduct)) return;
-
                 try {
+                    const submitButton = document.querySelector('form button[type="submit"]');
+                    const spinner = submitButton.querySelector('.fa-spinner');
+                    submitButton.disabled = true;
+                    spinner.classList.remove('hidden');
+
                     let data;
                     if (this.selectedFile) {
                         const formData = new FormData();
@@ -405,11 +446,7 @@
                             body: formData,
                             credentials: 'include'
                         });
-                        if (!res.ok) {
-                            const text = await res.text();
-                            console.log('Add product with image response:', text);
-                            throw new Error(text || 'فشل في إضافة المنتج');
-                        }
+                        if (!res.ok) throw new Error('فشل في إضافة المنتج');
                         data = await res.json();
                     } else {
                         const res = await fetch('/api/products', {
@@ -418,11 +455,7 @@
                             body: JSON.stringify(this.newProduct),
                             credentials: 'include'
                         });
-                        if (!res.ok) {
-                            const text = await res.text();
-                            console.log('Add product response:', text);
-                            throw new Error(text || 'فشل في إضافة المنتج');
-                        }
+                        if (!res.ok) throw new Error('فشل في إضافة المنتج');
                         data = await res.json();
                     }
 
@@ -433,6 +466,11 @@
                 } catch (err) {
                     console.error('Add product error:', err);
                     this.showAlert(err.message, 'error');
+                } finally {
+                    const submitButton = document.querySelector('form button[type="submit"]');
+                    const spinner = submitButton.querySelector('.fa-spinner');
+                    submitButton.disabled = false;
+                    spinner.classList.add('hidden');
                 }
             },
 
@@ -449,11 +487,7 @@
                         body: formData,
                         credentials: 'include'
                     });
-                    if (!res.ok) {
-                        const text = await res.text();
-                        console.log('Import CSV response:', text);
-                        throw new Error(text || 'فشل في استيراد الملف');
-                    }
+                    if (!res.ok) throw new Error('فشل في استيراد الملف');
                     const data = await res.json();
                     await this.loadProducts();
                     this.showAlert(`✅ تم استيراد ${data.data?.length || 0} منتج بنجاح`, 'success');
@@ -475,8 +509,16 @@
 
             async updateProduct() {
                 if (!this.validateProduct(this.modal.product)) return;
-
                 try {
+                    const submitButton = document.querySelector('.modal button.btn-primary');
+                    const spinner = submitButton.querySelector('.fa-spinner') || document.createElement('i');
+                    if (!spinner.classList.contains('fa-spinner')) {
+                        spinner.className = 'fa-solid fa-spinner hidden animate-spin';
+                        submitButton.appendChild(spinner);
+                    }
+                    submitButton.disabled = true;
+                    spinner.classList.remove('hidden');
+
                     let data;
                     if (this.modal.selectedFile || this.modal.removeCurrentImageFlag) {
                         const formData = new FormData();
@@ -498,12 +540,7 @@
                             body: formData,
                             credentials: 'include'
                         });
-
-                        if (!res.ok) {
-                            const text = await res.text();
-                            console.log('Update product with image response:', text);
-                            throw new Error(text || 'فشل في تحديث المنتج');
-                        }
+                        if (!res.ok) throw new Error('فشل في تحديث المنتج');
                         data = await res.json();
                     } else {
                         const res = await fetch(`/api/products/${this.modal.product._id}`, {
@@ -512,11 +549,7 @@
                             body: JSON.stringify(this.modal.product),
                             credentials: 'include'
                         });
-                        if (!res.ok) {
-                            const text = await res.text();
-                            console.log('Update product response:', text);
-                            throw new Error(text || 'فشل في تحديث المنتج');
-                        }
+                        if (!res.ok) throw new Error('فشل في تحديث المنتج');
                         data = await res.json();
                     }
 
@@ -526,28 +559,20 @@
                 } catch (err) {
                     console.error('Update product error:', err);
                     this.showAlert(err.message, 'error');
+                } finally {
+                    submitButton.disabled = false;
+                    spinner.classList.add('hidden');
                 }
             },
 
             async deleteProduct(id) {
                 if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
-
                 try {
                     const res = await fetch(`/api/products/${id}`, {
                         method: 'DELETE',
                         credentials: 'include'
                     });
-                    if (res.status === 204) {
-                        await this.loadProducts();
-                        this.showAlert('✅ تم الحذف بنجاح', 'success');
-                        return;
-                    }
-                    if (!res.ok) {
-                        const text = await res.text();
-                        console.log('Delete product response:', text);
-                        throw new Error(text || 'فشل في حذف المنتج');
-                    }
-                    const data = await res.json();
+                    if (!res.ok) throw new Error('فشل في حذف المنتج');
                     await this.loadProducts();
                     this.showAlert('✅ تم الحذف بنجاح', 'success');
                 } catch (err) {

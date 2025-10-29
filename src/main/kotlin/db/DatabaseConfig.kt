@@ -8,7 +8,7 @@ import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 
 object DatabaseConfig {
-    private const val MONGO_STRING = "mongodb://localhost:27017/"
+    private const val MONGO_STRING = "mongodb://hassan:54615@109.123.251.232:27017/?authSource=admin"
     private const val DATABASE_NAME = "Gal_db"
 
     private val client: MongoClient by lazy {
