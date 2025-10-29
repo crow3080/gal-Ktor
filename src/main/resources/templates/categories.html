@@ -92,7 +92,7 @@
                 <label class="label">
                     <span class="label-text">صورة التصنيف (اختياري)</span>
                 </label>
-                <input type="file" @change="handleFileSelect($event)" accept="image/*"
+                <input type="file" id="addImageInput" @change="handleFileSelect($event)" accept="image/*"
                        class="file-input file-input-bordered w-full rounded-lg">
             </div>
 
@@ -170,7 +170,7 @@
             <h3 class="text-xl font-semibold text-base-content mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-edit"></i> تعديل التصنيف
             </h3>
-            <div class="form-control space-y-4">
+            <form @submit.prevent="updateCategory()" enctype="multipart/form-data" class="space-y-4">
                 <input type="text" x-model="modal.category.nameAr" placeholder="اسم التصنيف بالعربية"
                        class="input input-bordered w-full rounded-lg" required>
                 <input type="text" x-model="modal.category.nameEn" placeholder="اسم التصنيف بالإنجليزية"
@@ -179,17 +179,35 @@
                 <div x-show="modal.category.imageUrl" class="flex items-center gap-3">
                     <img :src="modal.category.imageUrl" alt="Current" class="w-20 h-20 object-cover rounded-lg category-image">
                     <span class="text-sm text-base-content/70">الصورة الحالية</span>
+                    <button type="button" @click="removeCurrentImage()" class="btn btn-error btn-sm rounded-lg">
+                        <i class="fa-solid fa-trash"></i> إزالة الصورة الحالية
+                    </button>
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">صورة جديدة (اختياري)</span>
+                    </label>
+                    <input type="file" id="editImageInput" @change="handleEditFileSelect($event)" accept="image/*"
+                           class="file-input file-input-bordered w-full rounded-lg">
+                </div>
+
+                <div x-show="modal.imagePreview" class="flex items-center gap-3">
+                    <img :src="modal.imagePreview" alt="Preview" class="w-20 h-20 object-cover rounded-lg category-image">
+                    <button type="button" @click="clearEditImage()" class="btn btn-error btn-sm rounded-lg">
+                        <i class="fa-solid fa-trash"></i> إزالة
+                    </button>
                 </div>
 
                 <div class="flex gap-3">
-                    <button @click="modal.show = false" class="btn btn-ghost flex-1 rounded-lg">
+                    <button type="button" @click="modal.show = false" class="btn btn-ghost flex-1 rounded-lg">
                         إلغاء
                     </button>
-                    <button @click="updateCategory()" class="btn btn-primary flex-1 rounded-lg flex items-center gap-2">
-                        <i class="fa-solid fa-save"></i> حفظ
+                    <button type="submit" class="btn btn-primary flex-1 rounded-lg flex items-center gap-2">
+                        <i class="fa-solid fa-save loading-spinner"></i> حفظ
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </main>
