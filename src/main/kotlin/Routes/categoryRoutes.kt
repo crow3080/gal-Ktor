@@ -289,7 +289,6 @@ fun Route.categoryRoutes(
                 call.respond(HttpStatusCode.BadRequest, "ملف CSV مفقود")
                 return@post
             }
-
             val categories = csvFile!!.readLines()
                 .drop(1)
                 .mapNotNull { line ->
@@ -300,7 +299,6 @@ fun Route.categoryRoutes(
                 }
 
             categories.forEach {
-                // استبدل بدالة الحفظ الخاصة بك
                 categoryService.createCategory(it)
             }
 

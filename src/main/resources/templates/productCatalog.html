@@ -141,33 +141,44 @@
         .language-sensitive {
             transition: all 0.3s ease;
         }
-        /* شريط الأعلام الجديد - تم تعديل موقعه */
-        .flags-bar {
+        /* عمود الأعلام الجديد - عمودي على اليسار دائماً (يسار بصري) */
+        .flags-column {
             position: absolute;
-            bottom: 0;
-            right: 0;
+            top: 0;
             left: 0;
-            height: 24px;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(4px);
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 8px;
-            gap: 8px;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 6px 4px;
+            gap: 4px;
             z-index: 10;
-            border-radius: 0 0 12px 12px;
+            border-bottom-left-radius: 12px;
+            border-radius: 0 0 0 12px;
+        }
+        .flag-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            color: white;
+            font-size: 10px;
+            white-space: nowrap;
+            transition: transform 0.2s ease;
+        }
+        [dir="rtl"] .flag-item {
+            flex-direction: row-reverse;
+        }
+        .flag-item:hover {
+            transform: scale(1.05);
         }
         .flag-icon {
-            width: 20px;
-            height: 14px;
+            width: 16px;
+            height: 12px;
             border-radius: 2px;
             object-fit: cover;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
-        }
-        .flag-icon:hover {
-            transform: scale(1.2);
         }
     </style>
 </head>
@@ -343,7 +354,7 @@
                             <div class="p-3 text-center">
                                 <h3 class="font-bold text-gray-100 text-sm line-clamp-1" x-text="lang === 'ar' ? cat.nameAr : cat.nameEn || cat.nameAr"></h3>
                                 <p class="text-xs text-gray-400 mt-1">
-<!--                                    <span x-text="getCategoryProductCount(cat._id)"></span> <span id="productLabelCat" x-text="lang === 'ar' ? 'منتج' : 'products'"></span>-->
+                                    <!--                                    <span x-text="getCategoryProductCount(cat._id)"></span> <span id="productLabelCat" x-text="lang === 'ar' ? 'منتج' : 'products'"></span>-->
                                 </p>
                             </div>
                         </div>
@@ -377,13 +388,32 @@
                          :alt="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"
                          class="product-image">
 
-                    <!-- شريط الأعلام المضاف في الأسفل -->
-                    <div class="flags-bar">
-                        <img src="https://flagcdn.com/w20/vn.png" alt="فيتنام" class="flag-icon">
-                        <img src="https://flagcdn.com/w20/cn.png" alt="الصين" class="flag-icon">
-                        <img src="https://flagcdn.com/w20/it.png" alt="إيطاليا" class="flag-icon">
-                        <img src="https://flagcdn.com/w20/cz.png" alt="التشيك" class="flag-icon">
-                        <img src="https://flagcdn.com/w20/pl.png" alt="بولندا" class="flag-icon">
+                    <!-- عمود الأعلام الجديد - عمودي على اليسار -->
+                    <div class="flags-column">
+                        <div class="flag-item">
+                            <img src="https://flagcdn.com/w20/vn.png" alt="Vietnam" class="flag-icon">
+                            <span x-text="lang === 'ar' ? 'صنع في فيتنام' : 'Made in Vietnam'"></span>
+                        </div>
+                        <div class="flag-item">
+                            <img src="https://flagcdn.com/w20/cn.png" alt="China" class="flag-icon">
+                            <span x-text="lang === 'ar' ? 'صنع في الصين' : 'Made in China'"></span>
+                        </div>
+                        <div class="flag-item">
+                            <img src="https://flagcdn.com/w20/it.png" alt="Italy" class="flag-icon">
+                            <span x-text="lang === 'ar' ? 'صنع في إيطاليا' : 'Made in Italy'"></span>
+                        </div>
+                        <div class="flag-item">
+                            <img src="https://flagcdn.com/w20/cz.png" alt="Czech Republic" class="flag-icon">
+                            <span x-text="lang === 'ar' ? 'صنع في التشيك' : 'Made in Czech Republic'"></span>
+                        </div>
+                        <div class="flag-item">
+                            <img src="https://flagcdn.com/w20/pl.png" alt="Poland" class="flag-icon">
+                            <span x-text="lang === 'ar' ? 'صنع في بولندا' : 'Made in Poland'"></span>
+                        </div>
+                        <div class="flag-item">
+                            <img src="https://flagcdn.com/w20/de.png" alt="Germany" class="flag-icon">
+                            <span x-text="lang === 'ar' ? 'صنع في ألمانيا' : 'Made in Germany'"></span>
+                        </div>
                     </div>
 
                     <!-- شريط السعر في الأعلى -->
@@ -495,13 +525,32 @@
                     </button>
 
                     <div class="product-image-container rounded-2xl mb-6 relative">
-                        <!-- شريط الأعلام في المودال - في الأسفل -->
-                        <div class="flags-bar">
-                            <img src="https://flagcdn.com/w20/vn.png" alt="فيتنام" class="flag-icon">
-                            <img src="https://flagcdn.com/w20/cn.png" alt="الصين" class="flag-icon">
-                            <img src="https://flagcdn.com/w20/it.png" alt="إيطاليا" class="flag-icon">
-                            <img src="https://flagcdn.com/w20/cz.png" alt="التشيك" class="flag-icon">
-                            <img src="https://flagcdn.com/w20/pl.png" alt="بولندا" class="flag-icon">
+                        <!-- عمود الأعلام الجديد - عمودي على اليسار -->
+                        <div class="flags-column">
+                            <div class="flag-item">
+                                <img src="https://flagcdn.com/w20/vn.png" alt="Vietnam" class="flag-icon">
+                                <span x-text="lang === 'ar' ? 'صنع في فيتنام' : 'Made in Vietnam'"></span>
+                            </div>
+                            <div class="flag-item">
+                                <img src="https://flagcdn.com/w20/cn.png" alt="China" class="flag-icon">
+                                <span x-text="lang === 'ar' ? 'صنع في الصين' : 'Made in China'"></span>
+                            </div>
+                            <div class="flag-item">
+                                <img src="https://flagcdn.com/w20/it.png" alt="Italy" class="flag-icon">
+                                <span x-text="lang === 'ar' ? 'صنع في إيطاليا' : 'Made in Italy'"></span>
+                            </div>
+                            <div class="flag-item">
+                                <img src="https://flagcdn.com/w20/cz.png" alt="Czech Republic" class="flag-icon">
+                                <span x-text="lang === 'ar' ? 'صنع في التشيك' : 'Made in Czech Republic'"></span>
+                            </div>
+                            <div class="flag-item">
+                                <img src="https://flagcdn.com/w20/pl.png" alt="Poland" class="flag-icon">
+                                <span x-text="lang === 'ar' ? 'صنع في بولندا' : 'Made in Poland'"></span>
+                            </div>
+                            <div class="flag-item">
+                                <img src="https://flagcdn.com/w20/de.png" alt="Germany" class="flag-icon">
+                                <span x-text="lang === 'ar' ? 'صنع في ألمانيا' : 'Made in Germany'"></span>
+                            </div>
                         </div>
 
                         <img :src="selectedProduct.imageUrl || 'https://via.placeholder.com/600x400'"
@@ -519,6 +568,7 @@
                             <span x-text="getCategoryName(selectedProduct.categoryId)"></span>
                         </span>
                     </div>
+                    <p class="text-gray-400 text-sm mb-4" x-text="lang === 'ar' ? 'قد يختلف سعر المنتج بناء على منشأه' : 'The product price may vary based on its origin'"></p>
                     <div class="flex flex-col sm:flex-row gap-3">
                         <button @click="addToCart(selectedProduct); showModal = false"
                                 class="btn flex-1 text-slate-900 font-bold shadow-lg hover:scale-105 transition-all duration-300"
