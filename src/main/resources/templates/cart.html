@@ -159,7 +159,7 @@
                             <div class="flex items-center justify-between flex-wrap gap-3">
                                 <!-- السعر -->
                                 <div class="text-2xl font-bold gold-text">
-                                    <span x-text="item.price"></span> <span x-text="langs[localStorage.getItem('lang') || 'ar'].currency"></span>
+                                    <span x-text="lang === 'ar' ? ' من ' + (item.price * 0.5).toFixed(2) + ' إلى ' + (item.price * 1.5).toFixed(2) : ' from ' + (item.price * 0.5).toFixed(2) + ' to ' + (item.price * 1.5).toFixed(2)"></span> <span x-text="langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                                 </div>
 
                                 <!-- الكمية -->
@@ -189,7 +189,7 @@
                             <div class="mt-3 text-left">
                                 <span id="itemTotalLabel" class="text-gray-400">الإجمالي: </span>
                                 <span class="text-xl font-bold gold-text">
-                                    <span x-text="(item.price * item.quantity).toFixed(2)"></span> <span x-text="langs[localStorage.getItem('lang') || 'ar'].currency"></span>
+                                    <span x-text="lang === 'ar' ? ' من ' + (item.price * 0.5 * item.quantity).toFixed(2) + ' إلى ' + (item.price * 1.5 * item.quantity).toFixed(2) : ' from ' + (item.price * 0.5 * item.quantity).toFixed(2) + ' to ' + (item.price * 1.5 * item.quantity).toFixed(2)"></span> <span x-text="langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                                 </span>
                             </div>
                         </div>
@@ -210,18 +210,6 @@
                     <div class="flex justify-between text-gray-300">
                         <span id="totalItemsLabel">عدد المنتجات:</span>
                         <span class="font-bold" x-text="getTotalItems()"></span>
-                    </div>
-
-                    <div class="flex justify-between text-gray-300">
-                        <span id="subtotalLabel">الإجمالي:</span>
-                        <span class="font-bold" x-text="getSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <div class="flex justify-between text-xl">
-                        <span id="totalLabel" class="font-bold text-gray-100">الإجمالي:</span>
-                        <span class="font-bold text-2xl gold-text" x-text="getSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                     </div>
                 </div>
 
@@ -295,23 +283,10 @@
                                 <span class="text-gray-200 font-semibold" x-text="lang === 'ar' ? item.nameAr : item.nameEn || item.nameAr"></span>
                                 <span class="text-gray-400 mr-2">×<span x-text="item.quantity"></span></span>
                             </div>
-                            <span class="text-gray-200 font-bold" x-text="(item.price * item.quantity).toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
                         </div>
                     </template>
 
                     <div class="divider my-2"></div>
-
-                    <div class="flex justify-between text-gray-400">
-                        <span id="subtotalLabelModal">الإجمالي:</span>
-                        <span x-text="getOrderSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
-                    </div>
-
-                    <div class="divider my-2"></div>
-
-                    <div class="flex justify-between items-center">
-                        <span id="totalLabelModal" class="text-xl font-bold text-gray-100">الإجمالي:</span>
-                        <span class="text-2xl font-bold gold-text" x-text="getOrderSubtotal().toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
-                    </div>
                 </div>
             </div>
 
@@ -761,7 +736,7 @@ function cartManager() {
             this.customerWhatsApp = '';
             this.customerName = '';
             this.customerNotes = '';
-            this.countryCode = '+966';
+            this.countryCode = '+20';
         },
 
         sendOrderViaWhatsApp() {
@@ -769,9 +744,8 @@ function cartManager() {
             let message = `${this.getTranslation('orderDetailsTitle')} (${this.orderNumber})\n\n`;
             this.completedOrder.forEach(item => {
                 const name = lang === 'ar' ? item.nameAr : item.nameEn || item.nameAr;
-                message += `${name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
+                message += `${name} ×${item.quantity}\n`;
             });
-            message += `\n${this.getTranslation('totalLabelModal')}: ${this.getOrderSubtotal().toFixed(2)} ${this.getTranslation('currency')}\n`;
             if (this.customerName) message += `${this.getTranslation('nameLabel')}: ${this.customerName}\n`;
             if (this.customerWhatsApp) message += `${this.getTranslation('whatsappLabel')}: ${this.countryCode}${this.customerWhatsApp}\n`;
             if (this.customerNotes) message += `${this.getTranslation('notesLabel')}: ${this.customerNotes}\n`;
