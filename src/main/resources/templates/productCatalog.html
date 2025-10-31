@@ -419,7 +419,7 @@
                     <!-- شريط السعر في الأعلى -->
                     <div class="absolute top-2 right-2">
                         <span class="badge badge-lg shadow-lg" style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); color: #1a1a2e; font-weight: bold;">
-                            <span x-text="product.price"></span> <span id="currencyLabel" x-text="lang === 'ar' ? 'جنيه' : 'EGP'"></span>
+                            <span x-text="getPriceRange(product)"></span> <span id="currencyLabel" x-text="lang === 'ar' ? 'جنيه' : 'EGP'"></span>
                         </span>
                     </div>
                 </div>
@@ -561,7 +561,7 @@
                     <p class="text-gray-300 mb-4 leading-relaxed" x-text="lang === 'ar' ? selectedProduct.descriptionAr : selectedProduct.descriptionEn || selectedProduct.descriptionAr"></p>
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
                         <span class="text-2xl md:text-3xl font-bold gold-text">
-                            <span x-text="selectedProduct.price"></span> <span id="currencyLabelModal" x-text="lang === 'ar' ? 'جنيه' : 'EGP'"></span>
+                            <span x-text="getPriceRange(selectedProduct)"></span> <span id="currencyLabelModal" x-text="lang === 'ar' ? 'جنيه' : 'EGP'"></span>
                         </span>
                         <span class="badge badge-lg shadow-lg" style="background: rgba(212, 175, 55, 0.2); color: #d4af37;">
                             <i class="fas fa-layer-group ml-1"></i>
@@ -814,6 +814,14 @@
             }
 
             return pages;
+        },
+
+        getPriceRange(product) {
+            const price = parseFloat(product.price);
+            if (isNaN(price)) return '';
+            const min = Math.round(price * 0.5);
+            const max = Math.round(price * 1.5);
+            return this.lang === 'ar' ? `من ${min} إلى ${max}` : `From ${min} to ${max}`;
         },
 
         async init() {
