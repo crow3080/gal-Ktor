@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="luxury">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,436 +7,526 @@
     <link rel="icon" type="image/webp" href="/images/logo.webp">
     <link rel="apple-touch-icon" href="/images/logo.webp">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#d4af37',
+                        primaryDark: '#b8941f',
+                        secondary: '#374151',
+                        dark: '#111827',
+                        light: '#1f2937'
+                    }
+                }
+            }
+        }
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        body { font-family: "Cairo", sans-serif; }
-        .gold-text { color: #d4af37; }
-        .glass-card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212,175,55,0.2);
+        body { font-family: "Tajawal", sans-serif; background-color: #111827; }
+        .primary-text { color: #d4af37; }
+        .primary-bg { background-color: #d4af37; }
+        .primary-border { border-color: #d4af37; }
+        .product-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            overflow: hidden;
+            background-color: #1f2937;
+            color: #f9fafb;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: #d4af37;
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.2);
+        }
+        .product-card.selected {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.5);
+        }
+        .product-image {
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover .product-image {
+            transform: scale(1.05);
         }
         .cart-badge {
             position: absolute;
             top: -8px;
-            inset-inline-end: -8px;
-            background: #dc2626;
+            left: -8px;
+            background: #ef4444;
             color: white;
             border-radius: 50%;
-            padding: 4px 8px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 12px;
             font-weight: bold;
-            min-width: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .dropdown .cart-badge {
-            top: 0;
-            inset-inline-end: 0;
-            transform: translate(50%, -50%);
+            z-index: 10;
         }
         .selected-badge {
             position: absolute;
             top: 8px;
-            left: 8px;
+            right: 8px;
             background: #10b981;
             color: white;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
             z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .product-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-        .product-card:hover {
-            transform: translateY(-4px);
-        }
-        .product-card.selected {
-            border: 3px solid #d4af37;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
         .loading-spinner {
-            border: 4px solid rgba(212, 175, 55, 0.3);
+            border: 4px solid rgba(212, 175, 55, 0.2);
             border-top: 4px solid #d4af37;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.85); /* darker bg */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .pagination-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #374151; /* darker bg */
+            color: #f9fafb;
+            border: 1px solid #4b5563;
+        }
+        .pagination-btn:hover {
+            background-color: #4b5563;
+        }
+        .pagination-btn.active {
+            background-color: #d4af37;
+            color: #111827;
+            border-color: #d4af37;
+        }
+        .btn-outline {
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        .btn-outline:hover {
+            border-color: #d4af37;
+            color: #d4af37;
+        }
+        .input-bordered {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        .input-bordered:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
+        }
+        .select-bordered {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        .select-bordered:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
+        }
+        .textarea-bordered {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        .textarea-bordered:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
+        }
     </style>
 </head>
-<body class="bg-base-100">
+<body class="bg-gray-900 text-gray-100">
 
 <!-- Navbar -->
-<header class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4" x-data="headerManager()">
+<header class="navbar bg-gray-800 shadow-md sticky top-0 z-50 px-4 border-b border-gray-700">
     <div class="flex-1">
         <a href="/" class="flex items-center gap-3">
-            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="navbar-logo" style="width:50px;">
-            <span id="brandName" class="text-xl md:text-2xl font-bold">جال لتوريدات المصانع</span>
+            <img src="/images/logo.webp" alt="شعار جال للتجارة" class="w-12 h-12 object-contain">
+            <span id="brandName" class="text-xl md:text-2xl font-bold primary-text">جال لتوريدات المصانع</span>
         </a>
     </div>
 
-    <nav class="hidden md:flex gap-3">
-        <a href="/productCatalog" class="btn btn-ghost btn-sm">
-            <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
-        </a>
-        <a href="/cart" class="btn btn-ghost btn-sm relative">
-            <i class="fas fa-shopping-cart ml-1"></i>
-            <span id="navCart">السلة</span>
-            <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
-        </a>
-        <a href="/contact" class="btn btn-ghost btn-sm">
-            <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
-        </a>
-    </nav>
+    <div class="flex items-center gap-2">
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-ghost btn-sm text-gray-200">
+                <i class="fas fa-globe text-lg"></i>
+                <span id="current-lang">AR</span>
+            </label>
+            <ul tabindex="0" class="dropdown-content menu bg-gray-800 rounded-box w-32 shadow-lg p-2 border border-gray-700">
+                <li><button onclick="changeLang('ar')" class="p-2 hover:bg-gray-700 rounded text-gray-200">🇸🇦 عربي</button></li>
+                <li><button onclick="changeLang('en')" class="p-2 hover:bg-gray-700 rounded text-gray-200">🇬🇧 English</button></li>
+            </ul>
+        </div>
 
-    <div class="dropdown dropdown-end md:hidden relative">
-        <button tabindex="0" class="btn btn-ghost btn-lg">
-            <i class="fas fa-bars text-2xl"></i>
-        </button>
-        <ul tabindex="0" class="menu menu-lg dropdown-content mt-3 shadow-2xl bg-base-100 rounded-box w-64 z-[100] p-3 text-lg font-semibold border-2 border-[#d4af37]">
-            <li><a href="/productCatalog" class="py-4"><i class="fas fa-box-open ml-2 text-xl"></i> <span id="mnavProducts">المنتجات</span></a></li>
-            <li><a href="/cart" class="py-4 relative"><i class="fas fa-shopping-cart ml-2 text-xl"></i><span id="mnavCart">السلة</span><span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span></a></li>
-            <li><a href="/contact" class="py-4"><i class="fas fa-phone-alt ml-2 text-xl"></i> <span id="mnavContact">تواصل معنا</span></a></li>
-        </ul>
-    </div>
+        <div class="dropdown dropdown-end md:hidden">
+            <button tabindex="0" class="btn btn-ghost btn-md text-gray-200">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow bg-gray-800 rounded-box w-52 border border-gray-700">
+                <li><a href="/productCatalog" class="py-3 text-gray-200"><i class="fas fa-box-open ml-2"></i> <span id="mnavProducts">المنتجات</span></a></li>
+                <li><a href="/cart" class="py-3 relative text-gray-200"><i class="fas fa-shopping-cart ml-2"></i><span id="mnavCart">السلة</span><span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span></a></li>
+                <li><a href="/contact" class="py-3 text-gray-200"><i class="fas fa-phone-alt ml-2"></i> <span id="mnavContact">تواصل معنا</span></a></li>
+            </ul>
+        </div>
 
-    <div class="dropdown dropdown-end ml-2">
-        <label tabindex="0" class="btn btn-ghost">🌐 <span id="current-lang">AR</span></label>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-28 shadow">
-            <li><button onclick="changeLang('ar')">🇸🇦 عربي</button></li>
-            <li><button onclick="changeLang('en')">🇬🇧 English</button></li>
-        </ul>
+        <nav class="hidden md:flex items-center gap-2">
+            <a href="/productCatalog" class="btn btn-ghost btn-sm text-gray-200">
+                <i class="fas fa-box-open ml-1"></i> <span id="navProducts">المنتجات</span>
+            </a>
+            <a href="/cart" class="btn btn-ghost btn-sm relative text-gray-200">
+                <i class="fas fa-shopping-cart ml-1"></i>
+                <span id="navCart">السلة</span>
+                <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
+            </a>
+            <a href="/contact" class="btn btn-ghost btn-sm text-gray-200">
+                <i class="fas fa-phone-alt ml-1"></i> <span id="navContact">تواصل معنا</span>
+            </a>
+        </nav>
     </div>
 </header>
 
 <!-- Main Content -->
-<main class="max-w-7xl mx-auto p-6 min-h-screen" x-data="priceRequestApp()" x-init="init()">
+<main class="max-w-7xl mx-auto p-4 md:p-6 min-h-screen">
+    <div x-data="priceRequestApp()" x-init="init()">
 
-    <!-- Header -->
-    <div class="text-center mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4 gold-text">
-            <i class="fas fa-file-invoice-dollar ml-2"></i>
-            <span id="mainTitle">طلب عرض سعر</span>
-        </h1>
-        <p id="mainDesc" class="text-gray-300 text-lg">اختر المنتجات التي تحتاجها وسنرسل لك عرض سعر مفصل</p>
-    </div>
-
-    <!-- Selected Counter -->
-    <div x-show="selectedProducts.length > 0" class="glass-card p-4 rounded-2xl mb-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-check-circle text-2xl text-green-500"></i>
-            <span class="text-lg font-bold text-gray-100">
-                <span id="selectedLabel">تم اختيار</span>
-                <span x-text="selectedProducts.length" class="gold-text mx-2"></span>
-                <span id="productLabel">منتج</span>
-            </span>
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold mb-3 primary-text">
+                <i class="fas fa-file-invoice-dollar ml-2"></i>
+                <span id="mainTitle">طلب عرض سعر</span>
+            </h1>
+            <p id="mainDesc" class="text-gray-300">اختر المنتجات التي تحتاجها وسنرسل لك عرض سعر مفصل</p>
         </div>
-        <button @click="clearSelection()" class="btn btn-sm btn-outline" style="border-color: #dc2626; color: #dc2626;">
-            <i class="fas fa-times ml-1"></i>
-            <span id="clearBtn">مسح الكل</span>
-        </button>
-    </div>
 
-    <!-- Search Bar -->
-    <div class="glass-card p-6 rounded-2xl mb-8">
-        <div class="form-control">
-            <label class="label">
-                <span id="searchLabel" class="label-text text-gray-300">بحث عن المنتجات</span>
-            </label>
-            <div class="relative">
-                <input type="text"
-                       x-model="searchQuery"
-                       @input.debounce.300ms="filterProducts()"
-                       id="searchInput"
-                       placeholder="ابحث باسم المنتج أو الوصف..."
-                       class="input input-bordered w-full bg-base-200 text-gray-100 pr-10">
-                <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        <!-- Selected Counter and Limit Selector -->
+        <div x-show="selectedProducts.length > 0" class="bg-gray-800 p-4 rounded-xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm border border-gray-700">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-check-circle text-2xl text-green-500"></i>
+                <span class="text-lg font-semibold text-gray-100">
+                    <span id="selectedLabel">تم اختيار</span>
+                    <span x-text="selectedProducts.length" class="primary-text mx-1"></span>
+                    <span id="productLabel">منتج</span>
+                </span>
             </div>
-        </div>
-    </div>
-
-    <!-- Categories Filter -->
-    <div class="glass-card p-6 rounded-2xl mb-8">
-        <h2 class="text-2xl font-bold mb-4 text-gray-100 flex items-center gap-2">
-            <i class="fas fa-filter gold-text"></i>
-            <span id="filterTitle">تصفية حسب التصنيف</span>
-        </h2>
-
-        <div class="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
-            <button @click="selectedCategory = ''; filterProducts()"
-                    :class="selectedCategory === '' ? 'ring-2 ring-[#d4af37]' : ''"
-                    class="btn btn-sm whitespace-nowrap"
-                    style="background: rgba(212, 175, 55, 0.2); color: #d4af37;">
-                <i class="fas fa-th-large ml-1"></i>
-                <span id="allCat">جميع التصنيفات</span>
-                <span class="badge badge-sm ml-1" x-text="pagination.total"></span>
-            </button>
-
-            <template x-for="cat in categories" :key="cat._id">
-                <button @click="selectedCategory = cat._id; filterProducts()"
-                        :class="selectedCategory === cat._id ? 'ring-2 ring-[#d4af37]' : ''"
-                        class="btn btn-sm whitespace-nowrap"
-                        style="background: rgba(212, 175, 55, 0.1); color: #d4af37;">
-                    <span x-text="lang === 'ar' ? cat.nameAr : cat.nameEn || cat.nameAr"></span>
-                    <span class="badge badge-sm ml-1" x-text="getCategoryCount(cat._id)"></span>
+            <div class="flex items-center gap-3">
+                <label class="text-sm font-medium text-gray-300 mr-2" for="itemsPerPage">عدد العناصر/الصفحة:</label>
+                <select id="itemsPerPage" x-model="pagination.limit" @change="changeLimit()" class="select select-bordered select-sm w-24 bg-gray-700 text-gray-100 border-gray-600">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                    <option value="100">100</option>
+                </select>
+                <button @click="clearSelection()" class="btn btn-sm btn-outline btn-error text-gray-200">
+                    <i class="fas fa-trash ml-1"></i>
+                    <span id="clearBtn">مسح الكل</span>
                 </button>
-            </template>
+            </div>
         </div>
-    </div>
 
-    <!-- Loading -->
-    <div x-show="loading" class="flex justify-center py-20">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <!-- Products Grid -->
-    <div x-show="!loading && filteredProducts.length > 0"
-         class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-        <template x-for="product in filteredProducts" :key="product._id">
-            <div @click="toggleProduct(product)"
-                 :class="isSelected(product._id) ? 'selected' : ''"
-                 class="product-card glass-card rounded-2xl overflow-hidden shadow-xl">
-
-                <!-- Selected Badge -->
-                <div x-show="isSelected(product._id)" class="selected-badge">
-                    <i class="fas fa-check ml-1"></i>
-                    <span id="selectedBadge">محدد</span>
-                </div>
-
-                <!-- Product Image -->
-                <div class="relative h-48 overflow-hidden bg-base-300">
-                    <img :src="product.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'"
-                         :alt="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"
-                         class="w-full h-full object-cover">
-                </div>
-
-                <!-- Product Info -->
-                <div class="p-5">
-                    <h3 class="text-lg font-bold mb-2 text-gray-100 line-clamp-2" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></h3>
-                    <p class="text-gray-400 text-sm mb-3 line-clamp-2" x-text="lang === 'ar' ? product.descriptionAr : product.descriptionEn || product.descriptionAr"></p>
-
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-300">
-                            <i class="fas fa-layer-group gold-text ml-1"></i>
-                            <span x-text="getCategoryName(product.categoryId)"></span>
-                        </span>
-
-                        <div x-show="isSelected(product._id)">
-                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
-                        </div>
-                    </div>
+        <!-- Search Bar -->
+        <div class="bg-gray-800 p-4 rounded-xl mb-6 shadow-sm border border-gray-700">
+            <div class="form-control">
+                <label class="label">
+                    <span id="searchLabel" class="label-text text-gray-300 font-medium">بحث عن المنتجات</span>
+                </label>
+                <div class="relative">
+                    <input type="text"
+                           x-model="searchQuery"
+                           @input.debounce.300ms="filterProducts()"
+                           id="searchInput"
+                           placeholder="ابحث باسم المنتج أو الوصف..."
+                           class="input input-bordered w-full bg-gray-700 text-gray-100 pr-10">
+                    <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
             </div>
-        </template>
-    </div>
-
-    <!-- No Products -->
-    <div x-show="!loading && filteredProducts.length === 0" class="text-center py-20">
-        <div class="glass-card rounded-3xl p-12 max-w-md mx-auto">
-            <i class="fas fa-box-open text-6xl gold-text mb-4"></i>
-            <h3 id="noProductsTitle" class="text-2xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
-            <p id="noProductsDesc" class="text-gray-400">جرب اختيار تصنيف آخر أو تعديل البحث</p>
-        </div>
-    </div>
-
-    <!-- Pagination Controls -->
-    <div x-show="!loading && pagination.totalPages > 1" class="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
-        <div class="flex gap-2">
-            <button @click="goToPage(1)" :disabled="pagination.page === 1"
-                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
-                «
-            </button>
-            <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1"
-                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
-                ‹
-            </button>
-
-            <template x-for="pageNum in visiblePages" :key="pageNum">
-                <button
-                        @click="goToPage(pageNum)"
-                        :class="pageNum === pagination.page ? 'ring-2 ring-[#d4af37]' : ''"
-                        :style="pageNum === pagination.page ? 'background: #d4af37; color: #1a1a2e;' : 'background: rgba(212, 175, 55, 0.2); color: #d4af37;'"
-                        class="btn btn-sm"
-                        x-text="pageNum"
-                ></button>
-            </template>
-
-            <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages"
-                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
-                ›
-            </button>
-            <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages"
-                    class="btn btn-sm" style="background: #d4af37; color: #1a1a2e; border: none;">
-                »
-            </button>
         </div>
 
-        <span class="text-sm text-gray-400">
-            <span id="pageLabel">صفحة</span> <span x-text="pagination.page"></span>
-            <span id="ofPagesLabel">من</span> <span x-text="pagination.totalPages"></span>
-        </span>
-    </div>
-
-    <!-- Submit Button -->
-    <div x-show="selectedProducts.length > 0"
-         class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
-        <button @click="openWhatsAppDialog()"
-                class="btn btn-lg text-slate-900 font-bold shadow-2xl pulse-button"
-                style="background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%); border: none;">
-            <i class="fas fa-paper-plane ml-2 text-xl"></i>
-            <span id="submitBtn">إرسال الطلب</span>
-            <span class="badge badge-lg ml-2" style="background: #1a1a2e; color: #d4af37;" x-text="selectedProducts.length"></span>
-        </button>
-    </div>
-
-    <!-- WhatsApp Dialog -->
-    <div x-show="showDialog"
-         x-transition
-         @click="showDialog = false"
-         class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div @click.stop
-             x-transition
-             class="glass-card rounded-3xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
-
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 flex items-center gap-3">
-                <i class="fab fa-whatsapp text-green-500 text-4xl"></i>
-                <span id="dialogTitle">إرسال الطلب عبر واتساب</span>
+        <!-- Categories Filter -->
+        <div class="bg-gray-800 p-4 rounded-xl mb-6 shadow-sm border border-gray-700">
+            <h2 class="text-xl font-bold mb-4 text-gray-100 flex items-center gap-2">
+                <i class="fas fa-filter primary-text"></i>
+                <span id="filterTitle">تصفية حسب التصنيف</span>
             </h2>
 
-            <!-- Customer Info Form -->
-            <div class="space-y-4 mb-6">
-                <div class="form-control">
-                    <label class="label">
-                        <span id="nameLabel" class="label-text text-gray-300">الاسم</span>
-                    </label>
-                    <input type="text"
-                           x-model="customerName"
-                           id="nameInput"
-                           placeholder="اسمك الكامل"
-                           class="input input-bordered w-full bg-base-200 text-gray-100">
+            <div class="flex flex-wrap gap-2">
+                <button @click="selectedCategory = ''; filterProducts()"
+                        :class="selectedCategory === '' ? 'bg-primary text-gray-900' : 'bg-gray-700 text-gray-200 hover:bg-gray-600'"
+                        class="btn btn-sm px-4 py-2 rounded-full flex items-center gap-1">
+                    <i class="fas fa-th-large ml-1"></i>
+                    <span id="allCat">جميع التصنيفات</span>
+                    <span class="badge badge-sm badge-ghost text-gray-300" x-text="pagination.total"></span>
+                </button>
+
+                <template x-for="cat in categories" :key="cat._id">
+                    <button @click="selectedCategory = cat._id; filterProducts()"
+                            :class="selectedCategory === cat._id ? 'bg-primary text-gray-900' : 'bg-gray-700 text-gray-200 hover:bg-gray-600'"
+                            class="btn btn-sm px-4 py-2 rounded-full flex items-center gap-1">
+                        <span x-text="lang === 'ar' ? cat.nameAr : cat.nameEn || cat.nameAr"></span>
+                        <span class="badge badge-sm badge-ghost text-gray-300" x-text="getCategoryCount(cat._id)"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div x-show="loading" class="flex justify-center py-20">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- Products Grid -->
+        <div x-show="!loading && filteredProducts.length > 0"
+             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            <template x-for="product in filteredProducts" :key="product._id">
+                <div @click="toggleProduct(product)"
+                     :class="isSelected(product._id) ? 'selected' : ''"
+                     class="product-card rounded-xl shadow-sm border border-gray-700 overflow-hidden flex flex-col h-full">
+
+                    <!-- Selected Badge -->
+                    <div x-show="isSelected(product._id)" class="selected-badge">
+                        <i class="fas fa-check ml-1"></i>
+                        <span id="selectedBadge">محدد</span>
+                    </div>
+
+                    <!-- Product Image -->
+                    <div class="relative h-40 overflow-hidden bg-gray-700">
+                        <img :src="product.imageUrl || 'https://placehold.co/300x200?text=No+Image'"
+                             :alt="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"
+                             class="product-image w-full h-full object-cover">
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="p-4 flex-grow flex flex-col">
+                        <h3 class="text-md font-bold mb-2 text-gray-100 line-clamp-2" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></h3>
+                        <p class="text-gray-400 text-sm mb-3 line-clamp-2 flex-grow" x-text="lang === 'ar' ? product.descriptionAr : product.descriptionEn || product.descriptionAr"></p>
+
+                        <div class="mt-auto pt-2 border-t border-gray-700 flex items-center justify-between">
+                            <span class="text-xs text-gray-400 flex items-center gap-1">
+                                <i class="fas fa-layer-group primary-text"></i>
+                                <span x-text="getCategoryName(product.categoryId)"></span>
+                            </span>
+
+                            <div x-show="isSelected(product._id)">
+                                <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- No Products -->
+        <div x-show="!loading && filteredProducts.length === 0" class="text-center py-20">
+            <div class="bg-gray-800 rounded-2xl p-12 max-w-md mx-auto shadow-sm border border-gray-700">
+                <i class="fas fa-box-open text-6xl primary-text mb-4"></i>
+                <h3 id="noProductsTitle" class="text-xl font-bold mb-2 text-gray-100">لا توجد منتجات</h3>
+                <p id="noProductsDesc" class="text-gray-400">جرب اختيار تصنيف آخر أو تعديل البحث</p>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div x-show="!loading && pagination.totalPages > 1" class="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
+            <div class="flex flex-wrap justify-center gap-1">
+                <button @click="goToPage(1)" :disabled="pagination.page === 1"
+                        class="btn btn-sm pagination-btn btn-outline text-gray-200">
+                    «
+                </button>
+                <button @click="goToPage(pagination.page - 1)" :disabled="pagination.page === 1"
+                        class="btn btn-sm pagination-btn btn-outline text-gray-200">
+                    ‹
+                </button>
+
+                <template x-for="pageNum in visiblePages" :key="pageNum">
+                    <button
+                            @click="goToPage(pageNum)"
+                            :class="pageNum === pagination.page ? 'pagination-btn active' : 'pagination-btn'"
+                            class="btn btn-sm"
+                            x-text="pageNum"
+                    ></button>
+                </template>
+
+                <button @click="goToPage(pagination.page + 1)" :disabled="pagination.page === pagination.totalPages"
+                        class="btn btn-sm pagination-btn btn-outline text-gray-200">
+                    ›
+                </button>
+                <button @click="goToPage(pagination.totalPages)" :disabled="pagination.page === pagination.totalPages"
+                        class="btn btn-sm pagination-btn btn-outline text-gray-200">
+                    »
+                </button>
+            </div>
+
+            <div class="text-sm text-gray-400 mt-2 sm:mt-0">
+                <span x-text="`${langs[lang]?.showingLabel || 'عرض'} ${(pagination.page - 1) * pagination.limit + 1}-${Math.min(pagination.page * pagination.limit, pagination.total)} ${langs[lang]?.ofLabel || 'من'} ${pagination.total}`"></span>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div x-show="selectedProducts.length > 0"
+             class="fixed bottom-6 right-1/2 transform translate-x-1/2 z-40">
+            <button @click="openWhatsAppDialog()"
+                    class="btn btn-lg font-bold shadow-lg flex items-center gap-2 px-8 py-4"
+                    style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: #111827; border: none;">
+                <i class="fab fa-whatsapp text-xl"></i>
+                <span id="submitBtn">إرسال الطلب</span>
+                <span class="badge badge-lg badge-warning text-black" x-text="selectedProducts.length"></span>
+            </button>
+        </div>
+
+        <!-- WhatsApp Dialog -->
+        <div x-show="showDialog"
+             x-transition.opacity.duration.300ms
+             @click="showDialog = false"
+             class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+            <div @click.stop
+                 x-transition.scale.duration.300ms
+                 class="bg-gray-800 rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto border border-gray-700">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-2xl font-bold text-gray-100 flex items-center gap-2">
+                        <i class="fab fa-whatsapp text-green-500 text-2xl"></i>
+                        <span id="dialogTitle">إرسال الطلب عبر واتساب</span>
+                    </h2>
+                    <button @click="showDialog = false" class="btn btn-sm btn-circle btn-ghost text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
 
-                <div class="form-control">
-                    <label class="label">
-                        <span id="phoneLabel" class="label-text text-gray-300">رقم الهاتف</span>
-                    </label>
-                    <div class="flex gap-2">
-                        <select x-model="countryCode"
-                                class="select select-bordered bg-base-200 text-gray-100"
-                                style="max-width: 120px;">
-                            <option value="+966">🇸🇦 +966</option>
-                            <option value="+971">🇦🇪 +971</option>
-                            <option value="+965">🇰🇼 +965</option>
-                            <option value="+974">🇶🇦 +974</option>
-                            <option value="+973">🇧🇭 +973</option>
-                            <option value="+968">🇴🇲 +968</option>
-                            <option value="+962">🇯🇴 +962</option>
-                            <option value="+961">🇱🇧 +961</option>
-                            <option value="+970">🇵🇸 +970</option>
-                            <option value="+20">🇪🇬 +20</option>
-                            <option value="+212">🇲🇦 +212</option>
-                            <option value="+213">🇩🇿 +213</option>
-                            <option value="+216">🇹🇳 +216</option>
-                            <option value="+218">🇱🇾 +218</option>
-                            <option value="+249">🇸🇩 +249</option>
-                            <option value="+252">🇸🇴 +252</option>
-                            <option value="+269">🇰🇲 +269</option>
-                            <option value="+253">🇩🇯 +253</option>
-                            <option value="+222">🇲🇷 +222</option>
-                            <option value="+86">🇨🇳 +86</option>
-                            <option value="+33">🇫🇷 +33</option>
-                            <option value="+44">🇬🇧 +44</option>
-                            <option value="+1">🇺🇸 +1</option>
-                        </select>
-                        <input type="tel"
-                               x-model="customerPhone"
-                               id="phoneInput"
-                               placeholder="01xxxxxxxxx"
-                               class="input input-bordered w-full bg-base-200 text-gray-100">
+                <!-- Customer Info Form -->
+                <div class="space-y-4 mb-6">
+                    <div class="form-control">
+                        <label class="label">
+                            <span id="nameLabel" class="label-text text-gray-300">الاسم</span>
+                        </label>
+                        <input type="text"
+                               x-model="customerName"
+                               id="nameInput"
+                               placeholder="اسمك الكامل"
+                               class="input input-bordered w-full bg-gray-700 text-gray-100">
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span id="phoneLabel" class="label-text text-gray-300">رقم الهاتف</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <select x-model="countryCode"
+                                    class="select select-bordered w-32 bg-gray-700 text-gray-100 border-gray-600">
+                                <option value="+966">🇸🇦 +966</option>
+                                <option value="+971">🇦🇪 +971</option>
+                                <option value="+965">🇰🇼 +965</option>
+                                <option value="+974">🇶🇦 +974</option>
+                                <option value="+973">🇧🇭 +973</option>
+                                <option value="+968">🇴🇲 +968</option>
+                                <option value="+962">🇯🇴 +962</option>
+                                <option value="+961">🇱🇧 +961</option>
+                                <option value="+970">🇵🇸 +970</option>
+                                <option value="+20">🇪🇬 +20</option>
+                                <option value="+212">🇲🇦 +212</option>
+                                <option value="+213">🇩🇿 +213</option>
+                                <option value="+216">🇹🇳 +216</option>
+                                <option value="+218">🇱🇾 +218</option>
+                                <option value="+249">🇸🇩 +249</option>
+                                <option value="+252">🇸🇴 +252</option>
+                                <option value="+269">🇰🇲 +269</option>
+                                <option value="+253">🇩🇯 +253</option>
+                                <option value="+222">🇲🇷 +222</option>
+                                <option value="+86">🇨🇳 +86</option>
+                                <option value="+33">🇫🇷 +33</option>
+                                <option value="+44">🇬🇧 +44</option>
+                                <option value="+1">🇺🇸 +1</option>
+                            </select>
+                            <input type="tel"
+                                   x-model="customerPhone"
+                                   id="phoneInput"
+                                   placeholder="01xxxxxxxxx"
+                                   class="input input-bordered w-full bg-gray-700 text-gray-100">
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span id="notesLabel" class="label-text text-gray-300">ملاحظات إضافية (اختياري)</span>
+                        </label>
+                        <textarea x-model="customerNotes"
+                                  id="notesInput"
+                                  placeholder="أي تفاصيل إضافية..."
+                                  class="textarea textarea-bordered w-full h-24 bg-gray-700 text-gray-100"></textarea>
                     </div>
                 </div>
 
-                <div class="form-control">
-                    <label class="label">
-                        <span id="notesLabel" class="label-text text-gray-300">ملاحظات إضافية (اختياري)</span>
-                    </label>
-                    <textarea x-model="customerNotes"
-                              id="notesInput"
-                              placeholder="أي تفاصيل إضافية..."
-                              class="textarea textarea-bordered w-full bg-base-200 text-gray-100 h-24"></textarea>
-                </div>
-            </div>
-
-            <!-- Selected Products Preview -->
-            <div class="mb-6">
-                <h3 id="selectedItemsTitle" class="font-bold mb-3 text-gray-200 flex items-center gap-2">
-                    <i class="fas fa-list gold-text"></i>
-                    المنتجات المحددة (<span x-text="selectedProducts.length"></span>)
-                </h3>
-                <div class="space-y-2 max-h-60 overflow-y-auto">
-                    <template x-for="product in selectedProducts" :key="product._id">
-                        <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
-                            <img :src="product.imageUrl || 'https://via.placeholder.com/50'"
-                                 class="w-12 h-12 object-cover rounded-lg">
-                            <div class="flex-1">
-                                <p class="font-semibold text-gray-100 text-sm" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></p>
-                                <p class="text-xs text-gray-400" x-text="getCategoryName(product.categoryId)"></p>
+                <!-- Selected Products Preview -->
+                <div class="mb-6">
+                    <h3 id="selectedItemsTitle" class="font-bold mb-3 text-gray-100 flex items-center gap-2">
+                        <i class="fas fa-list primary-text"></i>
+                        المنتجات المحددة (<span x-text="selectedProducts.length"></span>)
+                    </h3>
+                    <div class="space-y-2 max-h-60 overflow-y-auto">
+                        <template x-for="product in selectedProducts" :key="product._id">
+                            <div class="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                                <img :src="product.imageUrl || 'https://placehold.co/50x50?text=Img'"
+                                     class="w-12 h-12 object-cover rounded-lg bg-gray-600">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-100 text-sm truncate" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></p>
+                                    <p class="text-xs text-gray-400 truncate" x-text="getCategoryName(product.categoryId)"></p>
+                                </div>
                             </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="flex gap-3">
-                <button @click="sendToWhatsApp()"
-                        :disabled="!customerName || !customerPhone"
-                        :class="(!customerName || !customerPhone) ? 'opacity-50 cursor-not-allowed' : ''"
-                        class="btn flex-1 text-white font-bold"
-                        style="background: #25D366; border: none;">
-                    <i class="fab fa-whatsapp ml-2 text-xl"></i>
-                    <span id="sendWhatsAppBtn">إرسال عبر واتساب</span>
-                </button>
-                <button @click="showDialog = false"
-                        class="btn btn-outline"
-                        style="border-color: #d4af37; color: #d4af37;">
-                    <span id="cancelBtn">إلغاء</span>
-                </button>
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button @click="sendToWhatsApp()"
+                            :disabled="!customerName || !customerPhone"
+                            :class="(!customerName || !customerPhone) ? 'opacity-60' : ''"
+                            class="btn flex-1 text-white font-bold"
+                            style="background: #25D366; border: none;">
+                        <i class="fab fa-whatsapp ml-2 text-xl"></i>
+                        <span id="sendWhatsAppBtn">إرسال عبر واتساب</span>
+                    </button>
+                    <button @click="showDialog = false"
+                            class="btn btn-outline btn-secondary text-gray-200 border-gray-600 hover:bg-gray-700">
+                        <span id="cancelBtn">إلغاء</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
 </main>
 
 <!-- Footer -->
-<footer class="footer footer-center p-12 glass-card text-gray-300 mt-20" x-data="headerManager()">
+<footer class="footer footer-center p-10 bg-gray-800 text-gray-400 border-t border-gray-700">
     <div class="mb-6 text-center">
         <div class="flex items-center justify-center gap-3 mb-2">
-            <img src="/images/logo.webp" alt="شعار" style="width: 100px;">
-            <span id="footerBrand" class="text-3xl font-bold gold-text">جال للتجارة</span>
+            <img src="/images/logo.webp" alt="شعار" class="w-16 h-16 object-contain">
+            <span id="footerBrand" class="text-2xl font-bold primary-text">جال للتجارة</span>
         </div>
-        <p id="footerDesc" class="text-gray-400 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية</p>
+        <p id="footerDesc" class="text-gray-500 max-w-md mx-auto">شريكك الموثوق في توريد المعدات والمنتجات الصناعية</p>
     </div>
-    <nav class="grid grid-flow-col gap-6">
-        <a href="/productCatalog" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
-        <a href="/cart" class="link link-hover hover:text-[#d4af37] relative"><i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span><span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span></a>
-        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
+    <nav class="flex flex-wrap justify-center gap-6 mb-4">
+        <a href="/productCatalog" class="link link-hover hover:text-primary text-gray-300"><i class="fas fa-box-open ml-1"></i> <span id="fnavProducts">المنتجات</span></a>
+        <a href="/cart" class="link link-hover hover:text-primary relative text-gray-300"><i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span><span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span></a>
+        <a href="/contact" class="link link-hover hover:text-primary text-gray-300"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
-    <p id="copyrightText" class="text-gray-400 mt-4">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
+    <p id="copyrightText" class="text-gray-500 mt-4">© 2025 جال للتجارة والتوريدات — جميع الحقوق محفوظة</p>
 </footer>
 
 <script>
@@ -577,7 +667,6 @@
             if (el && map[id]) el.innerText = map[id];
         }
 
-        // Placeholders
         const nameInput = document.getElementById('nameInput');
         const phoneInput = document.getElementById('phoneInput');
         const notesInput = document.getElementById('notesInput');
@@ -638,7 +727,7 @@
             lang: localStorage.getItem('lang') || 'ar',
             pagination: {
                 page: 1,
-                limit: 12,
+                limit: 12, // Default limit
                 total: 0,
                 totalPages: 0
             },
@@ -682,7 +771,7 @@
 
                     const params = new URLSearchParams({
                         page: this.pagination.page,
-                        limit: this.pagination.limit,
+                        limit: this.pagination.limit, // Use the dynamic limit
                         search: cleanSearchQuery
                     });
 
@@ -821,7 +910,7 @@
                 this.showDialog = false;
                 this.customerName = '';
                 this.customerPhone = '';
-                this.countryCode = '+966';
+                this.countryCode = '+20';
                 this.customerNotes = '';
                 this.selectedProducts = [];
             }
