@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">سلة المشتريات - جال للتجارة</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com  "></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.x/dist/full.min.css  " rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css  ">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="  https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js  "></script>
     <link rel="icon" type="image/webp" href="/images/logo.webp">
     <link rel="apple-touch-icon" href="/images/logo.webp">
     <link rel="stylesheet" href="/css/cart.css">
@@ -146,14 +146,15 @@
                 <div class="glass-card rounded-2xl p-6">
                     <div class="flex flex-col sm:flex-row gap-4">
                         <!-- الصورة -->
-                        <img :src="item.imageUrl || 'https://via.placeholder.com/100'"
-                             :alt="item.name"
+                        <img :src="item.imageUrl || 'https://via.placeholder.com/100  '"
+                             :alt="lang === 'ar' ? item.nameAr : item.nameEn || item.nameAr"
                              class="cart-item-image">
 
                         <!-- التفاصيل -->
                         <div class="flex-1">
-                            <h3 class="text-xl font-bold text-gray-100 mb-2" x-text="item.name"></h3>
-                            <p class="text-gray-400 text-sm mb-3 line-clamp-2" x-text="item.description"></p>
+                            <!-- ✅ تم تعديل هذا السطر لعرض الاسم حسب اللغة -->
+                            <h3 class="text-xl font-bold text-gray-100 mb-2" x-text="lang === 'ar' ? item.nameAr : item.nameEn || item.nameAr"></h3>
+                            <p class="text-gray-400 text-sm mb-3 line-clamp-2" x-text="lang === 'ar' ? item.descriptionAr : item.descriptionEn || item.descriptionAr"></p>
 
                             <div class="flex items-center justify-between flex-wrap gap-3">
                                 <!-- السعر -->
@@ -290,7 +291,8 @@
                     <template x-for="(item, idx) in completedOrder" :key="idx">
                         <div class="flex justify-between items-start text-sm">
                             <div class="flex-1">
-                                <span class="text-gray-200 font-semibold" x-text="item.name"></span>
+                                <!-- ✅ عرض الاسم حسب اللغة في الطلب النهائي أيضًا -->
+                                <span class="text-gray-200 font-semibold" x-text="lang === 'ar' ? item.nameAr : item.nameEn || item.nameAr"></span>
                                 <span class="text-gray-400 mr-2">×<span x-text="item.quantity"></span></span>
                             </div>
                             <span class="text-gray-200 font-bold" x-text="(item.price * item.quantity).toFixed(2) + ' ' + langs[localStorage.getItem('lang') || 'ar'].currency"></span>
@@ -440,21 +442,19 @@
             <i class="fas fa-shopping-cart ml-1"></i> <span id="fnavCart">السلة</span>
             <span x-show="cartCount > 0" x-cloak class="cart-badge" x-text="cartCount"></span>
         </a>
-        <a
-
-                href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
+        <a href="/contact" class="link link-hover hover:text-[#d4af37]"><i class="fas fa-phone-alt ml-1"></i> <span id="fnavContact">تواصل معنا</span></a>
     </nav>
     <div class="flex justify-center gap-6 text-2xl mt-6 mb-4">
         <a href="https://www.facebook.com/profile.php?id=61581092905595" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center hover:scale-110 transition-transform">
             <i class="fab fa-facebook-f text-white"></i>
         </a>
-        <a href="https://www.tiktok.com/@galimport1?is_from_webapp=1&sender_device=pc" class="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center hover:scale-110 transition-transform">
+        <a href="  https://www.tiktok.com/@galimport1?is_from_webapp=1&sender_device=pc" class="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center hover:scale-110 transition-transform">
             <i class="fab fa-tiktok text-white"></i>
         </a>
-        <a href="https://wa.me/201002491168" class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center hover:scale-110 transition-transform">
+        <a href="  https://wa.me/201002491168  " class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center hover:scale-110 transition-transform">
             <i class="fab fa-whatsapp text-white"></i>
         </a>
-        <a href="https://www.linkedin.com/in/gal-import-ba74bb38b/" class="w-12 h-12 rounded-full bg-blue-700 flex items-center justify-center hover:scale-110 transition-transform">
+        <a href="https://www.linkedin.com/in/gal-import-ba74bb38b/  " class="w-12 h-12 rounded-full bg-blue-700 flex items-center justify-center hover:scale-110 transition-transform">
             <i class="fab fa-linkedin-in text-white"></i>
         </a>
     </div>
@@ -685,6 +685,8 @@ function cartManager() {
         customerName: '',
         customerNotes: '',
         countryCode: '+20',
+        // ✅ إضافة متغير اللغة
+        lang: localStorage.getItem('lang') || 'ar',
 
         init() {
             this.loadCart();
@@ -760,18 +762,14 @@ function cartManager() {
             this.customerName = '';
             this.customerNotes = '';
             this.countryCode = '+966';
-            // لا يتم تفريغ السلة هنا حتى لا يفقد المستخدم محتوياتها
-            // this.cartItems = [];
-            // this.completedOrder = [];
-            // this.orderNumber = '';
-            // this.saveCart();
         },
 
         sendOrderViaWhatsApp() {
-            const lang = localStorage.getItem('lang') || 'ar';
+            const lang = this.lang;
             let message = `${this.getTranslation('orderDetailsTitle')} (${this.orderNumber})\n\n`;
             this.completedOrder.forEach(item => {
-                message += `${item.name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
+                const name = lang === 'ar' ? item.nameAr : item.nameEn || item.nameAr;
+                message += `${name} ×${item.quantity}: ${(item.price * item.quantity).toFixed(2)} ${this.getTranslation('currency')}\n`;
             });
             message += `\n${this.getTranslation('totalLabelModal')}: ${this.getOrderSubtotal().toFixed(2)} ${this.getTranslation('currency')}\n`;
             if (this.customerName) message += `${this.getTranslation('nameLabel')}: ${this.customerName}\n`;
@@ -781,7 +779,7 @@ function cartManager() {
             const whatsappUrl = `https://wa.me/+201002491168?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank');
 
-            // بعد إرسال الطلب، نغلق الديالوج ونفرغ السلة
+            // بعد الإرسال: تفريغ السلة
             this.cartItems = [];
             this.completedOrder = [];
             this.orderNumber = '';
@@ -797,7 +795,7 @@ function cartManager() {
         },
 
         getTranslation(key) {
-            const lang = localStorage.getItem('lang') || 'ar';
+            const lang = this.lang;
             return langs[lang][key] || langs.ar[key] || '';
         }
     };
