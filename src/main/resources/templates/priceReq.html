@@ -117,13 +117,15 @@
         }
 
         .product-image {
-            height: 200px;
-            object-fit: cover;
+            height: 220px;
+            object-fit: contain;
+            padding: 16px;
+            background-color: rgba(15, 23, 42, 0.5);
             transition: transform 0.3s ease;
         }
 
         .product-card:hover .product-image {
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
 
         .pagination-btn {
@@ -203,7 +205,6 @@
             border-color: var(--primary-color);
         }
 
-        /* تحسينات إضافية للثيم الغامق */
         .navbar {
             background-color: var(--bg-card);
             border-bottom: 1px solid var(--border-dark);
@@ -437,19 +438,19 @@
                 </div>
 
                 <!-- Product Image -->
-                <div class="relative h-48 overflow-hidden bg-slate-800">
+                <div class="relative h-56 overflow-hidden bg-slate-800 rounded-t-xl">
                     <img :src="product.imageUrl || 'https://via.placeholder.com/300x200/1e293b/94a3b8?text=No+Image'"
                          :alt="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"
                          class="w-full h-full product-image">
                 </div>
 
                 <!-- Product Info -->
-                <div class="p-4">
-                    <h3 class="font-bold mb-2 text-slate-100 line-clamp-2 h-14" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></h3>
-                    <p class="text-slate-400 text-sm mb-3 line-clamp-2 h-10" x-text="lang === 'ar' ? product.descriptionAr : product.descriptionEn || product.descriptionAr"></p>
+                <div class="p-5 space-y-3">
+                    <h3 class="font-bold text-base mb-2 text-slate-100 line-clamp-2 min-h-[3rem]" x-text="lang === 'ar' ? product.nameAr : product.nameEn || product.nameAr"></h3>
+                    <p class="text-slate-400 text-sm mb-3 line-clamp-3 min-h-[4rem]" x-text="lang === 'ar' ? product.descriptionAr : product.descriptionEn || product.descriptionAr"></p>
 
-                    <div class="flex items-center justify-between mt-4">
-                        <span class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded-full">
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-700">
+                        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-full">
                             <i class="fas fa-tag primary-color ml-1"></i>
                             <span x-text="getCategoryName(product.categoryId)"></span>
                         </span>
@@ -808,7 +809,6 @@
             if (el && map[id]) el.innerText = map[id];
         }
 
-        // Placeholders
         const nameInput = document.getElementById('nameInput');
         const phoneInput = document.getElementById('phoneInput');
         const notesInput = document.getElementById('notesInput');
@@ -1021,7 +1021,6 @@
                     return;
                 }
 
-                // Build WhatsApp message
                 let message = this.lang === 'en'
                     ? `*Price Request*\n\n*Customer Name:* ${this.customerName}\n*Phone:* ${this.countryCode}${this.customerPhone}\n\n*Selected Products:*\n\n`
                     : `*طلب عرض سعر*\n\n*اسم العميل:* ${this.customerName}\n*الهاتف:* ${this.countryCode}${this.customerPhone}\n\n*المنتجات المطلوبة:*\n\n`;
@@ -1043,13 +1042,11 @@
                         : `\n*ملاحظات إضافية:*\n${this.customerNotes}`;
                 }
 
-                // Company WhatsApp number
                 const whatsappNumber = '+201002491168';
                 const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
                 window.open(url, '_blank');
 
-                // Reset form
                 this.showDialog = false;
                 this.customerName = '';
                 this.customerPhone = '';
