@@ -92,7 +92,7 @@ fun Application.module() {
         categoryRoutes(categoryService, fileUploadService)
         contactRoutes(contactMessageService)
 
-        get("/login") {
+        get("/logintoAdminPanel") {
             call.respond(ThymeleafContent("login", mapOf()))
         }
 
@@ -101,7 +101,7 @@ fun Application.module() {
             val username = params["username"]
             val password = params["password"]
 
-            if (username == "admin" && password == "1234") {
+            if (username == "galAdmin3080" && password == "010001000") {
                 call.sessions.set(AdminSession(username))
                 call.respondRedirect("/products")
             } else {
