@@ -395,7 +395,6 @@
                             :class="selectedCategory === cat._id ? 'active' : ''"
                             class="category-btn px-4 py-2 rounded-lg flex items-center gap-2">
                         <span x-text="lang === 'ar' ? cat.nameAr : cat.nameEn || cat.nameAr"></span>
-                        <span class="bg-slate-700 text-slate-300 px-2 py-1 rounded-full text-xs" x-text="getCategoryCount(cat._id)"></span>
                     </button>
                 </template>
             </div>
